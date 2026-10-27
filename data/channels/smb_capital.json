@@ -1,0 +1,63 @@
+{
+  "channel": {
+    "channel": "",
+    "channel_id": "",
+    "channel_url": null,
+    "uploader_id": ""
+  },
+  "tab": "videos",
+  "sort": "latest",
+  "video_count": 5,
+  "videos": [
+    {
+      "id": "M1o0XqCaDiE",
+      "title": "How Pro Traders Know Which Breakouts to Trade",
+      "url": "https://www.youtube.com/watch?v=M1o0XqCaDiE",
+      "duration": 904,
+      "duration_string": "15:04",
+      "view_count": 43000,
+      "upload_date": "",
+      "description": ""
+    },
+    {
+      "id": "FQIH6o18y9g",
+      "title": "How I Trade Earnings (My 4-Step Strategy)",
+      "url": "https://www.youtube.com/watch?v=FQIH6o18y9g",
+      "duration": 1034,
+      "duration_string": "17:14",
+      "view_count": 21000,
+      "upload_date": "",
+      "description": ""
+    },
+    {
+      "id": "reWtEMpWlpA",
+      "title": "THE 6 MOMENTUM TRADES EVERY TRADER NEEDS TO KNOW (Part 2)",
+      "url": "https://www.youtube.com/watch?v=reWtEMpWlpA",
+      "duration": 1485,
+      "duration_string": "24:45",
+      "view_count": 45000,
+      "upload_date": "",
+      "description": ""
+    },
+    {
+      "id": "7zFONVRQHFs",
+      "title": "Don’t Sell Options Unless You Understand This",
+      "url": "https://www.youtube.com/watch?v=7zFONVRQHFs",
+      "duration": 705,
+      "duration_string": "11:45",
+      "view_count": 23000,
+      "upload_date": "",
+      "description": ""
+    },
+    {
+      "id": "h6KnW-ahzbU",
+      "title": "THE 6 MOMENTUM TRADES EVERY TRADER NEEDS TO KNOW",
+      "url": "https://www.youtube.com/watch?v=h6KnW-ahzbU",
+      "duration": 1324,
+      "duration_string": "22:04",
+      "view_count": 65000,
+      "upload_date": "",
+      "description": ""
+    }
+  ]
+}

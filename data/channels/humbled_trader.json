@@ -1,0 +1,63 @@
+{
+  "channel": {
+    "channel": "",
+    "channel_id": "",
+    "channel_url": null,
+    "uploader_id": ""
+  },
+  "tab": "videos",
+  "sort": "latest",
+  "video_count": 5,
+  "videos": [
+    {
+      "id": "zU0i9rBbEkI",
+      "title": "I made $376K in 2026... Here’s how I use AI for Trading",
+      "url": "https://www.youtube.com/watch?v=zU0i9rBbEkI",
+      "duration": 752,
+      "duration_string": "12:32",
+      "view_count": 184000,
+      "upload_date": "",
+      "description": ""
+    },
+    {
+      "id": "2HEsypfMcRQ",
+      "title": "The 200 Trades a Day Strategy That Made Him 7 Figures",
+      "url": "https://www.youtube.com/watch?v=2HEsypfMcRQ",
+      "duration": 4051,
+      "duration_string": "1:07:31",
+      "view_count": 390000,
+      "upload_date": "",
+      "description": ""
+    },
+    {
+      "id": "M5thAKMJsrw",
+      "title": "From Beginner to Making $1.6M Day Trading - Mari's Full Story",
+      "url": "https://www.youtube.com/watch?v=M5thAKMJsrw",
+      "duration": 3650,
+      "duration_string": "1:00:50",
+      "view_count": 205000,
+      "upload_date": "",
+      "description": ""
+    },
+    {
+      "id": "PKFkJ4TprVo",
+      "title": "I Replaced my 6AM Premarket Trading Routine with Claude + Codex",
+      "url": "https://www.youtube.com/watch?v=PKFkJ4TprVo",
+      "duration": 1409,
+      "duration_string": "23:29",
+      "view_count": 116000,
+      "upload_date": "",
+      "description": ""
+    },
+    {
+      "id": "UgWQtQ3MEVE",
+      "title": "Claude + IBKR API: Complete AI Trading Bot Guide",
+      "url": "https://www.youtube.com/watch?v=UgWQtQ3MEVE",
+      "duration": 1407,
+      "duration_string": "23:27",
+      "view_count": 244000,
+      "upload_date": "",
+      "description": ""
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "channel": {
+    "channel": "",
+    "channel_id": "",
+    "channel_url": null,
+    "uploader_id": ""
+  },
+  "tab": "videos",
+  "sort": "latest",
+  "video_count": 5,
+  "videos": [
+    {
+      "id": "57EgAdqUG6o",
+      "title": "What $450M Portfolio Manager Learned From Paul Tudor Jones  · Andrew Perry",
+      "url": "https://www.youtube.com/watch?v=57EgAdqUG6o",
+      "duration": 4670,
+      "duration_string": "1:17:50",
+      "view_count": 8900,
+      "upload_date": "",
+      "description": ""
+    },
+    {
+      "id": "6lyl7flPOOU",
+      "title": "Why Defense, Not Offense, Makes You a Profitable Trader · Tim Furey",
+      "url": "https://www.youtube.com/watch?v=6lyl7flPOOU",
+      "duration": 4998,
+      "duration_string": "1:23:18",
+      "view_count": 19000,
+      "upload_date": "",
+      "description": ""
+    },
+    {
+      "id": "ANbO-i3-GxY",
+      "title": "The Man Who Introduced Candlestick Charting to the West · Steve Nison",
+      "url": "https://www.youtube.com/watch?v=ANbO-i3-GxY",
+      "duration": 2783,
+      "duration_string": "46:23",
+      "view_count": 6700,
+      "upload_date": "",
+      "description": ""
+    },
+    {
+      "id": "UWDFkMaJXNw",
+      "title": "How Top Prop Traders Find and Scale Their Edge · Jeff Holden",
+      "url": "https://www.youtube.com/watch?v=UWDFkMaJXNw",
+      "duration": 5868,
+      "duration_string": "1:37:48",
+      "view_count": null,
+      "upload_date": "",
+      "description": ""
+    },
+    {
+      "id": "i5dUXg_t1nw",
+      "title": "From Chicago Pit Trader to Robinhood Exec · Steve Quirk",
+      "url": "https://www.youtube.com/watch?v=i5dUXg_t1nw",
+      "duration": 2997,
+      "duration_string": "49:57",
+      "view_count": 4500,
+      "upload_date": "",
+      "description": ""
+    }
+  ]
+}

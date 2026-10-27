@@ -1,0 +1,19 @@
+# Environments & secrets
+.env
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local data, Chroma vector store, audio, and databases
+data/*.db
+data/*.sqlite
+data/chroma_db/
+data/audio/
+data/transcripts/
+data/papers/
+data/screenshots/
+data/sessions/
+data/books/
+data/raw/
+*.log

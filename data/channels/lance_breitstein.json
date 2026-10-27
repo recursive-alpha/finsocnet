@@ -1,0 +1,63 @@
+{
+  "channel": {
+    "channel": "",
+    "channel_id": "",
+    "channel_url": null,
+    "uploader_id": ""
+  },
+  "tab": "videos",
+  "sort": "latest",
+  "video_count": 5,
+  "videos": [
+    {
+      "id": "hAwuIvMZkmQ",
+      "title": "3 Signs You Should Use Funded Trader Programs (and 3 Signs You Shouldn't)",
+      "url": "https://www.youtube.com/watch?v=hAwuIvMZkmQ",
+      "duration": 790,
+      "duration_string": "13:10",
+      "view_count": 32000,
+      "upload_date": "",
+      "description": ""
+    },
+    {
+      "id": "xHNwbqnrtdo",
+      "title": "Options Trading for Beginners ($100M Trader Explains)",
+      "url": "https://www.youtube.com/watch?v=xHNwbqnrtdo",
+      "duration": 680,
+      "duration_string": "11:20",
+      "view_count": 18000,
+      "upload_date": "",
+      "description": ""
+    },
+    {
+      "id": "UAlhNPmvB14",
+      "title": "Why Your Support & Resistance Lines Don’t Work ($100M Trader Explains)",
+      "url": "https://www.youtube.com/watch?v=UAlhNPmvB14",
+      "duration": 407,
+      "duration_string": "6:47",
+      "view_count": 70000,
+      "upload_date": "",
+      "description": ""
+    },
+    {
+      "id": "bZ7-iBaI_Xw",
+      "title": "16 Years of Swing Trading Lessons in 12 Minutes",
+      "url": "https://www.youtube.com/watch?v=bZ7-iBaI_Xw",
+      "duration": 719,
+      "duration_string": "11:59",
+      "view_count": 134000,
+      "upload_date": "",
+      "description": ""
+    },
+    {
+      "id": "n0-iSn_Aw2s",
+      "title": "How Funded Trader Influencers Like Patrick Wieland Deceive You",
+      "url": "https://www.youtube.com/watch?v=n0-iSn_Aw2s",
+      "duration": 579,
+      "duration_string": "9:39",
+      "view_count": 121000,
+      "upload_date": "",
+      "description": ""
+    }
+  ]
+}
