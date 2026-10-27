@@ -61,31 +61,31 @@
   <rect width="500" height="500" rx="90" fill="url(#glow-purple)"/>
 
   <!-- Quant Polar Radar Grid & Ticks (Vibrant Indigo & Cyan) -->
-  <circle cx="250" cy="225" r="190" fill="none" stroke="#3B82F6" stroke-width="1.5" stroke-dasharray="4,8" opacity="0.35"/>
-  <circle cx="250" cy="225" r="145" fill="none" stroke="#60A5FA" stroke-width="1" stroke-dasharray="2,6" opacity="0.25"/>
-  <circle cx="250" cy="225" r="85" fill="none" stroke="#00FFA3" stroke-width="1" stroke-dasharray="3,5" opacity="0.4"/>
-  <circle cx="250" cy="225" r="70" fill="url(#glow-core)"/>
+  <circle cx="250" cy="220" r="190" fill="none" stroke="#3B82F6" stroke-width="1.5" stroke-dasharray="4,8" opacity="0.35"/>
+  <circle cx="250" cy="220" r="145" fill="none" stroke="#60A5FA" stroke-width="1" stroke-dasharray="2,6" opacity="0.25"/>
+  <circle cx="250" cy="220" r="85" fill="none" stroke="#00FFA3" stroke-width="1" stroke-dasharray="3,5" opacity="0.4"/>
+  <circle cx="250" cy="220" r="70" fill="url(#glow-core)"/>
 
   <!-- Compass Cardinal Ticks (Bright Colors) -->
   <line x1="250" y1="35" x2="250" y2="55" stroke="#00FFA3" stroke-width="2.5"/>
-  <line x1="250" y1="395" x2="250" y2="415" stroke="#00FFA3" stroke-width="2.5"/>
-  <line x1="60" y1="225" x2="80" y2="225" stroke="#00F0FF" stroke-width="2.5"/>
-  <line x1="420" y1="225" x2="440" y2="225" stroke="#F43F5E" stroke-width="2.5"/>
+  <line x1="250" y1="385" x2="250" y2="405" stroke="#00FFA3" stroke-width="2.5"/>
+  <line x1="60" y1="220" x2="80" y2="220" stroke="#00F0FF" stroke-width="2.5"/>
+  <line x1="420" y1="220" x2="440" y2="220" stroke="#F43F5E" stroke-width="2.5"/>
 
   <!-- Candlestick Depth Bars in Background (Multi-color) -->
   <g opacity="0.35">
-    <line x1="85" y1="170" x2="85" y2="270" stroke="#00FFA3" stroke-width="1.5"/>
-    <rect x="81" y="195" width="8" height="45" rx="2" fill="#00FFA3"/>
-    <line x1="110" y1="140" x2="110" y2="230" stroke="#00F0FF" stroke-width="1.5"/>
-    <rect x="106" y="160" width="8" height="40" rx="2" fill="#00F0FF"/>
-    <line x1="390" y1="150" x2="390" y2="260" stroke="#F43F5E" stroke-width="1.5"/>
-    <rect x="386" y="175" width="8" height="50" rx="2" fill="#F43F5E"/>
-    <line x1="415" y1="180" x2="415" y2="290" stroke="#F59E0B" stroke-width="1.5"/>
-    <rect x="411" y="210" width="8" height="45" rx="2" fill="#F59E0B"/>
+    <line x1="85" y1="165" x2="85" y2="265" stroke="#00FFA3" stroke-width="1.5"/>
+    <rect x="81" y="190" width="8" height="45" rx="2" fill="#00FFA3"/>
+    <line x1="110" y1="135" x2="110" y2="225" stroke="#00F0FF" stroke-width="1.5"/>
+    <rect x="106" y="155" width="8" height="40" rx="2" fill="#00F0FF"/>
+    <line x1="390" y1="145" x2="390" y2="255" stroke="#F43F5E" stroke-width="1.5"/>
+    <rect x="386" y="170" width="8" height="50" rx="2" fill="#F43F5E"/>
+    <line x1="415" y1="175" x2="415" y2="285" stroke="#F59E0B" stroke-width="1.5"/>
+    <rect x="411" y="205" width="8" height="45" rx="2" fill="#F59E0B"/>
   </g>
 
   <!-- Decompiled Black-Box Mechanism (Multi-Color Isometric Disassembly) -->
-  <g transform="translate(250, 225)">
+  <g transform="translate(250, 220)">
     <!-- Exploded Colored Panels Peeling Back -->
     <!-- Top Face (Electric Cyan / Aquamarine) -->
     <polygon points="0,-130 75,-88 0,-46 -75,-88" fill="url(#panel-top)" stroke="#00F0FF" stroke-width="2.5"/>
@@ -124,12 +124,6 @@
       <polyline points="-7,133 0,142 7,133" fill="none"/>
     </g>
 
-    <!-- Disassembly Opcode Labels (Vibrant Colors) -->
-    <text x="-120" y="-80" fill="#00FFA3" font-family="monospace" font-size="11" font-weight="bold">&lt;&lt; DISASM</text>
-    <text x="65" y="-80" fill="#00F0FF" font-family="monospace" font-size="11" font-weight="bold">0xα_CORE &gt;&gt;</text>
-    <text x="-120" y="95" fill="#A78BFA" font-family="monospace" font-size="10" font-weight="bold">// UNPACK</text>
-    <text x="75" y="95" fill="#F43F5E" font-family="monospace" font-size="10" font-weight="bold">// RECURSE</text>
-
     <!-- The Glowing Extracted Core: The Sovereign Alpha -->
     <!-- Core Chamber (Vibrant Indigo-Sapphire background with luminous border) -->
     <circle cx="0" cy="12" r="54" fill="#111B3C" stroke="#00FFA3" stroke-width="3"/>
@@ -152,7 +146,6 @@
     <circle cx="-10" cy="-18" r="2.5" fill="#00F0FF"/>
   </g>
 
-  <!-- Typography (Retained as requested) -->
-  <text x="250" y="420" text-anchor="middle" fill="#FFFFFF" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="22" letter-spacing="4">RECURSIVE ALPHA</text>
-  <text x="250" y="444" text-anchor="middle" fill="#00FFA3" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-weight="700" font-size="11" letter-spacing="2">// BLACK-BOX DECOMPILER</text>
+  <!-- Typography: Only RECURSIVE ALPHA as requested -->
+  <text x="250" y="438" text-anchor="middle" fill="#FFFFFF" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="24" letter-spacing="5">RECURSIVE ALPHA</text>
 </svg>
