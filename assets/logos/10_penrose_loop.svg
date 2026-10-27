@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#07090E"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00FFA3"/><stop offset="50%" stop-color="#00D2FF"/><stop offset="100%" stop-color="#7928CA"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+  <rect width="500" height="500" rx="90" fill="url(#bg)"/>
+  <circle cx="250" cy="230" r="190" fill="none" stroke="#1E293B" stroke-width="1.5" stroke-dasharray="3,6"/>
+  
+<g filter="url(#glow)" transform="translate(250, 225)">
+  <!-- Isometric Impossible Alpha loop -->
+  <path d="M 0,-100 L 25,-85 L -35,20 L 70,20 L 85,45 L -85,45 L -85,25 Z" fill="#00FFA3" opacity="0.9"/>
+  <path d="M 85,45 L 60,60 L -60,60 L -35,20 L -85,25 L -100,0 L 0,-100 Z" fill="#00D2FF" opacity="0.75"/>
+  <path d="M 25,-85 L 85,20 L 85,45 L 70,20 L -35,20 L 0,-40 Z" fill="#7928CA" opacity="0.6"/>
+  <!-- Impossible optical intersection -->
+  <circle cx="0" cy="0" r="16" fill="#07090E" stroke="#00FFA3" stroke-width="2"/>
+  <text x="0" y="5" text-anchor="middle" fill="#FFFFFF" font-family="monospace" font-size="12" font-weight="bold">α</text>
+</g>
+
+  <text x="250" y="420" text-anchor="middle" fill="#FFFFFF" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="22" letter-spacing="4">RECURSIVE ALPHA</text>
+  <text x="250" y="444" text-anchor="middle" fill="#00FFA3" font-family="monospace" font-weight="600" font-size="11" letter-spacing="2">// IMPOSSIBLE PENROSE EDGE</text>
+</svg>
