@@ -217,3 +217,33 @@ uv run .agents/skills/user-skill-synthesizer/scripts/synthesize_skill.py "real-d
 uv run .agents/skills/user-skill-synthesizer/scripts/synthesize_skill.py "quant-data-cleaning" \
   --content-id "<MEDIUM_CONTENT_ID>" --platform medium
 ```
+
+---
+
+## 7. Multi-Harness AI Agent Integration
+
+FinSocNet serves as a centralized trading knowledge storage and strategy distribution engine for external AI agents:
+
+```bash
+# One-line remote installation:
+curl -fsSL https://raw.githubusercontent.com/recursive-alpha/finsocnet/main/install.sh | bash
+
+# Register plugins across AI harnesses:
+finsocnet install all
+finsocnet install claude      # Claude Code (~/.claude/commands/finsocnet.md)
+finsocnet install omp         # OMP (~/.omp/agent/extensions/finsocnet.ts)
+finsocnet install pi          # Pi Coding Agent (~/.pi/agent/extensions/finsocnet.ts)
+finsocnet install hermes      # Hermes (~/.hermes/skills/research/finsocnet/)
+finsocnet install codex       # OpenAI Codex (~/.codex/skills/finsocnet/)
+finsocnet install openclaw    # OpenClaw (~/.openclaw/skills/finsocnet/)
+```
+
+### Slash Commands in AI Agents
+Agents can retrieve strategy rules, run vector searches, and inspect hypotheses directly via slash commands:
+- `/finsocnet`: View overall database metrics.
+- `/finsocnet:search <query>`: Semantic vector search over 90+ hypotheses.
+- `/finsocnet:strategy <name>`: Load full strategy rulebooks (e.g. `minervini`, `qullamaggie`, `lance`, `smb`, `lewis-kelly`, `humbled`, `dante`, `brandt`, `furey`).
+- `/finsocnet:explore <platform> <target>`: Explore and catalog new creators.
+- `/finsocnet:skills`: Inspect System Skills vs Improved Strategy Skills.
+- `/finsocnet:rag <query>`: Retrieve verbatim content chunks for deeper context.
+- `/finsocnet:view <id>`: Inspect exact hypothesis card with quote and timestamps.

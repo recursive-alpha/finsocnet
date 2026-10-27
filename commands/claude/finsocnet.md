@@ -1,15 +1,18 @@
 ---
-description: Explore mined trading hypotheses, search quotes, and view setup details via FinSocNet
+description: FinSocNet Multi-Platform Financial Intelligence, Strategy Rulebooks & Hypothesis Search
 ---
 
-Run the `finsocnet` command using the Bash tool based on `$ARGUMENTS`:
-- If `$ARGUMENTS` is empty, execute: `finsocnet stats`
-- If `$ARGUMENTS` contains `search` or `find`, execute: `finsocnet search <query>`
-- If `$ARGUMENTS` contains `view`, execute: `finsocnet view <id>`
-- If `$ARGUMENTS` contains `hypo` or `list`, execute: `finsocnet hypo <filter>`
-- If `$ARGUMENTS` contains `creators`, execute: `finsocnet creators`
-- If `$ARGUMENTS` contains `contents`, execute: `finsocnet contents`
-- If `$ARGUMENTS` contains `skills`, execute: `finsocnet skills`
-- Otherwise, execute: `finsocnet search "$ARGUMENTS"`
+You have direct access to the FinSocNet intelligence and trading strategy storage engine.
+Execute the `finsocnet` CLI tool via Bash based on the user's intent or arguments:
 
-Present the output cleanly to the user with hypothesis IDs, creator attribution, empirical claims, setup conditions, holding periods, and timestamped quotes.
+- **Search Hypotheses:** `finsocnet search "<query>"` (semantic vector search across all creators)
+- **Get Creator Strategy Rulebook:** `finsocnet strategy <creator_or_strategy>` (e.g. minervini, qullamaggie, lance, smb, lewis-kelly, humbled, dante, brandt, furey)
+- **View Full Hypothesis Card:** `finsocnet view <id>` (verbatim quotes, exact timestamps, setup filters)
+- **Explore Creators & Content:** `finsocnet explore <youtube|x|reddit|medium|arxiv|annas_archive> "<target>"`
+- **List Skills:** `finsocnet skills` (shows System Skills vs Improved Strategy Skills)
+- **RAG Content Chunks:** `finsocnet rag "<query>"`
+- **Database Stats:** `finsocnet stats`
+
+If the user invokes subcommands like `/finsocnet:search <query>`, `/finsocnet:strategy <name>`, or `/finsocnet:explore <platform> <target>`, parse the arguments and execute the matching CLI command above.
+
+Always present output with clear creator attribution, setup conditions, holding periods, and verbatim citations.

@@ -6,7 +6,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import signal
 import sys
+
+if hasattr(signal, "SIGPIPE"):
+    signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -127,6 +131,103 @@ def search_command(query: str, limit: int = 10, category: Optional[str] = None, 
             print(f"#{h['id']} [{h['direction']}] {h['title']} ({h['user_name']} - {h['category']})")
             print(f"  {h['hypothesis_statement'][:140]}...")
             print("-" * 85)
+def load_strategy_rulebook(name: str):
+    skills_root = Path(__file__).resolve().parent.parent / ".agents" / "skills"
+    key = name.lower().strip()
+    alias_map = {
+        "minervini": "mark-minervini-vcp",
+        "vcp": "mark-minervini-vcp",
+        "qullamaggie": "qullamaggie-swing-strategy",
+        "ep": "qullamaggie-swing-strategy",
+        "kristjan": "qullamaggie-swing-strategy",
+        "lance": "lance-breitstein-levels",
+        "breitstein": "lance-breitstein-levels",
+        "smc": "lewis-kelly-smc",
+        "lewis": "lewis-kelly-smc",
+        "kelly": "lewis-kelly-smc",
+        "humbled": "humbled-trader-strategy",
+        "shay": "humbled-trader-strategy",
+        "smb": "smb-capital-breakouts",
+        "bellafiore": "smb-capital-breakouts",
+        "dante": "trader-dante-execution",
+        "tom": "trader-dante-execution",
+        "brandt": "peter-brandt-classical",
+        "peter": "peter-brandt-classical",
+        "furey": "chat-with-traders-defense",
+        "chat": "chat-with-traders-defense",
+    }
+    target_skill = alias_map.get(key, key)
+    skill_dir = skills_root / target_skill
+    if not skill_dir.exists():
+        candidates = [d.name for d in skills_root.iterdir() if d.is_dir() and key in d.name]
+        if candidates:
+            skill_dir = skills_root / candidates[0]
+            target_skill = candidates[0]
+        else:
+            print(f"Error: No strategy skill matching '{name}'. Available strategies:", file=sys.stderr)
+            for s in sorted(skills_root.iterdir()):
+                if s.is_dir() and (s / "references" / "hypotheses.md").exists():
+                    print(f"  - {s.name}", file=sys.stderr)
+            return
+
+    skill_md = skill_dir / "SKILL.md"
+    checklists_md = skill_dir / "references" / "checklists.md"
+    hypotheses_md = skill_dir / "references" / "hypotheses.md"
+
+    print("=" * 85)
+    print(f"STRATEGY RULEBOOK: {target_skill.upper()}")
+    print("=" * 85)
+    if skill_md.exists():
+        with open(skill_md, "r", encoding="utf-8") as f:
+            print(f.read())
+    if checklists_md.exists():
+        print("\n" + "=" * 85)
+        print("ACTIONABLE PRE-MARKET & TRADE CHECKLISTS")
+        print("=" * 85)
+        with open(checklists_md, "r", encoding="utf-8") as f:
+            print(f.read())
+    if hypotheses_md.exists():
+        print("\n" + "=" * 85)
+        print("VERIFIED HYPOTHESES & GROUND-TRUTH CITATIONS")
+        print("=" * 85)
+        with open(hypotheses_md, "r", encoding="utf-8") as f:
+            print(f.read())
+
+
+def run_explore_command(platform: str, target: str, limit: int = 10, ingest: bool = False):
+    import subprocess
+    root_skills = Path(__file__).resolve().parent.parent / ".agents" / "skills"
+    plat = platform.lower().strip()
+
+    if plat == "youtube":
+        script = root_skills / "youtube-extractor" / "scripts" / "explore_channel.py"
+        cmd = [sys.executable, str(script), target, "--limit", str(limit)]
+    elif plat == "x":
+        script = root_skills / "x-explorer" / "scripts" / "explore_user.py"
+        cmd = [sys.executable, str(script), target]
+        if ingest:
+            cmd.append("--ingest-db")
+    elif plat == "reddit":
+        script = root_skills / "reddit-explorer" / "scripts" / "explore_community.py"
+        cmd = [sys.executable, str(script), target, "--limit", str(limit)]
+    elif plat == "medium":
+        script = root_skills / "medium-explorer" / "scripts" / "explore_tag.py"
+        cmd = [sys.executable, str(script), target, "--limit", str(limit)]
+    elif plat == "arxiv":
+        script = root_skills / "paper-code-explorer" / "scripts" / "search_papers.py"
+        cmd = [sys.executable, str(script), target, "--limit", str(limit)]
+        if ingest:
+            cmd.append("--ingest-db")
+    elif plat == "annas_archive":
+        script = root_skills / "annas-archive-explorer" / "scripts" / "search_archive.py"
+        cmd = [sys.executable, str(script), target, "--limit", str(limit)]
+        if ingest:
+            cmd.append("--ingest-db")
+    else:
+        print(f"Unsupported platform: {platform}", file=sys.stderr)
+        return
+
+    subprocess.run(cmd)
 
 
 def main():
@@ -186,6 +287,21 @@ def main():
     mig_p = sub.add_parser("migrate", help="Run or inspect database migrations")
     mig_p.add_argument("--status", action="store_true", help="Display migration status")
 
+    # strategy
+    strat_p = sub.add_parser("strategy", help="Load complete creator strategy rulebook and checklists for AI agent")
+    strat_p.add_argument("name", help="Creator or strategy name (e.g. minervini, qullamaggie, lance, smb, lewis-kelly, humbled, dante, brandt, furey)")
+
+    # explore
+    exp_p = sub.add_parser("explore", help="Explore creator content across platforms")
+    exp_p.add_argument("platform", choices=["youtube", "x", "reddit", "medium", "arxiv", "annas_archive"])
+    exp_p.add_argument("target", help="Target handle, channel, tag, or topic")
+    exp_p.add_argument("--limit", "-n", type=int, default=10)
+    exp_p.add_argument("--ingest", action="store_true", help="Auto-ingest into database")
+
+    # install
+    inst_p = sub.add_parser("install", help="Install FinSocNet plugin / slash commands across AI harnesses")
+    inst_p.add_argument("harness", nargs="?", default="all", choices=["claude", "omp", "pi", "hermes", "codex", "openclaw", "shared", "all"])
+
     args = parser.parse_args()
 
     if args.cmd is None or args.cmd == "tui":
@@ -241,7 +357,15 @@ def main():
             else:
                 print(f"Applied {len(new_m)} migrations: {new_m}")
         conn.close()
-
+    elif args.cmd == "strategy":
+        load_strategy_rulebook(args.name)
+    elif args.cmd == "explore":
+        run_explore_command(args.platform, args.target, limit=args.limit, ingest=args.ingest)
+    elif args.cmd == "install":
+        from finsocnet.installer import install_harness
+        install_harness(args.harness)
+        conn = get_db()
+        conn.close()
 
 if __name__ == "__main__":
     main()
