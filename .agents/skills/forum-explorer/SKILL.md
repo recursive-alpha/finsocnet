@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P2"
-  status: planned
+  status: ready
   phase: "6"
   spec: docs/spec/05-platform-skills.md
 ---
 
 # Trading Forum Explorer
-
-> **Status: planned — built in Phase 6.** Nothing below runs yet; it is the contract the implementation must follow.
 
 Engine adapters: Discourse via its JSON API, XenForo/vBulletin/phpBB via HTML selectors, anything else via web-reader with agent-guided pagination. Reads all pages of a thread (cap `--max-pages 200` with a warning).
 

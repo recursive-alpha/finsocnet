@@ -242,7 +242,10 @@ def run_platform_cli(adapter: PlatformAdapter, extra: dict[str, tuple[Callable[[
                                                               "reason": it.get("title") or "new item from source refresh", "priority": 0.4}, run_id)
                                             for it in res["items"] if not it["known"]]
                     if args.save_cursor and (res.get("source") or {}).get("id"):
-                        content.set_source_cursor(conn, res["source"]["id"], res.get("next_cursor"))
+                        from finsocnet.core.db import transaction
+                        with transaction(conn):
+                            content.upsert_source(conn, {"id": res["source"]["id"], "title": res["source"].get("title")})
+                            content.set_source_cursor(conn, res["source"]["id"], res.get("next_cursor"))
                 return Result(data)
             rec = adapter.fetch(args.item, **_opts(args, skip))
             path = write_record(rec)

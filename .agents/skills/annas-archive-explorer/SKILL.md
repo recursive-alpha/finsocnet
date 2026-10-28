@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P1"
-  status: partial
+  status: ready
   phase: "4"
   spec: docs/spec/05-platform-skills.md
 ---
 
 # Anna's Archive Explorer
-
-> **Status: partial.** v1 scripts work today (see *Legacy commands*). The v2 adapter `scripts/annas.py` below is built in Phase 4 and replaces them.
 
 Search and metadata are always allowed; downloads happen only on an explicit `download` call. Downloading copyrighted books may be illegal where the user lives — mention this when the user asks to download.
 
@@ -70,17 +68,15 @@ Common flags (docs/spec/00-conventions.md §3): `--ingest --run R` stores the re
 
 ## Notes
 
-- v1 `session_manager.py` is replaced by the agent browser profile.
 
-## Legacy commands (v1, until Phase 4)
+## Legacy commands (v1 names; thin wrappers until Phase 8)
 
 ```bash
 uv run .agents/skills/annas-archive-explorer/scripts/search_archive.py "Market Wizards" --ext pdf
 uv run .agents/skills/annas-archive-explorer/scripts/get_book_details.py "<md5>"
-uv run .agents/skills/annas-archive-explorer/scripts/session_manager.py --interactive   # DDoS-Guard clearance; replaced by the agent browser profile
 ```
 
-v1 scripts write the v1 schema. After migration 003 their output is converted; do not mix v1 ingestion with v2 runs on the same database.
+The v1 names call the v2 adapter (`--ingest-db` maps to `--ingest`); use the new subcommands in new work.
 
 ## References
 

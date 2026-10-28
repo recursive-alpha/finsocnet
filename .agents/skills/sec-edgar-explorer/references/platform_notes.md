@@ -16,3 +16,7 @@ Implementation details for the adapter. Update this file (and add `kb lesson add
 
 | Date | Change | Lesson |
 |---|---|---|
+
+## Phase 4 implementation notes (2026-10-28)
+
+Verified live on 2026-10-28: `data.sec.gov/submissions/CIK<cik10>.json` with a contact User-Agent. Full-text search (`efts`) and the 13F information-table path are written from the documentation and **not** verified.

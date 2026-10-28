@@ -18,3 +18,7 @@ Implementation details for the adapter. Update this file (and add `kb lesson add
 
 | Date | Change | Lesson |
 |---|---|---|
+
+## Phase 4 implementation notes (2026-10-28)
+
+Verified live on 2026-10-28: `/search/advanced`, `/questions/<id>`, `/questions/<id>/answers`, `/users/<id>` with `filter=withbody`; quota 300/day without a key. Fixtures in `tests/fixtures/stackexchange/`.

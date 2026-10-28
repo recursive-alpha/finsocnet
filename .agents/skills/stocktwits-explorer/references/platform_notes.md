@@ -15,3 +15,7 @@ Implementation details for the adapter. Update this file (and add `kb lesson add
 
 | Date | Change | Lesson |
 |---|---|---|
+
+## Phase 4 implementation notes (2026-10-28)
+
+Verified live on 2026-10-28: plain HTTP to `api.stocktwits.com` answers **403**; the adapter therefore loads the JSON endpoints through the agent browser. NOT verified live (hand-written fixtures in the documented shape); check selectors/endpoints on the first real run and correct them here.

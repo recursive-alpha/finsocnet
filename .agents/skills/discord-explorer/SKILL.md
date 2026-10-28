@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P2"
-  status: planned
+  status: ready
   phase: "6"
   spec: docs/spec/05-platform-skills.md
 ---
 
 # Discord Explorer
-
-> **Status: planned — built in Phase 6.** Nothing below runs yet; it is the contract the implementation must follow.
 
 **Risk:** automating a personal Discord account breaks Discord's terms and can get it banned. Prefer a secondary account and bot mode where possible; keep the budget low. This skill is enabled only after the user accepts the risk (SPEC §9 Q2). The script never sends its own API requests with the user token: it scrolls the web app and reads the responses the app itself loads.
 

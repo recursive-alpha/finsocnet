@@ -18,3 +18,7 @@ Implementation details for the adapter. Update this file (and add `kb lesson add
 
 | Date | Change | Lesson |
 |---|---|---|
+
+## Phase 4 implementation notes (2026-10-28)
+
+Verified live on 2026-10-28: yt-dlp `ytsearch`, `youtube-transcript-api` listing and fetching on a server IP. Whisper fallback is covered with a fake model; a real Whisper run downloads the model on first use.

@@ -17,3 +17,7 @@ Implementation details for the adapter. Update this file (and add `kb lesson add
 
 | Date | Change | Lesson |
 |---|---|---|
+
+## Phase 4 implementation notes (2026-10-28)
+
+NOT verified live (hand-written fixtures in the documented shape); check selectors/endpoints on the first real run and correct them here. User mode reads the client's own REST responses (`/api/v*/channels/<id>/messages`); bot mode (official API) is the supported route for servers you administer. In-app search is not implemented.

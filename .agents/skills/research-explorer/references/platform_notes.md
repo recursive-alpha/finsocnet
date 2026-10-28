@@ -16,3 +16,7 @@ Implementation details for the adapter. Update this file (and add `kb lesson add
 
 | Date | Change | Lesson |
 |---|---|---|
+
+## Phase 4 implementation notes (2026-10-28)
+
+Verified live on 2026-10-28: OpenAlex `/works?search=` (abstract comes as `abstract_inverted_index`). Semantic Scholar answered **429** without a key; use `--provider s2` sparingly. SSRN search is not implemented (needs the browser).

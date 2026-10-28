@@ -1,0 +1,8 @@
+# Known trading forums (docs/spec/05 §3.4). `engine` is verified by `forum.py detect <url>`; entries marked "verify" were not checked live.
+forums:
+  - {host: forums.babypips.com, name: BabyPips, engine: discourse, language: en, requires_session: false, notes: "verify"}
+  - {host: elitetrader.com, name: Elite Trader, engine: xenforo, language: en, requires_session: false, notes: "verify; Cloudflare possible"}
+  - {host: trade2win.com, name: Trade2Win, engine: xenforo, language: en, requires_session: false, notes: "verify"}
+  - {host: f319.com, name: F319, engine: xenforo, language: vi, requires_session: false, notes: "verify; Vietnamese"}
+  - {host: futures.io, name: futures.io, engine: generic, language: en, requires_session: false, notes: "verify"}
+  - {host: forexfactory.com, name: Forex Factory, engine: generic, language: en, requires_session: false, notes: "verify; Cloudflare"}

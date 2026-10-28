@@ -15,3 +15,7 @@ Implementation details for the adapter. Update this file (and add `kb lesson add
 
 | Date | Change | Lesson |
 |---|---|---|
+
+## Phase 4 implementation notes (2026-10-28)
+
+Whisper (`faster-whisper`) is loaded lazily; tests use a fake model. Results are cached in `data/transcripts/<sha256[:16]>.json`.

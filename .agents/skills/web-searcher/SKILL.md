@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P1"
-  status: partial
+  status: ready
   phase: "4"
   spec: docs/spec/05-platform-skills.md
 ---
 
 # Web Searcher (DuckDuckGo)
-
-> **Status: partial.** v1 scripts work today (see *Legacy commands*). The v2 adapter `scripts/web_search.py` below is built in Phase 4 and replaces them.
 
 Keyless search; returns ItemRefs only. Use `web-reader` (or the dispatch rules) to fetch results.
 
@@ -68,13 +66,13 @@ Implements only `search` of the adapter contract; other subcommands exit 2 `UNSU
 
 - No `fetch`, `list`, `profile`.
 
-## Legacy commands (v1, until Phase 4)
+## Legacy commands (v1 names; thin wrappers until Phase 8)
 
 ```bash
 uv run .agents/skills/web-searcher/scripts/search_web.py "<query>" [--site x.com]
 ```
 
-v1 scripts write the v1 schema. After migration 003 their output is converted; do not mix v1 ingestion with v2 runs on the same database.
+The v1 names call the v2 adapter (`--ingest-db` maps to `--ingest`); use the new subcommands in new work.
 
 ## References
 

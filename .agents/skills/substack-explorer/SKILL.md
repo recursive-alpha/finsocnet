@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P1"
-  status: planned
+  status: ready
   phase: "4"
   spec: docs/spec/05-platform-skills.md
 ---
 
 # Substack Explorer
-
-> **Status: planned — built in Phase 4.** Nothing below runs yet; it is the contract the implementation must follow.
 
 Uses Substack's JSON endpoints through the agent browser (cookies apply). The endpoints are unofficial: if one changes, record it in `references/platform_notes.md` and add a lesson.
 

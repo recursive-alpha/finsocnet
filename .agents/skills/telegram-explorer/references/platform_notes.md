@@ -16,3 +16,7 @@ Implementation details for the adapter. Update this file (and add `kb lesson add
 
 | Date | Change | Lesson |
 |---|---|---|
+
+## Phase 4 implementation notes (2026-10-28)
+
+Verified live on 2026-10-28: `https://t.me/s/<channel>` preview parsing against a real saved page (`tests/fixtures/telegram/channel.html`); pagination uses the `tme_messages_more` link. Browser mode for private chats is not implemented.

@@ -186,3 +186,105 @@ def test_web_fetch_with_the_real_agent_browser(repo, conn, tmp_path, monkeypatch
         browser_proc.stop()
         srv.shutdown()
         budgets._load.cache_clear()
+
+
+def test_annas_search_and_details_parsers():
+    from finsocnet.adapters import annas
+    md5 = "0123456789abcdef0123456789abcdef"
+    html = f"""<html><body><a href="/md5/{md5}"><div><h3>Market Wizards</h3><div>Jack Schwager</div><div>English [en], pdf, 14.5MB, 2012</div><div>Wiley</div></div></a>
+    <a href="/md5/{md5}"><h3>Market Wizards</h3></a><a href="/md5/ffffffffffffffffffffffffffffffff"><div>no title anchor</div></a></body></html>"""
+    items = annas.parse_search(html, "https://annas-archive.gl")
+    assert len(items) == 1 and items[0]["id"] == f"book:{md5}" and items[0]["metrics"] == {"format": "pdf", "size": "14.5MB"} and items[0]["author_handle"] == "Jack Schwager"
+    det = annas.parse_details(f"""<html><head><title>Market Wizards - Anna's Archive</title></head><body><div class="text-3xl">Market Wizards</div><div class="js-md5-top-box-description">Interviews with top traders.</div>
+    <a href="/slow_download/{md5}/0/0">Slow Partner Server #1</a><a href="https://libgen.example/x">Libgen</a></body></html>""", md5, "https://annas-archive.gl")
+    rec = valid(annas.details_record(det, None))
+    assert rec["id"] == f"book:{md5}" and rec["segments"][0]["text"] == "Interviews with top traders." and len(rec["extra"]["mirrors"]) == 2 and annas.md5_of(f"book:{md5}") == md5
+
+
+DISCORD_MSGS = [
+    {"id": "1100000000000000000", "content": "Anyone holding NVDA through earnings?", "author": {"id": "11", "username": "alice_t", "global_name": "Alice"}, "attachments": [], "embeds": [], "timestamp": "2026-10-27T10:00:00+00:00"},
+    {"id": "1100000000000000001", "content": "I hold only with a hedge", "author": {"id": "22", "username": "bob_q"}, "message_reference": {"message_id": "1100000000000000000"},
+     "attachments": [{"url": "https://cdn.discordapp.com/chart.png"}], "embeds": [{"title": "Chart", "description": "NVDA daily"}]},
+    {"id": "1000000000000000000", "content": "an older message on another day", "author": {"id": "11", "username": "alice_t"}, "attachments": [], "embeds": []},
+]
+
+
+def test_discord_day_window_record():
+    from finsocnet.adapters import discord
+    day = discord.snowflake_day("1100000000000000000")
+    rec = valid(discord.build_record("555", day, DISCORD_MSGS, "777", "trade-ideas", None))
+    assert rec["id"] == f"discord:555:{day}" and rec["content_type"] == "chat_window" and rec["extra"]["private_source"] is True
+    assert [s["locator"]["message_id"] for s in rec["segments"]] == ["1100000000000000000", "1100000000000000001"]  # the older day is excluded
+    assert rec["segments"][1]["locator"]["reply_to"] == "1100000000000000000" and "NVDA daily" in rec["segments"][1]["text"] and rec["media"][0]["url"].endswith("chart.png")
+    assert discord.parse_link("https://discord.com/channels/777/555/1100000000000000000") == ("777", "555", "1100000000000000000")
+
+
+def test_discord_needs_a_session_and_bot_mode_needs_a_token(repo, monkeypatch):
+    from finsocnet.adapters.discord import Discord
+    monkeypatch.delenv("DISCORD_BOT_TOKEN", raising=False)
+    with pytest.raises(CliError) as e:
+        Discord().fetch("1100000000000000555", mode="bot")
+    assert e.value.code == "USAGE" and "bot" in e.value.message.lower()
+    assert Discord.requires_session is True
+
+
+def test_forum_discourse_and_xenforo_parsers():
+    from finsocnet.adapters import forum
+    topic = {"id": 42, "title": "Position sizing", "slug": "position-sizing", "created_at": "2026-09-01T10:00:00Z", "views": 100, "posts_count": 2, "like_count": 5, "category_id": 7, "tags": ["risk"],
+             "post_stream": {"posts": [{"id": 1, "post_number": 1, "username": "alice", "name": "Alice", "user_id": 1, "cooked": "<p>I risk 1% per trade and never more.</p>"},
+                                       {"id": 2, "post_number": 2, "username": "bob", "user_id": 2, "cooked": "<p>Same, but I scale in after confirmation.</p>", "reply_to_post_number": 1}], "stream": [1, 2]}}
+    rec = valid(forum.parse_discourse_topic(topic, "forums.babypips.com"))
+    assert rec["id"] == "forum:forums.babypips.com:42" and [s["kind"] for s in rec["segments"]] == ["post", "reply"] and rec["segments"][1]["locator"] == {"post_id": 2, "page": 1, "parent_id": 1}
+    xf = """<html><head><meta name="generator" content="XenForo"></head><body><h1 class="p-title-value">Stop loss rules</h1><ul class="pageNav-main"><li><a>1</a></li><li><a>3</a></li></ul>
+    <article class="message" data-content="post-901" data-author="nhadautu"><time datetime="2026-09-02T08:00:00+0700"></time><div class="bbWrapper"><blockquote>old quote</blockquote><p>Mua sai thì cắt lỗ 7% không bàn cãi.</p></div></article>
+    <article class="message" data-content="post-902" data-author="trader2"><div class="bbWrapper"><p>Agree, discipline first.</p></div></article></body></html>"""
+    assert forum.detect_engine(xf, "https://f319.com/threads/stop.885500/") == "xenforo" and forum.detect_engine("<html></html>", "https://futures.io/x") == "generic"
+    pg = forum.parse_xenforo_page(xf, 1)
+    assert pg["title"] == "Stop loss rules" and pg["last_page"] == 3 and pg["posts"][0]["quotes"] == ["old quote"] and "old quote" not in pg["posts"][0]["text"]
+    rec2 = valid(forum.xenforo_record("f319.com", "885500", pg["title"], [pg], "https://f319.com/threads/stop.885500", []))
+    assert rec2["id"] == "forum:f319.com:885500" and rec2["segments"][0]["author"]["handle"] == "nhadautu" and rec2["segments"][0]["locator"]["post_id"] == "901"
+    assert forum.thread_id_of("https://f319.com/threads/stop.885500/page-2") == "885500" and forum.thread_id_of("https://forums.babypips.com/t/position-sizing/42") == "42"
+
+
+def test_tradingview_idea_and_script_pages():
+    from finsocnet.adapters import tradingview as tv
+    html = """<html><head><title>NVDA long idea</title><meta property="og:image" content="https://s3.tradingview.com/snap.png"><script type="application/ld+json">{"headline":"NVDA breakout","author":{"name":"alice"},"datePublished":"2026-09-01"}</script></head>
+    <body><div data-name="content-description"><p>Buying the breakout above 140 with a stop under 132 and a target near 160.</p></div><a href="/symbols/NASDAQ-NVDA/">NVDA</a><span>Long</span>
+    <div data-comment-id="c1"><span data-username="bob"></span><div class="comment-content">Nice setup, volume confirms it.</div></div></body></html>"""
+    d = tv.parse_page(html, "https://www.tradingview.com/chart/NVDA/AbCdEf12-nvda-breakout/")
+    rec = valid(tv.build_record("https://www.tradingview.com/chart/NVDA/AbCdEf12-nvda-breakout/", d, None))
+    assert rec["id"] == "tradingview:idea:AbCdEf12" and rec["content_type"] == "idea" and rec["extra"]["symbol"] == "NASDAQ-NVDA" and rec["extra"]["direction"] == "Long" and rec["author"]["handle"] == "alice"
+    assert any(s["kind"] == "comment" and s["author"]["handle"] == "bob" for s in rec["segments"])
+    code = "\n".join(f"plot(close, 'x{i}')" for i in range(70))
+    sc = tv.build_record("https://www.tradingview.com/script/Xy12Zw90-EMA-cross/", {**d, "code": code, "comments": []}, None)
+    assert valid(sc)["id"] == "tradingview:script:Xy12Zw90" and sc["extra"]["code_visible"] is True and [s["locator"]["line_start"] for s in sc["segments"] if s["kind"] == "code"] == [1, 61]
+    prot = tv.build_record("https://www.tradingview.com/script/Xy12Zw90-EMA-cross/", {**d, "code": "", "comments": []}, None)
+    assert prot["extra"]["code_visible"] is False
+
+
+def test_social_parsers_facebook_threads_instagram_linkedin_seekingalpha_tiktok():
+    from finsocnet.adapters import social
+    fb = [{"data": {"node": {"__typename": "Story", "post_id": "999", "message": {"text": "Why I never hold losers overnight"}, "creation_time": 1789000000, "actors": [{"name": "Alice T", "id": "11"}],
+                             "comments": [{"__typename": "Comment", "id": "c1", "body": {"text": "Agree 100%"}, "author": {"name": "Bob", "id": "22"}}]}}}]
+    rec = valid(social.facebook_record("123", social.parse_facebook(fb), "https://www.facebook.com/groups/123/posts/999/", 200, None))
+    assert rec["id"] == "facebook:123:999" and rec["extra"]["private_source"] is True and [s["kind"] for s in rec["segments"]] == ["post", "comment"]
+    with pytest.raises(CliError):
+        social.parse_facebook([{}])
+    th = [{"data": {"post": {"pk": "3501", "code": "Cabc123", "caption": {"text": "Breakouts fail in chop. Wait for the market to trend."}, "user": {"username": "trader_x", "pk": "9"}, "taken_at": 1789000000, "like_count": 12}}}]
+    posts = social.parse_meta_posts(th)
+    trec = valid(social.meta_record("threads", "threads:3501", posts["Cabc123"], [], "https://www.threads.net/t/Cabc123", "post", None))
+    assert trec["id"] == "threads:3501" and trec["author"]["handle"] == "trader_x" and trec["published_at"].startswith("2026")
+    ig = valid(social.meta_record("instagram", "instagram:Cabc123", {**posts["Cabc123"], "video": "https://v/x.mp4"}, [], "https://www.instagram.com/p/Cabc123/", "short", None, [{"start": 0, "end": 5, "text": "today we talk risk"}]))
+    assert ig["content_type"] == "short" and ig["segments"][-1]["kind"] == "transcript"
+    li_html = """<div data-urn="urn:li:activity:7123456789012345678"><a class="update-components-actor__meta-link" href="https://www.linkedin.com/in/jane-doe?x=1"></a>
+    <span class="update-components-actor__name"><span aria-hidden="true">Jane Doe</span></span><div class="update-components-text">Lessons from 15 years of trading:<br>1. Defined risk.<br>2. Review weekly.</div></div>"""
+    lp = social.parse_linkedin_posts(li_html)
+    lrec = valid(social.linkedin_record(lp[0], None))
+    assert lrec["id"] == "linkedin:urn:li:activity:7123456789012345678" and lrec["author"]["handle"] == "jane-doe" and "Defined risk" in lrec["segments"][0]["text"]
+    sa_html = ARTICLE_HTML.replace("<footer>", "<a href='/author/jane-analyst'>Jane Analyst</a><div data-test-id='comment' id='cm1'><span data-test-id='comment-author'>reader1</span> Great analysis of the setup here</div><footer>")
+    sa = valid(social.sa_record("https://seekingalpha.com/article/4700001-trailing-stops", social.parse_seekingalpha(sa_html, "https://seekingalpha.com/article/4700001-trailing-stops"), None))
+    assert sa["id"] == "seekingalpha:4700001" and sa["author"]["handle"] == "jane-analyst" and any(s["kind"] == "comment" for s in sa["segments"])
+    tk = valid(social.tiktok_record({"id": "7300", "title": "Stop losses #trading", "description": "Always use a stop loss $SPY", "uploader": "Trader", "uploader_id": "trader_x", "upload_date": "20260901", "duration": 40,
+                                     "webpage_url": "https://www.tiktok.com/@trader_x/video/7300"}, [{"start": 0, "end": 8, "text": "always use a stop"}], "whisper", None))
+    assert tk["id"] == "tiktok:7300" and tk["segments"][0]["kind"] == "caption" and tk["segments"][1]["kind"] == "transcript" and "$SPY" in tk["mentions"]
+    assert social.sa_article_id("https://seekingalpha.com/article/4700001-x") == "4700001"

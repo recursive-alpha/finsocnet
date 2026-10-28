@@ -17,3 +17,7 @@ Implementation details for the adapter. Update this file (and add `kb lesson add
 
 | Date | Change | Lesson |
 |---|---|---|
+
+## Phase 4 implementation notes (2026-10-28)
+
+Verified live on 2026-10-28: search, repo, readme, user, git tree. 60 requests/hour without `GITHUB_TOKEN`.

@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P2"
-  status: planned
+  status: ready
   phase: "6"
   spec: docs/spec/05-platform-skills.md
 ---
 
 # TradingView Explorer
-
-> **Status: planned — built in Phase 6.** Nothing below runs yet; it is the contract the implementation must follow.
 
 Pine code is split into ≤ 60-line code segments; knowledge-transformer reads the entry/exit logic. Protected or invite-only scripts give description only.
 

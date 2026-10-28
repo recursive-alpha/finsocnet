@@ -15,3 +15,7 @@ Implementation details for the adapter. Update this file (and add `kb lesson add
 
 | Date | Change | Lesson |
 |---|---|---|
+
+## Phase 4 implementation notes (2026-10-28)
+
+Verified live on 2026-10-28: Algolia `/search`, `/items/<id>`, `/users/<name>` answer to plain HTTP; fixtures in `tests/fixtures/hackernews/`. Content ids use `hn:<id>` (platform key `hackernews`).

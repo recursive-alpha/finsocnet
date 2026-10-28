@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P1"
-  status: partial
+  status: ready
   phase: "4"
   spec: docs/spec/05-platform-skills.md
 ---
 
 # Paper & Code Explorer (arXiv)
-
-> **Status: partial.** v1 scripts work today (see *Legacy commands*). The v2 adapter `scripts/papers.py` below is built in Phase 4 and replaces them.
 
 Paper metadata and abstracts are stored as `metadata_only`; full text comes from `--pdf` → document-reader. Linked GitHub repos are enqueued for github-explorer.
 
@@ -67,7 +65,7 @@ Common flags (docs/spec/00-conventions.md §3): `--ingest --run R` stores the re
 | 5 `NOT_FOUND` / `GONE` | queue item → `failed`; already stored content stays (status `gone`) |
 | 1 `INTERNAL` | `kb lesson add --skill paper-code-explorer --kind script_bug …` with the error, then report |
 
-## Legacy commands (v1, until Phase 4)
+## Legacy commands (v1 names; thin wrappers until Phase 8)
 
 ```bash
 uv run .agents/skills/paper-code-explorer/scripts/search_papers.py "<query>" --has-code
@@ -75,7 +73,7 @@ uv run .agents/skills/paper-code-explorer/scripts/get_paper.py "<id>" --auto-dow
 uv run .agents/skills/paper-code-explorer/scripts/explore_trending.py --limit 5 --has-code
 ```
 
-v1 scripts write the v1 schema. After migration 003 their output is converted; do not mix v1 ingestion with v2 runs on the same database.
+The v1 names call the v2 adapter (`--ingest-db` maps to `--ingest`); use the new subcommands in new work.
 
 ## References
 

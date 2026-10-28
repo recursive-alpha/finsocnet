@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P2"
-  status: planned
+  status: ready
   phase: "6"
   spec: docs/spec/05-platform-skills.md
 ---
 
 # Research Explorer (SSRN, NBER, OpenAlex, Semantic Scholar)
-
-> **Status: planned — built in Phase 6.** Nothing below runs yet; it is the contract the implementation must follow.
 
 Complements paper-code-explorer (arXiv + code). Papers that test a claim give `backtested` evidence.
 

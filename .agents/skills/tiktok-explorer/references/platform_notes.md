@@ -15,3 +15,7 @@ Implementation details for the adapter. Update this file (and add `kb lesson add
 
 | Date | Change | Lesson |
 |---|---|---|
+
+## Phase 4 implementation notes (2026-10-28)
+
+yt-dlp metadata and Whisper on the audio; the parser is covered by a synthetic yt-dlp info dict. Profile listing relies on yt-dlp's TikTok extractor, which changes often.

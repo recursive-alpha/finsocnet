@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P3"
-  status: planned
+  status: ready
   phase: "7"
   spec: docs/spec/05-platform-skills.md
 ---
 
 # LinkedIn Explorer
-
-> **Status: planned — built in Phase 7.** Nothing below runs yet; it is the contract the implementation must follow.
 
 **Risk:** LinkedIn restricts automated accounts aggressively. Only profiles of persons already known; ~20 pages/hour; stop at the first checkpoint. Enabled after the user accepts the risk.
 

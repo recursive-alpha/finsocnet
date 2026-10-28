@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P1"
-  status: partial
+  status: ready
   phase: "4"
   spec: docs/spec/05-platform-skills.md
 ---
 
 # Reddit Explorer
-
-> **Status: partial.** v1 scripts work today (see *Legacy commands*). The v2 adapter `scripts/reddit.py` below is built in Phase 4 and replaces them.
 
 Uses Reddit's `.json` endpoints loaded through the agent browser, so cookies and proxy apply. Keeps every comment up to the cap (default 500, highest score first) and warns when the cap is hit.
 
@@ -81,7 +79,7 @@ Common flags (docs/spec/00-conventions.md §3): `--ingest --run R` stores the re
 - `more` stubs expanded with `/api/morechildren.json` until the cap.
 - Remove the v1 `--host-resolver-rules` DNS hack.
 
-## Legacy commands (v1, until Phase 4)
+## Legacy commands (v1 names; thin wrappers until Phase 8)
 
 ```bash
 uv run .agents/skills/reddit-explorer/scripts/explore_community.py "RealDayTrading" --sort hot --limit 5
@@ -90,7 +88,7 @@ uv run .agents/skills/reddit-explorer/scripts/read_thread.py "<thread url>"
 # login_reddit.py is superseded by session-bridge (Phase 3)
 ```
 
-v1 scripts write the v1 schema. After migration 003 their output is converted; do not mix v1 ingestion with v2 runs on the same database.
+The v1 names call the v2 adapter (`--ingest-db` maps to `--ingest`); use the new subcommands in new work.
 
 ## References
 

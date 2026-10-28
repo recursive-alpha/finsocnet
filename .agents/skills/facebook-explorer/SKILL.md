@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P2"
-  status: planned
+  status: ready
   phase: "6"
   spec: docs/spec/05-platform-skills.md
 ---
 
 # Facebook Explorer
-
-> **Status: planned — built in Phase 6.** Nothing below runs yet; it is the contract the implementation must follow.
 
 **Risk:** Facebook bans automated personal accounts; use a secondary account, strict budget (`facebook` in budgets.yaml), and stop at the first checkpoint. Enabled only after the user accepts the risk (SPEC §9 Q2).
 

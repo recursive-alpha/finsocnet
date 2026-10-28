@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P1"
-  status: partial
+  status: ready
   phase: "4"
   spec: docs/spec/05-platform-skills.md
 ---
 
 # YouTube Extractor
-
-> **Status: partial.** v1 scripts work today (see *Legacy commands*). The v2 adapter `scripts/youtube.py` below is built in Phase 4 and replaces them.
 
 Turns YouTube into FinSocNet content. Captions first, Whisper only when no captions exist. Uses the imported cookies file when present, which avoids "confirm you're not a bot" blocks on server IPs and unlocks members-only videos.
 
@@ -80,14 +78,14 @@ Common flags (docs/spec/00-conventions.md §3): `--ingest --run R` stores the re
 - Caption order: manual original language → manual en → auto original → auto en → Whisper.
 - Streams longer than 3 h are still fully transcribed (nothing ignored).
 
-## Legacy commands (v1, until Phase 4)
+## Legacy commands (v1 names; thin wrappers until Phase 8)
 
 ```bash
 uv run .agents/skills/youtube-extractor/scripts/extract_transcript.py "<url-or-id>"
 uv run .agents/skills/youtube-extractor/scripts/explore_channel.py "@handle" --tab all --limit 20 --save-json data/channels/<name>.json
 ```
 
-v1 scripts write the v1 schema. After migration 003 their output is converted; do not mix v1 ingestion with v2 runs on the same database.
+The v1 names call the v2 adapter (`--ingest-db` maps to `--ingest`); use the new subcommands in new work.
 
 ## References
 

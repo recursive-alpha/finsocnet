@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P3"
-  status: planned
+  status: ready
   phase: "7"
   spec: docs/spec/05-platform-skills.md
 ---
 
 # StockTwits Explorer
-
-> **Status: planned — built in Phase 7.** Nothing below runs yet; it is the contract the implementation must follow.
 
 High noise. Fetch on demand (a symbol or a known user), not as a broad crawl.
 

@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P1"
-  status: planned
+  status: ready
   phase: "4"
   spec: docs/spec/05-platform-skills.md
 ---
 
 # Google Searcher
-
-> **Status: planned — built in Phase 4.** Nothing below runs yet; it is the contract the implementation must follow.
 
 Strict budget (Google CAPTCHAs quickly). Use web-searcher first unless you need Google-only operators or coverage.
 

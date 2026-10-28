@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P2"
-  status: planned
+  status: ready
   phase: "6"
   spec: docs/spec/05-platform-skills.md
 ---
 
 # GitHub Explorer
-
-> **Status: planned — built in Phase 6.** Nothing below runs yet; it is the contract the implementation must follow.
 
 You choose which files to read: `tree` lists them, `fetch <repo>:<path>` reads one. Read strategy/signal/backtest files, skip boilerplate.
 

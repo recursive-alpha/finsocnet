@@ -20,3 +20,7 @@ Implementation details for the adapter. Update this file (and add `kb lesson add
 
 | Date | Change | Lesson |
 |---|---|---|
+
+## Phase 4 implementation notes (2026-10-28)
+
+Verified live on 2026-10-28: `/api/v1/archive`, `/api/v1/posts/<slug>`, `/api/v1/post/<id>/comments` on a public publication. `substack.com/api/v1/publication/search` returned an empty list; `/api/v1/publication` answered 403. Paid posts: `audience` is `only_paid` and the body is truncated (flagged `extra.truncated`).

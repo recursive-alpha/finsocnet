@@ -17,3 +17,7 @@ Implementation details for the adapter. Update this file (and add `kb lesson add
 
 | Date | Change | Lesson |
 |---|---|---|
+
+## Phase 4 implementation notes (2026-10-28)
+
+Verified by tests with generated PDF, DOCX, EPUB, HTML, MD and audio (fake Whisper) files. OCR needs the optional `ocr` extra (`ocrmypdf`); without it, text-less pages are counted in `extra.empty_pages`.

@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P1"
-  status: planned
+  status: ready
   phase: "4"
   spec: docs/spec/05-platform-skills.md
 ---
 
 # Document Reader
-
-> **Status: planned — built in Phase 4.** Nothing below runs yet; it is the contract the implementation must follow.
 
 Every page or paragraph becomes a quotable segment. Big books are fine; the miner reads them in 8000-char chunks.
 

@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P1"
-  status: partial
+  status: ready
   phase: "4"
   spec: docs/spec/05-platform-skills.md
 ---
 
 # Web Reader
-
-> **Status: partial.** v1 scripts work today (see *Legacy commands*). The v2 adapter `scripts/web.py` below is built in Phase 4 and replaces them.
 
 The fallback reader. Attaches to the agent browser (never launches its own Chromium), extracts with trafilatura, and hands PDFs to `document-reader`.
 
@@ -76,14 +74,14 @@ Common flags (docs/spec/00-conventions.md §3): `--ingest --run R` stores the re
 
 - Canonical URL removes tracking params (`utm_*`, `fbclid`, `gclid`, …) — see docs/spec/00 §4.
 
-## Legacy commands (v1, until Phase 4)
+## Legacy commands (v1 names; thin wrappers until Phase 8)
 
 ```bash
 uv run .agents/skills/web-reader/scripts/read_page.py "<url>" [--screenshot data/screenshots/x.png]
 uv run .agents/skills/web-reader/scripts/inspect_video.py "<url>"
 ```
 
-v1 scripts write the v1 schema. After migration 003 their output is converted; do not mix v1 ingestion with v2 runs on the same database.
+The v1 names call the v2 adapter (`--ingest-db` maps to `--ingest`); use the new subcommands in new work.
 
 ## References
 

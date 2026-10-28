@@ -15,3 +15,7 @@ Implementation details for the adapter. Update this file (and add `kb lesson add
 
 | Date | Change | Lesson |
 |---|---|---|
+
+## Phase 4 implementation notes (2026-10-28)
+
+Verified with the real agent browser on a local page (render, trafilatura extraction, discovery). trafilatura output falls back to DOM text under 200 characters.

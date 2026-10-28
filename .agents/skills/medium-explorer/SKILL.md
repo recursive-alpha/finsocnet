@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P1"
-  status: partial
+  status: ready
   phase: "4"
   spec: docs/spec/05-platform-skills.md
 ---
 
 # Medium Explorer
-
-> **Status: partial.** v1 scripts work today (see *Legacy commands*). The v2 adapter `scripts/medium.py` below is built in Phase 4 and replaces them.
 
 RSS for listing (fast, recent items), the agent browser for search, profiles, full history and article text.
 
@@ -79,7 +77,7 @@ Common flags (docs/spec/00-conventions.md §3): `--ingest --run R` stores the re
 
 - RSS returns only the latest ~10 items; use `--full` for history.
 
-## Legacy commands (v1, until Phase 4)
+## Legacy commands (v1 names; thin wrappers until Phase 8)
 
 ```bash
 uv run .agents/skills/medium-explorer/scripts/explore_tag.py "algorithmic-trading" --limit 5
@@ -88,7 +86,7 @@ uv run .agents/skills/medium-explorer/scripts/read_article.py "<url>"
 # login_medium.py is superseded by session-bridge (Phase 3)
 ```
 
-v1 scripts write the v1 schema. After migration 003 their output is converted; do not mix v1 ingestion with v2 runs on the same database.
+The v1 names call the v2 adapter (`--ingest-db` maps to `--ingest`); use the new subcommands in new work.
 
 ## References
 

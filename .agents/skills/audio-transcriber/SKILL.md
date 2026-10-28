@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P1"
-  status: partial
+  status: ready
   phase: "4"
   spec: docs/spec/05-platform-skills.md
 ---
 
 # Audio Transcriber
-
-> **Status: partial.** v1 scripts work today (see *Legacy commands*). The v2 adapter `scripts/transcribe.py` below is built in Phase 4 and replaces them.
 
 The only model FinSocNet scripts run (ADR-002 exception: speech-to-text, not reasoning). Other skills call it and build their own ContentRecord from its segments.
 
@@ -68,14 +66,12 @@ Not a platform adapter: it returns segments and does not write to the database i
 - VAD filter on, `word_timestamps=False`.
 - `--diarize` (speaker labels via whisperX/pyannote) is a later option, not part of v2.
 
-## Legacy commands (v1, until Phase 4)
+## Legacy commands (v1 names; thin wrappers until Phase 8)
 
 ```bash
-uv run .agents/skills/audio-transcriber/scripts/extract_audio.py "<url>"
-uv run .agents/skills/audio-transcriber/scripts/transcribe_whisper.py "data/audio/<id>.wav" --video-id "<id>"
 ```
 
-v1 scripts write the v1 schema. After migration 003 their output is converted; do not mix v1 ingestion with v2 runs on the same database.
+The v1 names call the v2 adapter (`--ingest-db` maps to `--ingest`); use the new subcommands in new work.
 
 ## References
 
