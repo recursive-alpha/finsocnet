@@ -288,3 +288,19 @@ def test_social_parsers_facebook_threads_instagram_linkedin_seekingalpha_tiktok(
                                      "webpage_url": "https://www.tiktok.com/@trader_x/video/7300"}, [{"start": 0, "end": 8, "text": "always use a stop"}], "whisper", None))
     assert tk["id"] == "tiktok:7300" and tk["segments"][0]["kind"] == "caption" and tk["segments"][1]["kind"] == "transcript" and "$SPY" in tk["mentions"]
     assert social.sa_article_id("https://seekingalpha.com/article/4700001-x") == "4700001"
+
+
+def test_reddit_rss_fallback_when_json_is_blocked(monkeypatch):
+    """Verified 2026-10-28: reddit.com/*.json is blocked from this network, *.rss is not (fixture hand-written in the Atom shape)."""
+    import feedparser
+    from finsocnet.adapters import reddit as rd
+    feed = feedparser.parse((Path(__file__).resolve().parents[1] / "fixtures" / "reddit" / "thread.rss").read_text())
+    refs_ = rd.rss_refs(feed)
+    assert refs_[0]["id"] == "reddit:1xg9xq1" and refs_[0]["author_handle"] == "u/example_dt"
+    warns: list = []
+    rec = valid(rd.rss_thread_record(feed, "1xg9xq1", warns))
+    assert rec["extra"]["partial"] is True and [s["kind"] for s in rec["segments"]] == ["post", "comment"] and rec["segments"][1]["author"]["handle"] == "u/other" and warns
+    monkeypatch.setattr(rd._browser, "load_json", lambda *a, **k: (_ for _ in ()).throw(CliError("CHECKPOINT", "blocked")))
+    monkeypatch.setattr(rd, "_rss", lambda url: feed)
+    assert rd.Reddit().fetch("https://www.reddit.com/r/Daytrading/comments/1xg9xq1/x/")["fetch_method"] == "rss"
+    assert rd.Reddit().search("sizing")[0]["id"] == "reddit:1xg9xq1" and rd.Reddit().list("r/Daytrading")["items"]
