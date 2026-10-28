@@ -1,10 +1,25 @@
-# FinSocNet: Multi-Platform Financial Intelligence & Strategy Synthesizer
+# FinSocNet: Multi-Platform Financial Intelligence & Strategy Network
 
-A modular framework, intelligence storage engine, and AI agent plugin for exploring trading creators across **YouTube, X (Twitter), Reddit, Medium, arXiv, and Anna's Archive**, transcribing media, mining empirical trading hypotheses into SQLite and Chroma, and synthesizing reusable [Agent Skills](https://agentskills.io).
+FinSocNet is an agent-operated financial intelligence framework and skill distribution engine. It discovers traders, investors, and quantitative researchers across **31 platforms** (video, podcasts, newsletters, social networks, chat communities, forums, code repositories, academic papers, and SEC filings), captures their content into a single SQLite database, transforms insights into structured **Knowledge Cards**, deduplicates claims using agent reasoning, and delivers executable trading rulebooks and semantic search to AI coding harnesses.
+
+Adheres strictly to the open [Agent Skills Specification](https://agentskills.io).
 
 ---
 
-## 1. Quick Installation
+## 1. Core Principles (v2 Architecture)
+
+- **Harness-Native Intelligence:** Agents read, analyze, judge, and transform financial knowledge using explicit instructions, claim grammar, and few-shot examples. Deterministic scripts handle fetch, storage, validation, and search.
+- **Pure SQLite Storage:** Single local file (`data/knowledge.db`) using relational tables, vector embeddings (BLOBs), and FTS5 full-text search. Zero external daemon or Chroma dependency.
+- **Structured Knowledge Cards:** Knowledge is stored in a canonical schema with strict claim grammar (`WHEN ... IF ... THEN ... WITH CONFIDENCE ...`) and controlled vocabulary.
+- **Agent-Judged Deduplication:** Candidates are retrieved algorithmically, but the agent determines whether a claim is identical, refining, related, contradicting, or novel.
+- **Person-Centric Attribution:** Knowledge belongs to individual practitioners, not media channels. Every citation records who claimed it, their role, and the exact content anchor.
+- **Remote-First Session Bridge:** Secure transfer of authenticated browser sessions from local machines to dedicated agent browser profiles—no plain-text passwords or cookies stored in `.env`.
+
+Full design specifications live in [`SPEC.md`](SPEC.md) and [`docs/spec/`](docs/spec/).
+
+---
+
+## 2. Quick Installation
 
 Install FinSocNet via a single command:
 
@@ -22,15 +37,15 @@ cd finsocnet
 
 ---
 
-## 2. Multi-Harness AI Agent Integration
+## 3. Multi-Harness AI Agent Integration
 
-FinSocNet acts as a centralized trading knowledge storage and skill distribution engine for external AI agents. Register the plugin across your agent harnesses:
+FinSocNet serves as a centralized knowledge base and strategy distribution engine for AI coding harnesses:
 
 ```bash
 # Install / register across ALL supported harnesses:
 finsocnet install all
 
-# Or install for a specific agent:
+# Or install for a specific agent harness:
 finsocnet install claude      # Claude Code (~/.claude/commands/finsocnet.md)
 finsocnet install omp         # OMP (~/.omp/agent/extensions/finsocnet.ts)
 finsocnet install pi          # Pi Coding Agent (~/.pi/agent/extensions/finsocnet.ts)
@@ -39,36 +54,34 @@ finsocnet install codex       # OpenAI Codex (~/.codex/skills/finsocnet/)
 finsocnet install openclaw    # OpenClaw (~/.openclaw/skills/finsocnet/)
 ```
 
-### Slash Commands in AI Agents (Claude Code, OMP, etc.)
-Once installed, use slash commands directly inside your AI coding assistant:
+### Slash Commands in AI Agents
+Once registered, interact with FinSocNet directly inside your AI harness:
 
-```bash
-/finsocnet                             # Summary metrics across all platforms
-/finsocnet:search "breakout momentum"  # Semantic vector search across all creators
-/finsocnet:strategy minervini          # Load full VCP rulebook and risk parameters
-/finsocnet:strategy qullamaggie        # Load Episodic Pivot & 10/20 EMA swing rules
-/finsocnet:strategy lewis-kelly        # Load SMC market structure & M15/M1 execution
-/finsocnet:strategy lance              # Load Right Side of the V capitulation rules
-/finsocnet:explore youtube "@handle"   # Explore and catalog any new creator
-/finsocnet:skills                      # Inspect System Skills vs Improved Strategy Skills
-/finsocnet:rag "data cleaning"         # Retrieve raw transcript/content chunks
-```
+| Command | Action |
+|---|---|
+| `/finsocnet` | Summary metrics across platforms, creators, and hypotheses |
+| `/finsocnet:search <query>` | Cited search across all indexed trading knowledge |
+| `/finsocnet:strategy <name>` | Load full trader rulebooks (e.g. `minervini`, `qullamaggie`, `lance`, `dante`) |
+| `/finsocnet:explore <platform> <target>` | Explore and catalog a new creator or channel |
+| `/finsocnet:skills` | Inspect installed system skills and strategy rulebooks |
+| `/finsocnet:rag <query>` | Retrieve verbatim content chunks with source citations |
+| `/finsocnet:view <id>` | Inspect an exact hypothesis card with quote and metadata |
 
 ---
 
-## 3. CLI & Terminal UI (TUI)
+## 4. CLI & Terminal UI (TUI)
 
 ```bash
 # Launch interactive Terminal UI
 finsocnet
 
-# Semantic vector search across all creators
+# Semantic vector & keyword search across all indexed knowledge
 finsocnet search "volatility contraction pattern VCP" --limit 3
 
 # View full hypothesis card with exact verbatim quote & timestamp
 finsocnet view 93
 
-# Load creator strategy rulebook and checklists
+# Load trader strategy rulebook and actionable checklists
 finsocnet strategy minervini
 
 # List cataloged creators across platforms
@@ -80,33 +93,58 @@ finsocnet stats
 
 ---
 
-## 4. Available Skills in `.agents/skills/`
+## 5. Skill Catalog (`.agents/skills/`)
 
-| Skill | Classification | Description |
+FinSocNet provides 45 standardized skills adhering to [agentskills.io](https://agentskills.io):
+
+### A. Core Knowledge Engine
+| Skill | Role | Description |
 |---|---|---|
-| **`youtube-extractor`** | System | Fetch transcripts with timestamps, explore channel catalogs across all tabs (videos, shorts, streams) with Whisper fallback. |
-| **`audio-transcriber`** | System | Download audio tracks and transcribe locally using `openai/whisper-large-v3-turbo` (`int8`). |
-| **`x-explorer`** | System | Explore X (Twitter) profiles, search live posts/tickers, and extract tweet threads with browser session & password login. |
-| **`reddit-explorer`** | System | Discover and explore trading subreddits (`r/RealDayTrading`, `r/Daytrading`), search discussions, and read threads with comments. |
-| **`medium-explorer`** | System | Explore Medium articles, quantitative finance publications, author profiles, and read full stories. |
-| **`web-searcher`** | System | Query DuckDuckGo without API keys for creators, profiles, and internet research with site-filtering. |
-| **`web-reader`** | System | Render dynamic JS pages via Playwright, extract clean markdown/text, take screenshots, and inspect embedded videos and caption tracks. |
-| **`annas-archive-explorer`** | System | Search open books, research papers, and textbooks across Anna's Archive (https://annas-archive.gl) with mirror detection. |
-| **`paper-code-explorer`** | System | Explore scientific research papers and code implementations across arXiv and Papers With Code (Hugging Face Papers). |
-| **`knowledge-db`** | System | Relational SQLite database (`knowledge.db`) and Chroma vector store (`data/chroma_db`) with `sentence-transformers/all-MiniLM-L6-v2`. |
-| **`hypothesis-miner`** | System | Mine empirical trading hypotheses, setups, holding periods, and verbatim quotes directly into the database. |
-| **`user-skill-synthesizer`** | System | Transform extracted user rules across YouTube, X, Reddit, and Medium into production-ready Agent Skills conforming to [agentskills.io](https://agentskills.io). |
-| **`mark-minervini-vcp`** | Improved | Mark Minervini Volatility Contraction Pattern (VCP), 6 preservation rules, 1.25% equity risk. |
-| **`qullamaggie-swing-strategy`** | Improved | Kristjan Qullamaggie Episodic Pivots (EP), High Tight Flags, 10/20 EMA trailing stops. |
-| **`lance-breitstein-levels`** | Improved | Lance Breitstein liquidity dynamics, Right Side of the V, failed breakdown execution. |
-| **`lewis-kelly-smc`** | Improved | Lewis Kelly Smart Money Concepts (SMC), M15 trend definition, M1 change of character entries. |
-| **`humbled-trader-strategy`** | Improved | Humbled Trader momentum swing rules, ADR >= 4% filter, overnight long holding vs same-day short. |
-| **`smb-capital-breakouts`** | Improved | SMB Capital prop desk breakout confirmation, relative volume surge, multi-timeframe alignment. |
-| **`trader-dante-execution`** | Improved | Tom Dante institutional level mapping, pre-market preparation, unconditional stop discipline. |
-| **`peter-brandt-classical`** | Improved | Peter Brandt 50-year classical factor charting, geometric supply/demand consolidation footprints. |
-| **`chat-with-traders-defense`** | Improved | Tim Furey defense-first portfolio management, capital longevity, and drawdown truncation. |
+| **`knowledge-db`** | Storage | Database CLI (`finsocnet kb`) over SQLite (`data/knowledge.db`), FTS5, and vector search. |
+| **`knowledge-transformer`** | Extraction | Transforms raw transcripts and texts into validated Knowledge Cards using claim grammar and vocabulary. |
+| **`knowledge-dedup`** | Deduplication | Evaluates candidate cards to decide `same`, `refines`, `relates`, or `contradicts`. |
+| **`knowledge-search`** | Retrieval | Answers trading questions with cited Knowledge Cards, consensus, and contradiction checks. |
+| **`market-idea-miner`** | Pipeline | Orchestrates end-to-end mining of a content item into segmented citations and cards. |
+| **`person-matcher`** | Attribution | Resolves creators, guests, and authors to canonical person entities across platforms. |
+| **`person-skill-synthesizer`** | Synthesis | Synthesizes a trader's Knowledge Cards into modular rulebooks (screening, execution, risk). |
+| **`person-skills-explorer`** | Inspection | Lists, searches, and compares synthesized trader rulebooks. |
+
+### B. Orchestration, Browsing & Self-Improvement
+| Skill | Role | Description |
+|---|---|---|
+| **`agent-browser`** | Browser | Persistent, authenticated Chromium browser over Chrome DevTools Protocol (CDP). |
+| **`session-bridge`** | Auth | Exports local browser cookies/storage states and imports them into remote agent profiles. |
+| **`source-explorer`** | Discovery | Autonomous exploration loop processing queued discovery seeds and knowledge gaps. |
+| **`self-improver`** | Evolution | Diagnoses failed runs and gaps to synthesize skill improvements under human evaluation. |
+| **`skill-installer`** | Extensions | Installs external skills from GitHub, local paths, or URLs with automated security audits. |
+| **`finsocnet`** | Root Entry | Central entry point for platform metrics, rulebooks, and unified intelligence queries. |
+
+### C. Platform Exploration Adapters (31 Platforms)
+| Priority | Platforms | Covered Sources |
+|---|---|---|
+| **P1: Core Media & Web** | `youtube-extractor`, `audio-transcriber`, `podcast-explorer`, `x-explorer`, `reddit-explorer`, `medium-explorer`, `substack-explorer`, `web-searcher`, `google-searcher`, `web-reader`, `document-reader`, `annas-archive-explorer`, `paper-code-explorer` | YouTube (videos/shorts/streams), local Whisper (`large-v3-turbo`), Apple/Spotify podcasts, X/Twitter, Reddit (`r/RealDayTrading`, etc.), Medium, Substack, DuckDuckGo, Google, Playwright dynamic web, PDF/EPUB/DOCX, Anna's Archive, arXiv & Papers With Code. |
+| **P2: Communities & Markets** | `discord-explorer`, `telegram-explorer`, `stackexchange-explorer`, `forum-explorer`, `tradingview-explorer`, `facebook-explorer`, `rss-explorer`, `sec-edgar-explorer`, `research-explorer`, `github-explorer`, `bluesky-explorer` | Discord trading servers, Telegram channels, Quant Stack Exchange, Elite Trader / Forex Factory forums, TradingView ideas/scripts, Facebook groups, RSS/Atom feeds, SEC EDGAR 10-K/8-K filings, OpenAlex / Semantic Scholar, GitHub repos, Bluesky fintwit. |
+| **P3: Secondary Social** | `stocktwits-explorer`, `tiktok-explorer`, `instagram-explorer`, `threads-explorer`, `linkedin-explorer`, `seekingalpha-explorer`, `hackernews-explorer` | StockTwits ticker streams, TikTok creators, Instagram trading posts/reels, Meta Threads, LinkedIn articles, Seeking Alpha analyses, Hacker News fintech/quant threads. |
 
 ---
 
-## 5. Agent Operating Guide
-See **[AGENTS.md](AGENTS.md)** for instructions, workflow pipelines, and command references.
+## 6. Verified Trader Rulebooks (`finsocnet strategy <name>`)
+
+Synthesized rulebooks and actionable checklists for legendary practitioners:
+- **Mark Minervini (`minervini`):** Volatility Contraction Pattern (VCP), SEPA analysis, trend templates, 1.25% equity risk limit.
+- **Kristjan Qullamaggie (`qullamaggie`):** Episodic Pivots, High Tight Flags, ORB execution, 10/20 EMA trailing stops.
+- **Lance Breitstein (`lance`):** Liquidity dynamics, Right Side of the V, failed breakdown reclamation, asymmetric risk sizing.
+- **Lewis Kelly (`lewis-kelly`):** Smart Money Concepts (SMC), multi-timeframe structural alignment (M15 to M1), change of character.
+- **Tom Dante (`dante`):** Institutional S/R liquidity sweeps, pre-market plan sheets, -2R daily circuit breaker.
+- **SMB Capital (`smb`):** Prop desk breakout confirmation, relative volume surges, Reading the Tape.
+- **Peter Brandt (`brandt`):** Classical factor charting, 50-year geometric consolidation footprints, factor rules.
+- **Humbled Trader (`humbled`):** Momentum swing execution, ADR ≥ 4% filter, strict overnight holding protocols.
+- **Tim Furey (`furey`):** Defense-first capital preservation, risk-of-ruin minimization, drawdown truncation.
+
+---
+
+## 7. Documentation & Guides
+
+- **[`SPEC.md`](SPEC.md):** Complete architectural specification and design decisions.
+- **[`docs/spec/`](docs/spec/):** In-depth guides on database schemas, knowledge cards, pipelines, sessions, and platform adapters.
+- **[`AGENTS.md`](AGENTS.md):** Operational guidelines for AI agents executing FinSocNet pipelines.
