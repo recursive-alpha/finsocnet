@@ -29,12 +29,13 @@ def run_platform_cli(adapter: PlatformAdapter, extra: dict[str, Callable] | None
 ```
 <script>.py search  "<query>" [--limit 20] [--since YYYY-MM-DD] [platform opts]
 <script>.py profile <handle|url>  [--ingest]           # --ingest: kb source upsert + person candidates in output
-<script>.py list    <source>      [--limit 50] [--cursor C] [--since D] [--save-cursor] [--enqueue]
+<script>.py list    <source>      [--limit 50] [--cursor C] [--since D] [--save-cursor] [--enqueue] [--catalog]
 <script>.py fetch   <item>        [--ingest] [platform opts]
 ```
 
 - `--ingest` on `fetch` calls `kb content add` (requires `--run`) and returns its result inside `data.ingest`.
 - `--enqueue` on `list` adds unknown items to `explore_queue` (`origin=source_refresh`, `action=fetch`).
+- `--catalog` on `list` stores every unknown listed item as a `metadata_only` content (id, title, url, kind such as video/short/stream, duration and views when the platform lists them, source), so a whole channel, archive or feed is *discovered* in one call without fetching each item; text is fetched later (`fetch --ingest`) only for what is worth reading. Needs `--run`.
 - `--save-cursor` stores `next_cursor` in `sources.crawl_cursor`.
 - Unsupported subcommand → exit 2 `UNSUPPORTED`.
 - Every adapter saves the original response to `data/raw/<platform>/<native_id>.<json|html>` and sets `raw_path`.

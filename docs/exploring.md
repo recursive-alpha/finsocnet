@@ -48,7 +48,7 @@ Every platform script records the items it shows you (when the call has a run) i
 uv run .agents/skills/reddit-explorer/scripts/reddit.py list r/Daytrading --limit 25 --new-only --run $R
 ```
 
-Each item has `visited` (`null`, `seen`, `queued`, `fetched`, `skipped`, `failed`), `seen_count` and `known` (true for stored, fetched or skipped items). `--new-only` hides known items (`hidden_known` tells how many). `list --enqueue` queues only unseen items. Decisions you make stick:
+Each item has `visited` (`null`, `seen`, `queued`, `fetched`, `skipped`, `failed`), `seen_count` and `known` (true for stored, fetched or skipped items). `--new-only` hides known items (`hidden_known` tells how many). `list --enqueue` queues only unseen items. `list --catalog` stores every unseen listed item as a metadata-only content (title, url, kind, duration, views), which discovers a whole channel or archive (YouTube: long videos, shorts and streams with `--tab all`) in one call. Decisions you make stick:
 
 ```bash
 finsocnet kb seen mark --key reddit:1xg9xq1 --status skipped --note "off topic" --run $R

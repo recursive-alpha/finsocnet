@@ -128,6 +128,7 @@ def build_parser(adapter: PlatformAdapter, extra: dict[str, tuple[Callable[[argp
     l.add_argument("--since")
     l.add_argument("--save-cursor", action="store_true")
     l.add_argument("--enqueue", action="store_true")
+    l.add_argument("--catalog", action="store_true", help="store every unknown listed item as a metadata-only content (title, url, kind, duration, views) so the whole source is discovered")
     l.add_argument("--new-only", action="store_true", help="drop items that were already fetched or skipped")
     _add_opts(l, adapter.opts.get("list"))
     f = sub.add_parser("fetch", parents=[common])
@@ -145,7 +146,7 @@ def _opts(args: argparse.Namespace, skip: set[str]) -> dict[str, Any]:
     return {k: v for k, v in vars(args).items() if k not in skip}
 
 
-STD_SKIP = {"cmd", "format", "run", "db", "ingest", "full", "save_cursor", "enqueue", "new_only", "no_track", "query", "target", "source", "item", "limit", "since", "cursor"}
+STD_SKIP = {"cmd", "format", "run", "db", "ingest", "full", "save_cursor", "enqueue", "catalog", "new_only", "no_track", "query", "target", "source", "item", "limit", "since", "cursor"}
 
 
 def _mark_known(conn: Any, items: list[dict[str, Any]]) -> None:
@@ -269,6 +270,13 @@ def run_platform_cli(adapter: PlatformAdapter, extra: dict[str, tuple[Callable[[
                 if args.new_only:
                     data["items"] = [i for i in res["items"] if not i["known"]]
                     data["hidden_known"] = len(res["items"]) - len(data["items"])
+                if args.catalog:
+                    if conn is None:
+                        raise CliError("NOT_FOUND", "database does not exist", "run `finsocnet kb init`")
+                    data["cataloged"] = _catalog_items(conn, adapter.platform, res, runs.resolve_run(conn, args.run))
+                    for it in res["items"]:
+                        if not it["known"] and it.get("visited") != "fetched":
+                            _visit(conn, args, it["id"], "seen", platform=adapter.platform, url=it.get("ref"), title=it.get("title"))
                 if args.enqueue or args.save_cursor:
                     if conn is None:
                         raise CliError("NOT_FOUND", "database does not exist", "run `finsocnet kb init`")
@@ -305,6 +313,35 @@ def run_platform_cli(adapter: PlatformAdapter, extra: dict[str, tuple[Callable[[
                 conn.close()
 
     output.run_command(command, run, fmt)
+
+
+_CONTENT_TYPES = {"video", "short", "stream", "episode", "post", "thread", "chat_window", "article", "paper", "book", "filing", "page", "question", "repo", "file", "idea", "script"}
+
+
+def _catalog_items(conn: Any, platform: str, res: dict[str, Any], run_id: int) -> dict[str, Any]:
+    """`list --catalog`: every listed item that is not stored yet becomes a metadata-only content (no segments, status `metadata_only`)."""
+    src = res.get("source") or {}
+    source = None
+    if src.get("id"):
+        parts = src["id"].split(":")
+        source = {"id": src["id"], "kind": parts[1] if len(parts) > 2 else "source", "title": src.get("title")}
+    counts = {"created": 0, "existing": 0, "failed": 0}
+    errors: list[str] = []
+    for it in res["items"]:
+        if it.get("known"):
+            counts["existing"] += 1
+            continue
+        m = it.get("metrics") or {}
+        try:
+            rec = content_record(it["id"], platform, it["kind"] if it.get("kind") in _CONTENT_TYPES else "post", [], url=it.get("ref"), title=it.get("title"),
+                                 published_at=it.get("published_at"), duration_sec=int(m["duration"]) if m.get("duration") else None,
+                                 metrics={k: v for k, v in m.items() if k != "duration" and v is not None}, source=source, fetch_method="list-catalog")
+            status = content.add_content(conn, rec, run_id).get("status")
+            counts["created" if status == "created" else "existing"] += 1
+        except CliError as e:
+            counts["failed"] += 1
+            errors.append(f"{it['id']}: {e.message}"[:200])
+    return {**counts, "errors": errors[:5]}
 
 
 def _ingest_source(conn: Any, prof: dict[str, Any], run_id: int) -> dict[str, Any]:

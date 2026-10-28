@@ -69,9 +69,9 @@ COPY --from=web-builder /app/web/public ./web/public
 COPY --from=web-builder /app/web/next.config.ts /app/web/tsconfig.json ./web/
 COPY --from=web-builder /app/web/src ./web/src
 
-RUN mkdir -p /app/data && chmod +x /app/.venv/bin/* 2>/dev/null; true
-COPY docker-entrypoint.sh /app/docker-entrypoint.sh
-RUN chmod +x /app/docker-entrypoint.sh
+COPY --chmod=0755 docker-entrypoint.sh /app/docker-entrypoint.sh
+# The stack runs as the host user (compose `user:`), so everything must be readable by anyone whatever the host file modes are.
+RUN mkdir -p /app/data && chmod -R a+rX /app
 
 EXPOSE 3000
 HEALTHCHECK --interval=20s --timeout=5s --start-period=20s --retries=3 \

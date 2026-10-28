@@ -122,3 +122,16 @@ def test_visited_items_are_tracked_per_run_and_new_only_hides_them(conn, run_id,
     before = conn.execute("SELECT times_seen FROM seen_items WHERE key = 'reddit:aaa111'").fetchone()[0]
     call(Fake(), capsys, "search", "sizing", "--no-track", "--run", str(run_id))
     assert conn.execute("SELECT times_seen FROM seen_items WHERE key = 'reddit:aaa111'").fetchone()[0] == before
+
+
+def test_list_catalog_stores_every_item_as_metadata_only_content(conn, run_id, capsys):
+    code, env = call(Fake(), capsys, "list", "r/test", "--catalog")
+    assert code == 2 and env["error"]["code"] == "RUN_REQUIRED"  # a write needs a run
+    code, env = call(Fake(), capsys, "list", "r/test", "--catalog", "--run", str(run_id))
+    assert code == 0 and env["data"]["cataloged"] == {"created": 2, "existing": 0, "failed": 0, "errors": []}
+    rows = conn.execute("SELECT id, content_type, process_status, source_id, title FROM contents ORDER BY id").fetchall()
+    assert [tuple(r) for r in rows] == [("reddit:aaa111", "thread", "metadata_only", "reddit:subreddit:test", "t"), ("reddit:bbb222", "thread", "metadata_only", "reddit:subreddit:test", "u")]
+    assert conn.execute("SELECT COUNT(*) FROM seen_items WHERE status = 'seen'").fetchone()[0] == 2
+    code, env = call(Fake(), capsys, "list", "r/test", "--catalog", "--run", str(run_id))  # a second pass adds nothing
+    assert env["data"]["cataloged"]["created"] == 0 and env["data"]["cataloged"]["existing"] == 2
+    assert conn.execute("SELECT COUNT(*) FROM contents").fetchone()[0] == 2

@@ -10,7 +10,10 @@ x-finsocnet: &finsocnet
     context: .
     dockerfile: Dockerfile
   image: finsocnet:latest
+  # Run as the host user so files in ./data stay writable from the host (export FINSOCNET_UID/GID if yours is not 1000).
+  user: "${FINSOCNET_UID:-1000}:${FINSOCNET_GID:-1000}"
   environment:
+    HOME: /tmp
     KNOWLEDGE_DB_PATH: /app/data/knowledge.db
     FINSOCNET_HOME: /app
     FINSOCNET_EMBED_PROVIDER: ${FINSOCNET_EMBED_PROVIDER:-fastembed}
@@ -24,6 +27,7 @@ services:
     ports:
       - "${PORT:-3001}:3000"
     environment:
+      HOME: /tmp
       KNOWLEDGE_DB_PATH: /app/data/knowledge.db
       FINSOCNET_HOME: /app
       FINSOCNET_EMBED_PROVIDER: ${FINSOCNET_EMBED_PROVIDER:-fastembed}

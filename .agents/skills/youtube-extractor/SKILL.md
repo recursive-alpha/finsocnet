@@ -47,7 +47,7 @@ Common flags (specs/00-conventions.md §3): `--ingest --run R` stores the record
 ## Procedure
 
 1. `uv run finsocnet kb run start --skill youtube-extractor --goal "<goal>" --harness <h> --model <m>` → `R`. If a parent skill (source-explorer, knowledge-search) already started a run, reuse its `R`.
-2. Channel: `profile --ingest` → `person-matcher` on the channel owner → `list --tab all --enqueue --save-cursor --run R`.
+2. Channel: `profile --ingest` → `person-matcher` on the channel owner → `list --tab all --limit 5000 --catalog --save-cursor --run R`. `--catalog` stores every long video, short and stream as a metadata-only content (title, url, kind, views, duration for long videos), i.e. the whole channel is discovered in one call; read the transcripts later with `fetch --ingest` for what is worth mining. `--enqueue` is for the few items you want the explorer to pick up.
 3. Video: `fetch <url> --ingest --run R` → then `market-idea-miner` on the returned content id.
 4. If `extra.caption_source` is `auto` and the transcript looks garbled (many `[Music]`, wrong language), refetch with `--force-whisper`.
 5. Read `warnings` in every envelope (`truncated`, `cap_reached`, `partial`) and pass them on to the user or the queue item; nothing is dropped silently.

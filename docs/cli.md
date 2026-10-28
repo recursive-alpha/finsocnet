@@ -82,7 +82,7 @@ Same contract everywhere (details: [Exploring](exploring.md)):
 S=.agents/skills/<skill>/scripts/<script>.py
 uv run $S search "<query>" [--limit N] [--since YYYY-MM-DD] [--new-only] [--run R]
 uv run $S profile <handle-or-url> [--ingest --run R]          # avatars are downloaded with --ingest
-uv run $S list <source> [--limit N] [--cursor C] [--save-cursor] [--enqueue] [--new-only] --run R
+uv run $S list <source> [--limit N] [--cursor C] [--save-cursor] [--enqueue] [--catalog] [--new-only] --run R
 uv run $S fetch <url-or-id> [--ingest --run R] [--full]
 ```
 
