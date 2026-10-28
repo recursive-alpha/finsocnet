@@ -69,14 +69,6 @@ Common flags (docs/spec/00-conventions.md §3): `--ingest --run R` stores the re
 ## Notes
 
 
-## Legacy commands (v1 names; thin wrappers until Phase 8)
-
-```bash
-uv run .agents/skills/annas-archive-explorer/scripts/search_archive.py "Market Wizards" --ext pdf
-uv run .agents/skills/annas-archive-explorer/scripts/get_book_details.py "<md5>"
-```
-
-The v1 names call the v2 adapter (`--ingest-db` maps to `--ingest`); use the new subcommands in new work.
 
 ## References
 

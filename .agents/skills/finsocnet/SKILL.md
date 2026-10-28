@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P2"
-  status: partial
+  status: ready
   phase: "8"
   spec: docs/spec/07-harness-integration.md
 ---
 
 # FinSocNet
-
-> **Status: partial.** Commands marked v1 work today; the rest arrive with the phases in `docs/spec/08-phases.md`. v1 hypothesis commands (`finsocnet search/view/hypo`) are replaced by cards in Phase 1.
 
 ## Route the request
 
@@ -22,7 +20,7 @@ metadata:
 |---|---|
 | numbers: how much do we know | `/finsocnet` → `uv run finsocnet kb stats` |
 | an answer about trading/finance | `knowledge-search` |
-| a trader's strategy | `person-skills-explorer` (v1 today: `uv run finsocnet strategy <name>`) |
+| a trader's strategy | `person-skills-explorer` (`uv run finsocnet strategy <name>`) |
 | compare traders | `person-skills-explorer` compare procedure |
 | a specific card | `uv run finsocnet kb card get <id> --citations --links` |
 | who is this person | `person-matcher` |

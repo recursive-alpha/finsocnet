@@ -79,16 +79,6 @@ Common flags (docs/spec/00-conventions.md §3): `--ingest --run R` stores the re
 - `more` stubs expanded with `/api/morechildren.json` until the cap.
 - Remove the v1 `--host-resolver-rules` DNS hack.
 
-## Legacy commands (v1 names; thin wrappers until Phase 8)
-
-```bash
-uv run .agents/skills/reddit-explorer/scripts/explore_community.py "RealDayTrading" --sort hot --limit 5
-uv run .agents/skills/reddit-explorer/scripts/search_reddit.py "<query>" --limit 5
-uv run .agents/skills/reddit-explorer/scripts/read_thread.py "<thread url>"
-# login_reddit.py is superseded by session-bridge (Phase 3)
-```
-
-The v1 names call the v2 adapter (`--ingest-db` maps to `--ingest`); use the new subcommands in new work.
 
 ## References
 

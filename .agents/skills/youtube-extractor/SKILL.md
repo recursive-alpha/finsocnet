@@ -78,14 +78,6 @@ Common flags (docs/spec/00-conventions.md §3): `--ingest --run R` stores the re
 - Caption order: manual original language → manual en → auto original → auto en → Whisper.
 - Streams longer than 3 h are still fully transcribed (nothing ignored).
 
-## Legacy commands (v1 names; thin wrappers until Phase 8)
-
-```bash
-uv run .agents/skills/youtube-extractor/scripts/extract_transcript.py "<url-or-id>"
-uv run .agents/skills/youtube-extractor/scripts/explore_channel.py "@handle" --tab all --limit 20 --save-json data/channels/<name>.json
-```
-
-The v1 names call the v2 adapter (`--ingest-db` maps to `--ingest`); use the new subcommands in new work.
 
 ## References
 

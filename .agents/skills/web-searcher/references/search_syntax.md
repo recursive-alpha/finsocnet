@@ -11,8 +11,8 @@
 ## Examples
 ```bash
 # Find X profile of a creator
-uv run .agents/skills/web-searcher/scripts/search_web.py "Humbled Trader" --site x.com
+uv run .agents/skills/web-searcher/scripts/web_search.py search "Humbled Trader" --site x.com
 
 # Find Reddit trading reviews
-uv run .agents/skills/web-searcher/scripts/search_web.py "Qullamaggie swing trading rules" --site reddit.com
+uv run .agents/skills/web-searcher/scripts/web_search.py search "Qullamaggie swing trading rules" --site reddit.com
 ```

@@ -79,15 +79,6 @@ Common flags (docs/spec/00-conventions.md §3): `--ingest --run R` stores the re
 - Self-thread = consecutive replies by the same author to their own tweet.
 - Never send API calls with the session token yourself; only read responses the page loads.
 
-## Legacy commands (v1 names; thin wrappers until Phase 8)
-
-```bash
-uv run .agents/skills/x-explorer/scripts/explore_user.py "@handle"
-uv run .agents/skills/x-explorer/scripts/search_x.py "<query>" --limit 5
-# login_x.py is superseded by session-bridge (Phase 3); do not ask the user for tokens or passwords
-```
-
-The v1 names call the v2 adapter (`--ingest-db` maps to `--ingest`); use the new subcommands in new work.
 
 ## References
 

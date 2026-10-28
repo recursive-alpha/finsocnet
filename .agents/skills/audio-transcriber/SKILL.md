@@ -66,12 +66,6 @@ Not a platform adapter: it returns segments and does not write to the database i
 - VAD filter on, `word_timestamps=False`.
 - `--diarize` (speaker labels via whisperX/pyannote) is a later option, not part of v2.
 
-## Legacy commands (v1 names; thin wrappers until Phase 8)
-
-```bash
-```
-
-The v1 names call the v2 adapter (`--ingest-db` maps to `--ingest`); use the new subcommands in new work.
 
 ## References
 

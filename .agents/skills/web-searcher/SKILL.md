@@ -66,13 +66,6 @@ Implements only `search` of the adapter contract; other subcommands exit 2 `UNSU
 
 - No `fetch`, `list`, `profile`.
 
-## Legacy commands (v1 names; thin wrappers until Phase 8)
-
-```bash
-uv run .agents/skills/web-searcher/scripts/search_web.py "<query>" [--site x.com]
-```
-
-The v1 names call the v2 adapter (`--ingest-db` maps to `--ingest`); use the new subcommands in new work.
 
 ## References
 

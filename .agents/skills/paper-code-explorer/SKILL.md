@@ -65,15 +65,6 @@ Common flags (docs/spec/00-conventions.md §3): `--ingest --run R` stores the re
 | 5 `NOT_FOUND` / `GONE` | queue item → `failed`; already stored content stays (status `gone`) |
 | 1 `INTERNAL` | `kb lesson add --skill paper-code-explorer --kind script_bug …` with the error, then report |
 
-## Legacy commands (v1 names; thin wrappers until Phase 8)
-
-```bash
-uv run .agents/skills/paper-code-explorer/scripts/search_papers.py "<query>" --has-code
-uv run .agents/skills/paper-code-explorer/scripts/get_paper.py "<id>" --auto-download
-uv run .agents/skills/paper-code-explorer/scripts/explore_trending.py --limit 5 --has-code
-```
-
-The v1 names call the v2 adapter (`--ingest-db` maps to `--ingest`); use the new subcommands in new work.
 
 ## References
 

@@ -1,150 +1,55 @@
-# FinSocNet: Multi-Platform Financial Intelligence & Strategy Network
+# FinSocNet
 
-FinSocNet is an agent-operated financial intelligence framework and skill distribution engine. It discovers traders, investors, and quantitative researchers across **31 platforms** (video, podcasts, newsletters, social networks, chat communities, forums, code repositories, academic papers, and SEC filings), captures their content into a single SQLite database, transforms insights into structured **Knowledge Cards**, deduplicates claims using agent reasoning, and delivers executable trading rulebooks and semantic search to AI coding harnesses.
+**FinSocNet is an agent-operated knowledge network for finance and trading.** It finds the people who publish market knowledge (video, podcasts, social networks, chats, newsletters, forums, Q&A sites, code, papers, filings, books), stores everything they publish in one SQLite file, has your AI harness rewrite it into canonical **Knowledge Cards**, merges duplicates with the agent's judgment, and then answers questions with citations and hands out per-person rulebooks.
 
-Adheres strictly to the open [Agent Skills Specification](https://agentskills.io).
+No vector database, no embeddings, no LLM calls from scripts: the harness agent (Claude Code, Codex, Hermes, Pi, OMP, OpenClaw) does all the reading and judging; scripts only fetch, store, validate, search and score. Skills follow the open [Agent Skills specification](https://agentskills.io). Design and decisions: [`SPEC.md`](SPEC.md), [`docs/spec/`](docs/spec/).
 
----
+## How it works
 
-## 1. Core Principles (v2 Architecture)
-
-- **Harness-Native Intelligence:** Agents read, analyze, judge, and transform financial knowledge using explicit instructions, claim grammar, and few-shot examples. Deterministic scripts handle fetch, storage, validation, and search.
-- **Pure SQLite Storage:** Single local file (`data/knowledge.db`) using relational tables, vector embeddings (BLOBs), and FTS5 full-text search. Zero external daemon or Chroma dependency.
-- **Structured Knowledge Cards:** Knowledge is stored in a canonical schema with strict claim grammar (`WHEN ... IF ... THEN ... WITH CONFIDENCE ...`) and controlled vocabulary.
-- **Agent-Judged Deduplication:** Candidates are retrieved algorithmically, but the agent determines whether a claim is identical, refining, related, contradicting, or novel.
-- **Person-Centric Attribution:** Knowledge belongs to individual practitioners, not media channels. Every citation records who claimed it, their role, and the exact content anchor.
-- **Remote-First Session Bridge:** Secure transfer of authenticated browser sessions from local machines to dedicated agent browser profiles—no plain-text passwords or cookies stored in `.env`.
-
-Full design specifications live in [`SPEC.md`](SPEC.md) and [`docs/spec/`](docs/spec/).
-
----
-
-## 2. Quick Installation
-
-Install FinSocNet via a single command:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/recursive-alpha/finsocnet/main/install.sh | bash
+```
+platform skills ──fetch──► contents + segments ──► agent writes Knowledge Cards ──► validate ──► dedup (agent decides) ──► commit
+ (youtube, x, reddit,       (data/knowledge.db,      (claim grammar, controlled       kb card      same / refines / related       atomic,
+  substack, discord, …)      SQLite + FTS5)           vocabulary, exact quotes)        validate     / contradicts / new            logged
+                                                                                                                                  │
+ questions ──► Query Card ──► kb card search (BM25 over canonical form) ──► cited answer ──► weak? ──► gap ──► explore ──► more content
 ```
 
-Or install from a local clone:
+- **Knowledge Card:** one atomic statement (`rule`, `setup`, `observation`, `mechanism`, `definition`, `metric`, `practice`) with a fixed claim grammar such as `IF breakout position AND 3-5 days since entry THEN EXIT_PARTIAL 1/4-1/3 of position`, vocabulary terms (`ema_10`, `episodic_pivot`), and citations that point at an exact segment and quote.
+- **Person-centric:** knowledge belongs to people, not channels; every citation records who said it and in which role. Rulebooks live in the database (`finsocnet strategy <person>`), not in skill folders.
+- **Remote-first sessions:** you log in on your own machine, `finsocnet session export` makes an encrypted bundle of your browser sessions, and the remote host imports it into its one agent Chrome. No passwords or cookies in `.env`.
+- **Self-improving:** failed searches become gaps that drive exploration; lessons become reviewed changes on git branches with evaluation results.
+
+## Install
 
 ```bash
-git clone https://github.com/recursive-alpha/finsocnet.git
-cd finsocnet
-./install.sh
+curl -fsSL https://raw.githubusercontent.com/recursive-alpha/finsocnet/main/install.sh | bash        # remote host: CLI + harness registration
+curl -fsSL https://raw.githubusercontent.com/recursive-alpha/finsocnet/main/install.sh | bash -s -- --local   # your own machine: session export only
 ```
 
----
+or from a clone: `./install.sh`. Requires `uv`, Python ≥ 3.11 and SQLite ≥ 3.38.
 
-## 3. Multi-Harness AI Agent Integration
-
-FinSocNet serves as a centralized knowledge base and strategy distribution engine for AI coding harnesses:
+## Quick start
 
 ```bash
-# Install / register across ALL supported harnesses:
-finsocnet install all
-
-# Or install for a specific agent harness:
-finsocnet install claude      # Claude Code (~/.claude/commands/finsocnet.md)
-finsocnet install omp         # OMP (~/.omp/agent/extensions/finsocnet.ts)
-finsocnet install pi          # Pi Coding Agent (~/.pi/agent/extensions/finsocnet.ts)
-finsocnet install hermes      # Hermes (~/.hermes/skills/research/finsocnet/)
-finsocnet install codex       # OpenAI Codex (~/.codex/skills/finsocnet/)
-finsocnet install openclaw    # OpenClaw (~/.openclaw/skills/finsocnet/)
+finsocnet kb init                                    # database + vocabulary seed (344 terms)
+finsocnet install all                                # slash commands and skill links for every harness found
+uv run .agents/skills/session-bridge/scripts/session_bridge.py keygen        # remote: prints the age recipient
+finsocnet session init-local --recipient age1… --remote me@host --remote-path /srv/finsocnet   # local
+finsocnet session export && finsocnet session push   # local: log in in your browser first
+uv run .agents/skills/agent-browser/scripts/agent_browser.py start           # remote
+finsocnet explore add @qullamaggie                   # then, in your harness: /finsocnet:explore-step
 ```
 
-### Slash Commands in AI Agents
-Once registered, interact with FinSocNet directly inside your AI harness:
+In a harness: `/finsocnet:search should I hold overnight or close same day?` · `/finsocnet:strategy qullamaggie` · `/finsocnet:compare minervini,qullamaggie stops` · `/finsocnet:install-skill <link>`.
 
-| Command | Action |
-|---|---|
-| `/finsocnet` | Summary metrics across platforms, creators, and hypotheses |
-| `/finsocnet:search <query>` | Cited search across all indexed trading knowledge |
-| `/finsocnet:strategy <name>` | Load full trader rulebooks (e.g. `minervini`, `qullamaggie`, `lance`, `dante`) |
-| `/finsocnet:explore <platform> <target>` | Explore and catalog a new creator or channel |
-| `/finsocnet:skills` | Inspect installed system skills and strategy rulebooks |
-| `/finsocnet:rag <query>` | Retrieve verbatim content chunks with source citations |
-| `/finsocnet:view <id>` | Inspect an exact hypothesis card with quote and metadata |
+## Skills
 
----
+About 45 skills in [`.agents/skills/`](.agents/skills/): the knowledge core (`knowledge-db`, `knowledge-transformer`, `knowledge-dedup`, `knowledge-search`, `market-idea-miner`), people (`person-matcher`, `person-skill-synthesizer`, `person-skills-explorer`), access (`session-bridge`, `agent-browser`), the improvement loop (`source-explorer`, `self-improver`, `skill-installer`) and one skill per platform family: YouTube, podcasts, X, Reddit, Bluesky, Threads, Instagram, Facebook, LinkedIn, StockTwits, Discord, Telegram, Medium, Substack, RSS, Seeking Alpha, forums, Stack Exchange, Hacker News, TradingView, web search and reading, documents, papers, SEC filings, GitHub, books. Third-party skills are installed only through `skill-installer` (quarantine, scan, review of every file, your confirmation, lock file).
 
-## 4. CLI & Terminal UI (TUI)
+## Status
 
-```bash
-# Launch interactive Terminal UI
-finsocnet
+Everything in the specification is implemented; what has been checked against real sites and what still waits for your accounts is listed in [`docs/spec/09-checklist.md`](docs/spec/09-checklist.md) and in each skill's `references/platform_notes.md`. Run the offline tests with `uv run pytest`.
 
-# Semantic vector & keyword search across all indexed knowledge
-finsocnet search "volatility contraction pattern VCP" --limit 3
+## Responsible use
 
-# View full hypothesis card with exact verbatim quote & timestamp
-finsocnet view 93
-
-# Load trader strategy rulebook and actionable checklists
-finsocnet strategy minervini
-
-# List cataloged creators across platforms
-finsocnet creators --platform x
-
-# Check database summary statistics
-finsocnet stats
-```
-
----
-
-## 5. Skill Catalog (`.agents/skills/`)
-
-FinSocNet provides 45 standardized skills adhering to [agentskills.io](https://agentskills.io):
-
-### A. Core Knowledge Engine
-| Skill | Role | Description |
-|---|---|---|
-| **`knowledge-db`** | Storage | Database CLI (`finsocnet kb`) over SQLite (`data/knowledge.db`), FTS5, and vector search. |
-| **`knowledge-transformer`** | Extraction | Transforms raw transcripts and texts into validated Knowledge Cards using claim grammar and vocabulary. |
-| **`knowledge-dedup`** | Deduplication | Evaluates candidate cards to decide `same`, `refines`, `relates`, or `contradicts`. |
-| **`knowledge-search`** | Retrieval | Answers trading questions with cited Knowledge Cards, consensus, and contradiction checks. |
-| **`market-idea-miner`** | Pipeline | Orchestrates end-to-end mining of a content item into segmented citations and cards. |
-| **`person-matcher`** | Attribution | Resolves creators, guests, and authors to canonical person entities across platforms. |
-| **`person-skill-synthesizer`** | Synthesis | Synthesizes a trader's Knowledge Cards into modular rulebooks (screening, execution, risk). |
-| **`person-skills-explorer`** | Inspection | Lists, searches, and compares synthesized trader rulebooks. |
-
-### B. Orchestration, Browsing & Self-Improvement
-| Skill | Role | Description |
-|---|---|---|
-| **`agent-browser`** | Browser | Persistent, authenticated Chromium browser over Chrome DevTools Protocol (CDP). |
-| **`session-bridge`** | Auth | Exports local browser cookies/storage states and imports them into remote agent profiles. |
-| **`source-explorer`** | Discovery | Autonomous exploration loop processing queued discovery seeds and knowledge gaps. |
-| **`self-improver`** | Evolution | Diagnoses failed runs and gaps to synthesize skill improvements under human evaluation. |
-| **`skill-installer`** | Extensions | Installs external skills from GitHub, local paths, or URLs with automated security audits. |
-| **`finsocnet`** | Root Entry | Central entry point for platform metrics, rulebooks, and unified intelligence queries. |
-
-### C. Platform Exploration Adapters (31 Platforms)
-| Priority | Platforms | Covered Sources |
-|---|---|---|
-| **P1: Core Media & Web** | `youtube-extractor`, `audio-transcriber`, `podcast-explorer`, `x-explorer`, `reddit-explorer`, `medium-explorer`, `substack-explorer`, `web-searcher`, `google-searcher`, `web-reader`, `document-reader`, `annas-archive-explorer`, `paper-code-explorer` | YouTube (videos/shorts/streams), local Whisper (`large-v3-turbo`), Apple/Spotify podcasts, X/Twitter, Reddit (`r/RealDayTrading`, etc.), Medium, Substack, DuckDuckGo, Google, Playwright dynamic web, PDF/EPUB/DOCX, Anna's Archive, arXiv & Papers With Code. |
-| **P2: Communities & Markets** | `discord-explorer`, `telegram-explorer`, `stackexchange-explorer`, `forum-explorer`, `tradingview-explorer`, `facebook-explorer`, `rss-explorer`, `sec-edgar-explorer`, `research-explorer`, `github-explorer`, `bluesky-explorer` | Discord trading servers, Telegram channels, Quant Stack Exchange, Elite Trader / Forex Factory forums, TradingView ideas/scripts, Facebook groups, RSS/Atom feeds, SEC EDGAR 10-K/8-K filings, OpenAlex / Semantic Scholar, GitHub repos, Bluesky fintwit. |
-| **P3: Secondary Social** | `stocktwits-explorer`, `tiktok-explorer`, `instagram-explorer`, `threads-explorer`, `linkedin-explorer`, `seekingalpha-explorer`, `hackernews-explorer` | StockTwits ticker streams, TikTok creators, Instagram trading posts/reels, Meta Threads, LinkedIn articles, Seeking Alpha analyses, Hacker News fintech/quant threads. |
-
----
-
-## 6. Verified Trader Rulebooks (`finsocnet strategy <name>`)
-
-Synthesized rulebooks and actionable checklists for legendary practitioners:
-- **Mark Minervini (`minervini`):** Volatility Contraction Pattern (VCP), SEPA analysis, trend templates, 1.25% equity risk limit.
-- **Kristjan Qullamaggie (`qullamaggie`):** Episodic Pivots, High Tight Flags, ORB execution, 10/20 EMA trailing stops.
-- **Lance Breitstein (`lance`):** Liquidity dynamics, Right Side of the V, failed breakdown reclamation, asymmetric risk sizing.
-- **Lewis Kelly (`lewis-kelly`):** Smart Money Concepts (SMC), multi-timeframe structural alignment (M15 to M1), change of character.
-- **Tom Dante (`dante`):** Institutional S/R liquidity sweeps, pre-market plan sheets, -2R daily circuit breaker.
-- **SMB Capital (`smb`):** Prop desk breakout confirmation, relative volume surges, Reading the Tape.
-- **Peter Brandt (`brandt`):** Classical factor charting, 50-year geometric consolidation footprints, factor rules.
-- **Humbled Trader (`humbled`):** Momentum swing execution, ADR ≥ 4% filter, strict overnight holding protocols.
-- **Tim Furey (`furey`):** Defense-first capital preservation, risk-of-ruin minimization, drawdown truncation.
-
----
-
-## 7. Documentation & Guides
-
-- **[`SPEC.md`](SPEC.md):** Complete architectural specification and design decisions.
-- **[`docs/spec/`](docs/spec/):** In-depth guides on database schemas, knowledge cards, pipelines, sessions, and platform adapters.
-- **[`AGENTS.md`](AGENTS.md):** Operational guidelines for AI agents executing FinSocNet pipelines.
+Reading Discord, Facebook, LinkedIn or Instagram by automating a user account can violate their terms and get the account banned; use a secondary account, keep the strict budgets, and read the notes in SPEC §9. Downloading copyrighted books may be illegal where you live. Nothing here is investment advice.

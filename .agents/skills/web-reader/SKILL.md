@@ -38,7 +38,7 @@ uv run $S (inspect_media.py) <url>
 |---|---|
 | `fetch <url>` | ContentRecord (paragraphs); PDFs delegated to document-reader |
 | `discover <url>` | ItemRefs: RSS/Atom feeds, sitemap, outbound links, PDFs, embedded YouTube/Vimeo, `<video>`, `.vtt/.srt` tracks |
-| `(inspect_media.py) <url>` | embedded media and caption tracks (former inspect_video.py) |
+| `web.py discover <url>` | feeds, outbound links, embedded media, caption tracks and PDFs as ItemRefs |
 
 Common flags (docs/spec/00-conventions.md §3): `--ingest --run R` stores the record (writes require a run id); `--enqueue --run R` adds unseen items to the explore queue; `--save-cursor` stores the paging position in `sources.cursor_json` so the next `list` continues where it stopped; `--cursor C` overrides it. Output is always the JSON envelope `{ok, command, data, warnings, meta}`.
 
@@ -74,14 +74,6 @@ Common flags (docs/spec/00-conventions.md §3): `--ingest --run R` stores the re
 
 - Canonical URL removes tracking params (`utm_*`, `fbclid`, `gclid`, …) — see docs/spec/00 §4.
 
-## Legacy commands (v1 names; thin wrappers until Phase 8)
-
-```bash
-uv run .agents/skills/web-reader/scripts/read_page.py "<url>" [--screenshot data/screenshots/x.png]
-uv run .agents/skills/web-reader/scripts/inspect_video.py "<url>"
-```
-
-The v1 names call the v2 adapter (`--ingest-db` maps to `--ingest`); use the new subcommands in new work.
 
 ## References
 

@@ -26,6 +26,10 @@ if ! command -v uv >/dev/null 2>&1; then
     export PATH="$HOME/.local/bin:$PATH"
 fi
 
+# --local: install only what the user's own machine needs (session export), plus the optional cookie readers
+LOCAL_ONLY=0
+for a in "$@"; do [ "$a" = "--local" ] && LOCAL_ONLY=1; done
+
 # Determine source directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd || echo "$PWD")"
 INSTALL_DIR="${FINSOCNET_DIR:-$HOME/.local/share/finsocnet}"
@@ -50,7 +54,7 @@ mkdir -p "$BIN_DIR"
 TARGET_BIN="$BIN_DIR/finsocnet"
 
 echo -e "${BLUE}[2/4]${NC} Building environment and creating CLI executable at ${BOLD}$TARGET_BIN${NC}..."
-uv sync --project "$INSTALL_DIR"
+if [ "$LOCAL_ONLY" = "1" ]; then uv sync --project "$INSTALL_DIR" --extra local; else uv sync --project "$INSTALL_DIR"; fi
 
 rm -f "$TARGET_BIN"
 cat > "$TARGET_BIN" << EOF
@@ -67,9 +71,13 @@ if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
     echo "        export PATH=\"\$HOME/.local/bin:\$PATH\""
 fi
 
-# Register Plugins across AI Harnesses
-echo -e "${BLUE}[3/4]${NC} Registering FinSocNet plugins across AI Harnesses..."
-"$TARGET_BIN" install all
+# Register Plugins across AI Harnesses (not needed on the machine that only exports browser sessions)
+if [ "$LOCAL_ONLY" = "1" ]; then
+    echo -e "${BLUE}[3/4]${NC} --local: skipping harness registration. Next: finsocnet session init-local --recipient age1… --remote user@host --remote-path /srv/finsocnet"
+else
+    echo -e "${BLUE}[3/4]${NC} Registering FinSocNet plugins across AI Harnesses..."
+    "$TARGET_BIN" install all
+fi
 
 # Verification
 echo -e "${BLUE}[4/4]${NC} Verifying installation..."
@@ -78,9 +86,10 @@ echo -e "${GREEN}      ✓ FinSocNet CLI and database verified!${NC}"
 
 echo -e "\n${CYAN}${BOLD}Installation Complete!${NC}\n"
 echo -e "You can now run:"
-echo -e "  ${BOLD}finsocnet${NC}                              # Open interactive Terminal UI"
-echo -e "  ${BOLD}finsocnet search \"breakout\"${NC}              # Semantic vector search across all creators"
-echo -e "  ${BOLD}finsocnet strategy minervini${NC}           # Load full creator strategy rulebook"
-echo -e "  ${BOLD}finsocnet install claude${NC}               # Reinstall or update Claude Code plugin"
-echo -e "  ${BOLD}/finsocnet${NC}                              # Use slash command inside Claude, OMP, Codex, Hermes"
+echo -e "  ${BOLD}finsocnet kb init${NC}                      # Create data/knowledge.db (v2 schema, vocabulary seed)"
+echo -e "  ${BOLD}finsocnet${NC}                              # Knowledge base summary"
+echo -e "  ${BOLD}finsocnet tui${NC}                          # Terminal UI: cards, persons, gaps, sessions"
+echo -e "  ${BOLD}finsocnet strategy minervini${NC}           # A person's rulebook"
+echo -e "  ${BOLD}finsocnet session export${NC}               # (your own machine) export logged-in browser sessions"
+echo -e "  ${BOLD}/finsocnet:search <question>${NC}           # Slash command inside Claude Code, OMP, Pi, Codex, Hermes, OpenClaw"
 echo ""

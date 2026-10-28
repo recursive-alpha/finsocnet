@@ -1,6 +1,6 @@
 # 09 — Status Checklist (done / missing)
 
-> **Last checked:** 2026-10-28, branch `v2/phase-0-foundation` (Phase 0 done; Phases 1–8 not started).
+> **Last checked:** 2026-10-28, on `main` (all eight phases implemented; 181 offline tests green). What is **not** done is listed under 2.x and 3.
 > **Who updates it:** the implementing agent ticks items at the end of each phase (same branch as the phase) and updates the date; the reviewer checks the ticks against the acceptance tests in `08-phases.md`.
 > Legend: `[x]` done and verified · `[~]` partly done (note says what is left) · `[ ]` missing.
 
@@ -16,9 +16,9 @@
 | 5 Explore, self-improve, eval, skill installer | [x] | [x] source-explorer, self-improver, skill-installer | [x] | [~] eval sets below the spec minimum (see 2.6); unattended explore run not demonstrated |
 | 6 P2 platform skills (11) | [x] | [x] all 11 | [x] | [~] 5 verified against live APIs/pages, 6 hand-written fixtures only |
 | 7 P3 platform skills (7) | [x] | [x] all 7 | [x] | [~] hackernews verified live, the rest hand-written fixtures |
-| 8 Harness integration and docs | [x] | [x] finsocnet | [~] v1 installer and commands | [ ] |
+| 8 Harness integration and docs | [x] | [x] finsocnet | [x] | [~] repo invariants and installer tested; real harness smoke test pending |
 
-Bottom line: the **spec and every skill's instructions are written** (45 skills); **Phase 0 code exists** (`finsocnet/core`, `kb` admin/run/lesson/feedback/source/content, migration 003). Phases 1–8 are not implemented. The real `data/knowledge.db` is still on the v1 schema (migration waits for your approval); v1 platform scripts still run except their `--ingest-db` paths, which called the removed `knowledge-db/scripts/db.py` and return in Phase 4.
+Bottom line: **all eight phases are implemented on `main`**, 45 skills, 181 offline tests (including a real headless Chromium for the session bridge and web reader). Not done, because it needs you, your accounts or time: live checks of the session-gated adapters, the unattended explore / self-improve demonstrations, larger evaluation sets, the user review of the legacy conversion (and the deletion of `legacy/`), and the answers in section 3.
 
 ---
 
@@ -129,27 +129,43 @@ Notes: `session_bridge.py keygen` was run once while testing and created `~/.con
 - [x] `hackernews, stocktwits, tiktok, instagram, threads, seekingalpha, linkedin`.
 
 ### 2.9 Phase 8 — Harness integration and docs
-- [~] `finsocnet install <harness>` exists (v1); needs v2 slash commands (07 §3) and symlinks for all core + installed skills.
-- [ ] `commands/` sources for all slash commands, rendered per harness.
-- [ ] `finsocnet tui` on v2 data.
-- [ ] Rewrite `AGENTS.md`, `README.md`.
-- [ ] Remove old script-name wrappers and v1 CLI commands.
-- [ ] Final acceptance checklist in `08-phases.md`.
+- [x] `commands/*.md` (15 slash commands, single source) rendered by `finsocnet install <harness|all> [--uninstall]`: Claude Code commands + skill symlinks, OMP/Pi extension (generated TypeScript), Hermes/Codex/OpenClaw/shared bridge skill + symlinks; manifest in `~/.config/finsocnet/installed.json`; tested in a temp home (idempotent, uninstall leaves nothing).
+- [~] **Not tested** against a real Claude Code / OMP / Pi / Hermes / Codex / OpenClaw installation (none available here); path conventions follow the spec.
+- [x] `finsocnet tui` on v2 data (stats, card search, persons with rulebooks, gaps and queue, sessions; tested headless with Textual's pilot).
+- [x] `AGENTS.md`, `README.md`, `.env.example` rewritten for v2; `install.sh` gets `--local`.
+- [x] Removed: v1 CLI commands (`search`, `rag`, `view`, `list`, `creators`, `contents`, `explore <platform>`, `migrate`), `finsocnet/db.py`, the v1 script-name wrappers and `core/legacy.py`.
+- [x] Final acceptance as tests (`tests/unit/test_repo_invariants.py`).
+
+## 2.10 Final acceptance checklist (08-phases.md)
+
+| Item | State |
+|---|---|
+| SQLite only, no vector stack | [x] test + grep |
+| No LLM SDK in scripts | [x] test |
+| Every active card validates; quotes found except `quote_verified = 0` | [x] 58/58 valid, 2 unverified legacy cards (11, 12) |
+| Every card insert/merge has a `dedup_decisions` row | [x] 58 decisions |
+| Nothing ignored (no code path deletes contents; caps warn; all session domains imported) | [x] |
+| Person-centric (citations carry person/handle and role; review queue works) | [x] |
+| No person skill folders in `.agents/skills/` | [x] test |
+| Session bridge: no credentials in `.env`, secret-leak test, re-export protocol | [x]; real export/import with your browser pending |
+| Agent browser: no launch in skills, budgets and checkpoints enforced | [x] |
+| Explore -> gap -> fill loop demonstrated | [ ] not demonstrated |
+| Self-improver proposals only as branches with eval reports | [ ] not demonstrated (the rule is in the skill; no run yet) |
+| Rulebooks timestamp-free, citations keep locators | [x] validator-enforced |
+| agentskills.io: valid frontmatter, description <= 1024, referenced scripts exist | [x] test |
+| Skill installs: every folder is core or locked (hashes match or `locally_modified`) | [x] test + installer tests |
+| Docs describe v2 only | [x] test |
 
 ---
 
-## 3. Waiting on user decisions
+## 3. Waiting on you
 
-| # | Question | Blocks |
+| # | What | Why it waits |
 |---|---|---|
-| Q1 | All-domain cookie import: accept, or default denylist for banking/payment domains? (SPEC §9) | Phase 3 |
-| Q2 | Accept ToS/ban risk for Discord, Facebook, LinkedIn, Instagram (per platform)? | Phase 6–7 for those skills |
-| Q3 | Private-group members as `private_source` persons, excluded from exports? | Phase 2 |
-| Q4 | No user-agent spoofing by default? | Phase 3 |
-| Q5 | Card language: English cards with source-language quotes, or Vietnamese cards for Vietnamese sources? | Phase 1 |
-| Q6 | Pin one model for transformation? | Phase 1 |
-| Q7 | Bulk ingest cost: books now or after the core is stable? | Phase 4 (`document-reader` books) |
-| Q8 | Skill installer: lighter review for trusted publishers, or full review always (current spec)? | Phase 5 |
-| Q9 | Move `login_*.py` to `legacy/` now, or keep until session-bridge works (current choice: keep)? | — |
-| Q10 | Delete or keep your uncommitted `vector_store.py` / `ingest_idea.py` changes? | Phase 0 |
-| Q11 | Build `skill-installer` before Phase 5 (it only needs Phase 0)? | scheduling |
+| 1 | Approve `docs/improvements/legacy-conversion.md` (rules dropped because no stored source supports them), then delete `legacy/person-skills/`, `legacy/meta-skills/`, `legacy/scripts/`; migration `004_drop_legacy.sql` (drops the `legacy_*` tables except `legacy_id_map`) is **not written yet** | destructive; the spec requires your approval |
+| 2 | SPEC §9 Q1 all-domain cookie import vs a default banking denylist (implemented as specified: import everything, `--exclude` available) | your risk decision |
+| 3 | SPEC §9 Q2 ToS risk for Discord, Facebook, LinkedIn, Instagram (adapters exist with strict budgets and warnings) | your risk decision; do not run them on your main account |
+| 4 | Q3 private-group members as `private_source`, Q4 no UA spoofing (implemented), Q5 English cards with source-language quotes (implemented), Q6 model pinning (not pinned), Q7 bulk ingest of books (supported, not exercised) | defaults were used |
+| 5 | A real run with your accounts: `session export` -> `push` -> `verify --all`; then one `fetch --ingest` per platform; correct `config/platforms.yaml` cookie names and the selectors listed in each `references/platform_notes.md` | needs your browser sessions |
+| 6 | Review and extend the golden evaluation sets (transform 10/30, dedup 15/40, search 15/30); the numbers in this file were produced by the same agent that wrote the cases | independent review |
+| 7 | Try `finsocnet install <your harness>` | no harness available here |

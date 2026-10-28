@@ -1,243 +1,188 @@
-"""
-Multi-Harness Plugin Installer for FinSocNet.
-Registers /finsocnet commands, extensions, and skills across AI agent harnesses:
-Claude Code, OMP, Pi, Hermes, OpenAI Codex, and OpenClaw.
-"""
+"""Harness registration (docs/spec/07 §2–§3): renders the slash commands in `commands/` for every harness and links the system
+skills from `.agents/skills/` (symlinks, never copies). Everything created is recorded in `~/.config/finsocnet/installed.json`
+so `finsocnet install --uninstall <harness>` removes exactly that. Nothing person-specific is exported (private_source persons stay out)."""
 
 from __future__ import annotations
 
+import json
 import os
-import shutil
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-HOME = Path.home()
 REPO_ROOT = Path(__file__).resolve().parent.parent
+CONFIG = Path("~/.config/finsocnet").expanduser()
+MANIFEST = CONFIG / "installed.json"
+HARNESSES = ["claude", "omp", "pi", "hermes", "codex", "openclaw", "shared"]
 
-CLAUDE_COMMAND_CONTENT = """---
-description: Explore creator trading hypotheses, search strategies, and view alpha rules via FinSocNet
----
 
-You have access to the FinSocNet intelligence and trading strategy storage engine.
-Execute the `finsocnet` CLI tool via Bash based on the user's intent or arguments:
+def home() -> Path:
+    return Path(os.environ.get("FINSOCNET_INSTALL_HOME") or Path.home())
 
-- **Search Hypotheses:** `finsocnet search "<query>"` (semantic vector search across all creators)
-- **View Full Hypothesis Card:** `finsocnet view <id>` (verbatim quotes, exact timestamps, setup filters)
-- **Get Creator Strategy Rulebook:** `finsocnet strategy <creator_or_strategy>` (e.g. minervini, qullamaggie, lance, smb, lewis-kelly, humbled, dante, brandt)
-- **Explore Creators:** `finsocnet explore <youtube|x|reddit|medium|arxiv|annas_archive> "<target>"`
-- **List Skills:** `finsocnet skills`
-- **RAG Content Chunks:** `finsocnet rag "<query>"`
-- **Database Stats:** `finsocnet stats`
 
-If the user provides an argument (e.g. `/finsocnet:search breakout` or `/finsocnet minervini`), map it to the matching command above.
-Format the output cleanly with creator attribution, setup conditions, holding period, and exact quotes.
-"""
+def load_commands() -> dict[str, dict[str, str]]:
+    """`commands/<name>.md` -> {name: {description, argument_hint, body}} with $FINSOCNET_HOME resolved."""
+    out: dict[str, dict[str, str]] = {}
+    for p in sorted((REPO_ROOT / "commands").glob("*.md")):
+        text = p.read_text(encoding="utf-8")
+        _, fm, body = text.split("---", 2)
+        meta = {}
+        for line in fm.strip().splitlines():
+            k, _, v = line.partition(":")
+            meta[k.strip()] = v.strip().strip('"')
+        out[p.stem] = {"description": meta.get("description", ""), "argument_hint": meta.get("argument-hint", ""), "body": body.strip().replace("$FINSOCNET_HOME", str(REPO_ROOT))}
+    return out
 
-OMP_EXTENSION_CONTENT = """import { execFile } from "child_process";
-import { promisify } from "util";
 
-const execFileAsync = promisify(execFile);
+def system_skills() -> list[Path]:
+    d = REPO_ROOT / ".agents" / "skills"
+    return sorted(p for p in d.iterdir() if p.is_dir() and (p / "SKILL.md").exists())
 
-interface ExtensionCommandContext {
-  ui?: {
-    notify?: (message: string, level?: "info" | "warning" | "error") => void;
-  };
-  session?: {
-    sendUserMessage?: (message: string) => void;
-  };
+
+def _load_manifest() -> dict[str, Any]:
+    try:
+        return json.loads(MANIFEST.read_text())
+    except (OSError, ValueError):
+        return {}
+
+
+def _save_manifest(m: dict[str, Any]) -> None:
+    CONFIG.mkdir(parents=True, exist_ok=True)
+    MANIFEST.write_text(json.dumps(m, indent=1))
+
+
+def _write(path: Path, content: str, created: list[str]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content, encoding="utf-8")
+    created.append(str(path))
+
+
+def _link_skills(target_dir: Path, created: list[str], warnings: list[str]) -> int:
+    target_dir.mkdir(parents=True, exist_ok=True)
+    n = 0
+    for skill in system_skills():
+        link = target_dir / skill.name
+        if link.is_symlink():
+            if Path(os.readlink(link)).resolve() != skill.resolve():
+                link.unlink()
+            else:
+                created.append(str(link))
+                n += 1
+                continue
+        elif link.exists():
+            warnings.append(f"{link} exists and is not a link; left alone")
+            continue
+        link.symlink_to(skill, target_is_directory=True)
+        created.append(str(link))
+        n += 1
+    return n
+
+
+def render_claude_command(name: str, c: dict[str, str]) -> str:
+    hint = f'argument-hint: "{c["argument_hint"]}"\n' if c["argument_hint"] else ""
+    return f"---\ndescription: \"{c['description']}\"\n{hint}---\n\n{c['body']}\n"
+
+
+def render_extension(commands: dict[str, dict[str, str]]) -> str:
+    table = json.dumps({k: {"description": v["description"], "hint": v["argument_hint"], "body": v["body"]} for k, v in commands.items()}, indent=2, ensure_ascii=False)
+    return f"""// Generated by `finsocnet install` from commands/*.md — do not edit.
+const COMMANDS: Record<string, {{ description: string; hint: string; body: string }}> = {table};
+
+interface Ctx {{
+  ui?: {{ notify?: (message: string, level?: "info" | "warning" | "error") => void }};
+  session?: {{ sendUserMessage?: (message: string) => void }};
   reply?: (message: string) => void;
-  send?: (msg: { role: string; content: string }) => void;
-}
+  send?: (msg: {{ role: string; content: string }}) => void;
+}}
 
-interface CommandOptions {
-  description: string;
-  handler: (args: string, ctx: ExtensionCommandContext) => Promise<void>;
-}
-
-interface HarnessAPI {
-  registerCommand?: (name: string, options: CommandOptions) => void;
-}
-
-export default function (harness: unknown): void {
-  if (!harness || typeof harness !== "object" || !("registerCommand" in harness)) return;
-  const api = harness as HarnessAPI;
-  if (typeof api.registerCommand !== "function") return;
-
-  api.registerCommand("finsocnet", {
-    description:
-      "Explore creator trading strategies and hypotheses (/finsocnet search 'query', /finsocnet strategy minervini, /finsocnet stats)",
-    handler: async (args: string, ctx: ExtensionCommandContext): Promise<void> => {
+export default function (harness: unknown): void {{
+  const api = harness as {{ registerCommand?: (name: string, o: {{ description: string; handler: (args: string, ctx: Ctx) => Promise<void> }}) => void }};
+  if (!api || typeof api.registerCommand !== "function") return;
+  api.registerCommand("finsocnet", {{
+    description: "FinSocNet: " + Object.keys(COMMANDS).filter((k) => k !== "finsocnet").map((k) => "/finsocnet " + k).join(", "),
+    handler: async (args: string, ctx: Ctx): Promise<void> => {{
       const raw = (args || "").trim();
-      let cmdArgs: string[] = [];
-
-      if (raw.length === 0) {
-        cmdArgs = ["stats"];
-      } else {
-        const match = raw.match(/(?:[^\\s"']+|"[^"]*"|'[^']*')+/g);
-        if (match) {
-          cmdArgs = match.map((s) => s.replace(/^['"]|['"]$/g, ""));
-        } else {
-          cmdArgs = raw.split(/\\s+/);
-        }
-      }
-
-      try {
-        const { stdout, stderr } = await execFileAsync("finsocnet", cmdArgs, {
-          timeout: 45000,
-        });
-        const output = (stdout || stderr || "").trim();
-
-        if (ctx.ui?.notify) {
-          ctx.ui.notify("FinSocNet executed successfully", "info");
-        }
-
-        const formatted = `[FinSocNet]\\n\\`\\`\\`\\n${output}\\n\\`\\`\\``;
-        if (typeof ctx.session?.sendUserMessage === "function") {
-          ctx.session.sendUserMessage(formatted);
-        } else if (typeof ctx.reply === "function") {
-          ctx.reply(formatted);
-        } else if (typeof ctx.send === "function") {
-          ctx.send({ role: "user", content: formatted });
-        }
-      } catch (err: unknown) {
-        let msg = "Unknown error occurred";
-        if (err instanceof Error) {
-          if ("stderr" in err && typeof err.stderr === "string" && err.stderr.length > 0) {
-            msg = err.stderr;
-          } else {
-            msg = err.message;
-          }
-        }
-        if (ctx.ui?.notify) {
-          ctx.ui.notify(`FinSocNet error: ${msg}`, "error");
-        }
-      }
-    },
-  });
-}
-"""
-
-SKILL_BRIDGE_CONTENT = """---
-name: finsocnet
-description: Explore, search, filter, and inspect mined trading hypotheses, creator strategies, and cross-platform market intelligence across YouTube, X, Reddit, Medium, and arXiv.
-license: MIT
-metadata:
-  author: "finsocnet"
-  version: "1.0.0"
----
-
-# FinSocNet Skill Bridge
-
-Allows AI agents to interface directly with the FinSocNet intelligence and trading strategy storage engine.
-
-## Usage
-Run the `finsocnet` CLI via Bash:
-- `finsocnet search "<query>"`: Semantic vector search over 90+ trading hypotheses across all creators.
-- `finsocnet view <id>`: View complete hypothesis card with verbatim quotes and citations.
-- `finsocnet strategy <name>`: Load full strategy rulebook (e.g. minervini, qullamaggie, lewis-kelly, lance, smb, brandt, dante).
-- `finsocnet explore <platform> <target>`: Explore creator content across YouTube, X, Reddit, Medium, arXiv.
-- `finsocnet skills`: List available system skills vs improved strategy skills.
-- `finsocnet stats`: Summary database metrics.
+      const [first, ...rest] = raw.split(/\\s+/);
+      const name = raw && COMMANDS[first] && first !== "finsocnet" ? first : "finsocnet";
+      const arguments_ = name === "finsocnet" && raw ? raw : rest.join(" ");
+      const text = COMMANDS[name].body.replace(/\\$ARGUMENTS/g, arguments_);
+      if (ctx.session?.sendUserMessage) ctx.session.sendUserMessage(text);
+      else if (ctx.reply) ctx.reply(text);
+      else if (ctx.send) ctx.send({{ role: "user", content: text }});
+    }},
+  }});
+}}
 """
 
 
-def install_claude() -> bool:
-    target_dir = HOME / ".claude" / "commands"
-    target_dir.mkdir(parents=True, exist_ok=True)
-    target_file = target_dir / "finsocnet.md"
-    with open(target_file, "w", encoding="utf-8") as f:
-        f.write(CLAUDE_COMMAND_CONTENT)
-    print(f"  ✓ Claude Code: Registered slash command at {target_file}")
-    return True
+def render_bridge_skill() -> str:
+    src = (REPO_ROOT / ".agents" / "skills" / "finsocnet" / "SKILL.md").read_text(encoding="utf-8")
+    cmds = load_commands()
+    table = "\n".join(f"| `/finsocnet:{k}` {v['argument_hint']} | {v['description']} |" for k, v in cmds.items() if k != "finsocnet")
+    return src.replace("$FINSOCNET_HOME", str(REPO_ROOT)) + f"\n\n## Installed commands (generated)\n\n| Command | What it does |\n|---|---|\n{table}\n\nFINSOCNET_HOME = `{REPO_ROOT}`; run commands with `uv run --project {REPO_ROOT} …`.\n"
 
 
-def install_omp() -> bool:
-    target_dir = HOME / ".omp" / "agent" / "extensions"
-    target_dir.mkdir(parents=True, exist_ok=True)
-    target_file = target_dir / "finsocnet.ts"
-    with open(target_file, "w", encoding="utf-8") as f:
-        f.write(OMP_EXTENSION_CONTENT)
-    print(f"  ✓ OMP: Installed extension at {target_file}")
-    return True
-
-
-def install_pi() -> bool:
-    target_dir = HOME / ".pi" / "agent" / "extensions"
-    target_dir.mkdir(parents=True, exist_ok=True)
-    target_file = target_dir / "finsocnet.ts"
-    with open(target_file, "w", encoding="utf-8") as f:
-        f.write(OMP_EXTENSION_CONTENT)
-    print(f"  ✓ Pi Coding Agent: Installed extension at {target_file}")
-    return True
-
-
-def install_hermes() -> bool:
-    target_dir = HOME / ".hermes" / "skills" / "research" / "finsocnet"
-    target_dir.mkdir(parents=True, exist_ok=True)
-    target_file = target_dir / "SKILL.md"
-    with open(target_file, "w", encoding="utf-8") as f:
-        f.write(SKILL_BRIDGE_CONTENT)
-    print(f"  ✓ Hermes: Installed skill at {target_file}")
-    return True
-
-
-def install_codex() -> bool:
-    target_dir = HOME / ".codex" / "skills" / "finsocnet"
-    target_dir.mkdir(parents=True, exist_ok=True)
-    target_file = target_dir / "SKILL.md"
-    with open(target_file, "w", encoding="utf-8") as f:
-        f.write(SKILL_BRIDGE_CONTENT)
-    print(f"  ✓ OpenAI Codex: Installed skill at {target_file}")
-    return True
-
-
-def install_openclaw() -> bool:
-    target_dir = HOME / ".openclaw" / "skills" / "finsocnet"
-    target_dir.mkdir(parents=True, exist_ok=True)
-    target_file = target_dir / "SKILL.md"
-    with open(target_file, "w", encoding="utf-8") as f:
-        f.write(SKILL_BRIDGE_CONTENT)
-    print(f"  ✓ OpenClaw: Installed skill at {target_file}")
-    return True
-
-
-def install_agents_shared() -> bool:
-    target_dir = HOME / ".agents" / "skills" / "finsocnet"
-    target_dir.mkdir(parents=True, exist_ok=True)
-    target_file = target_dir / "SKILL.md"
-    with open(target_file, "w", encoding="utf-8") as f:
-        f.write(SKILL_BRIDGE_CONTENT)
-    print(f"  ✓ Agent Skills: Installed shared skill at {target_file}")
-    return True
-
-
-HARNESS_INSTALLERS = {
-    "claude": install_claude,
-    "omp": install_omp,
-    "pi": install_pi,
-    "hermes": install_hermes,
-    "codex": install_codex,
-    "openclaw": install_openclaw,
-    "shared": install_agents_shared,
-}
-
-
-def install_harness(name: str = "all") -> None:
-    target = name.lower().strip()
-    print(f"Installing FinSocNet harness integration for: '{target}'...")
-
-    if target == "all":
-        install_agents_shared()
-        for h_name, fn in HARNESS_INSTALLERS.items():
-            if h_name != "shared":
-                try:
-                    fn()
-                except Exception as e:
-                    print(f"  [WARN] Failed to install {h_name}: {e}", file=sys.stderr)
-        print("\nAll AI harness integrations successfully registered!")
-    elif target in HARNESS_INSTALLERS:
-        HARNESS_INSTALLERS[target]()
-        print(f"\nFinSocNet successfully installed for {target}!")
+def install_one(name: str) -> dict[str, Any]:
+    h = home()
+    created: list[str] = []
+    warnings: list[str] = []
+    cmds = load_commands()
+    skills = 0
+    if name == "claude":
+        base = h / ".claude" / "commands"
+        _write(base / "finsocnet.md", render_claude_command("finsocnet", cmds["finsocnet"]), created)
+        for k, c in cmds.items():
+            if k != "finsocnet":
+                _write(base / "finsocnet" / f"{k}.md", render_claude_command(k, c), created)
+        skills = _link_skills(h / ".claude" / "skills", created, warnings)
+    elif name in ("omp", "pi"):
+        _write(h / f".{name}" / "agent" / "extensions" / "finsocnet.ts", render_extension(cmds), created)
+    elif name in ("hermes", "codex", "openclaw", "shared"):
+        root = {"hermes": h / ".hermes" / "skills" / "research", "codex": h / ".codex" / "skills", "openclaw": h / ".openclaw" / "skills", "shared": h / ".agents" / "skills"}[name]
+        bridge = root / "finsocnet-bridge"
+        _write(bridge / "SKILL.md", render_bridge_skill().replace("name: finsocnet\n", "name: finsocnet-bridge\n", 1), created)
+        skills = _link_skills(root, created, warnings)
     else:
-        print(f"Unknown harness: {target}. Available options: {', '.join(list(HARNESS_INSTALLERS.keys()) + ['all'])}")
+        raise ValueError(name)
+    m = _load_manifest()
+    m[name] = {"files": sorted(set(created)), "repo": str(REPO_ROOT)}
+    _save_manifest(m)
+    return {"harness": name, "files": len(created), "skills_linked": skills, "warnings": warnings}
+
+
+def uninstall_one(name: str) -> dict[str, Any]:
+    m = _load_manifest()
+    removed = 0
+    for f in m.get(name, {}).get("files", []):
+        p = Path(f)
+        if p.is_symlink() or p.is_file():
+            p.unlink()
+            removed += 1
+    for f in sorted(m.get(name, {}).get("files", []), reverse=True):
+        d = Path(f).parent
+        try:
+            d.rmdir()
+        except OSError:
+            pass
+    m.pop(name, None)
+    _save_manifest(m)
+    return {"harness": name, "removed": removed}
+
+
+def install_harness(name: str = "all", uninstall: bool = False) -> list[dict[str, Any]]:
+    target = name.lower().strip()
+    names = HARNESSES if target == "all" else [target]
+    if any(n not in HARNESSES for n in names):
+        print(f"Unknown harness: {target}. Options: {', '.join(HARNESSES + ['all'])}", file=sys.stderr)
+        return []
+    results = []
+    for n in names:
+        try:
+            r = uninstall_one(n) if uninstall else install_one(n)
+        except OSError as e:
+            r = {"harness": n, "error": str(e)}
+            print(f"  [WARN] {n}: {e}", file=sys.stderr)
+        results.append(r)
+        if "error" not in r:
+            print(f"  ✓ {n}: " + (f"removed {r['removed']} file(s)" if uninstall else f"{r['files']} file(s), {r['skills_linked']} skill link(s)" + (f"; {len(r['warnings'])} warning(s)" if r["warnings"] else "")))
+    return results

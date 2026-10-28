@@ -1,249 +1,80 @@
-# Agent Operating Guide: Multi-Platform Intelligence & User Skill Synthesis
+# Agent Operating Guide
 
-Welcome to **FinSocNet**. This repository provides an end-to-end framework for AI agents to discover creators across platforms (**YouTube, X/Twitter, Reddit, Medium, and the Web**), transcribe media (via API or local `openai/whisper-large-v3-turbo`), mine empirical trading hypotheses directly into a database and vector store (`knowledge.db` + Chroma), and synthesize production-ready **User Agent Skills** conforming to the [agentskills.io](https://agentskills.io) specification.
+FinSocNet is an agent-operated knowledge network. **You are the only model in it**: scripts fetch, store, validate, search and score; you read, judge and write. The spec is the source of truth: [`SPEC.md`](SPEC.md) and [`docs/spec/`](docs/spec/). If code and spec disagree, the spec wins; if the spec is ambiguous, ask.
 
----
+## What it does
 
-## 1. Skill Architecture (`.agents/skills/`)
+1. **Discover** people and sources on every platform where finance knowledge is published.
+2. **Capture** everything into one SQLite file, `data/knowledge.db` (relational tables + FTS5; no vector store, no embeddings).
+3. **Transform** content into **Knowledge Cards** (fixed schema, claim grammar, controlled vocabulary).
+4. **Deduplicate** with your judgment (`same / refines / related / contradicts / new`), logged with a rationale.
+5. **Serve** answers with citations, per-person rulebooks, consensus and contradictions.
+6. **Improve**: failed searches become gaps, gaps drive exploration, lessons become reviewed changes.
 
-All skills adhere strictly to the open [Agent Skills Specification](https://agentskills.io/specification.md) with YAML frontmatter, documentation, and executable scripts.
+## Rules you must follow
 
-| Skill | Directory | Primary Role |
-|---|---|---|
-| **`youtube-extractor`** | `.agents/skills/youtube-extractor` | Fetch transcripts with timestamps, video metadata, and catalog uploads across all tabs (videos, shorts, streams) with Whisper fallback. |
-| **`audio-transcriber`** | `.agents/skills/audio-transcriber` | Download audio tracks from YouTube or local media and transcribe with local `openai/whisper-large-v3-turbo` (int8 quantized). |
-| **`x-explorer`** | `.agents/skills/x-explorer` | Explore X profiles, search live posts/cashtags, and extract tweet threads with browser session & password login. |
-| **`reddit-explorer`** | `.agents/skills/reddit-explorer` | Discover and explore trading subreddits (`r/RealDayTrading`, `r/Daytrading`), search discussions, and read threads with comments. |
-| **`medium-explorer`** | `.agents/skills/medium-explorer` | Explore Medium articles, quantitative finance publications, author profiles, and read full stories. |
-| **`web-searcher`** | `.agents/skills/web-searcher` | Query DuckDuckGo without API keys for creators, profiles, and internet research with site-filtering. |
-| **`web-reader`** | `.agents/skills/web-reader` | Render dynamic JS pages via Playwright, extract clean markdown/text, take screenshots, and inspect embedded videos and caption tracks. |
-| **`annas-archive-explorer`** | `.agents/skills/annas-archive-explorer` | Search open books, research papers, and textbooks across Anna's Archive (https://annas-archive.gl) with mirror detection. |
-| **`paper-code-explorer`** | `.agents/skills/paper-code-explorer` | Explore scientific papers and open-source code implementations across arXiv and Papers With Code (Hugging Face Papers). |
-| **`knowledge-db`** | `.agents/skills/knowledge-db` | Manage SQLite database (`knowledge.db`) and Chroma vector store (`data/chroma_db`) with `sentence-transformers/all-MiniLM-L6-v2`. |
-| **`hypothesis-miner`** | `.agents/skills/hypothesis-miner` | Extract structured trading hypotheses, setup filters, holding periods, win rates, and quotes directly into the database. |
-| **`user-skill-synthesizer`** | `.agents/skills/user-skill-synthesizer` | Package mined user/creator rules across platforms (YouTube, X, Reddit, Medium, etc.) into standardized, reusable Agent Skills. |
+**Never:** add a vector database or embedding code (ADR-001) · call an LLM API from a script (ADR-002) · call `chromium.launch()` / `new_context()` (use the agent browser, ADR-006) · print, log or store cookie values or tokens · add username/password login (ADR-005) · create per-person folders under `.agents/skills/` · delete contents, segments, citations or decisions · write to `knowledge.db` with raw SQL · change the schema without a numbered migration and a backup · install, update or remove a skill without `skill-installer`'s review and the user's yes · edit an installed third-party skill in place · commit to `main` from the self-improver.
 
----
+**Always:** start a workflow with `kb run start` and pass `--run <id>` to every write · validate agent-written JSON with `kb card validate` before committing · read `error.hint` before retrying · keep SKILL.md in step with the CLI.
 
-## 2. Environment & Configuration
+## Skills (`.agents/skills/`)
 
-Environment variables are loaded from `.env` (configured via `.env.example`):
+| Group | Skills |
+|---|---|
+| Knowledge core | `knowledge-db` (the `kb` CLI), `knowledge-transformer`, `knowledge-dedup`, `knowledge-search`, `market-idea-miner` |
+| People | `person-matcher`, `person-skill-synthesizer`, `person-skills-explorer` |
+| Access | `session-bridge`, `agent-browser` |
+| Loop | `source-explorer`, `self-improver`, `skill-installer`, `finsocnet` |
+| Video and audio | `youtube-extractor`, `audio-transcriber`, `podcast-explorer`, `tiktok-explorer` |
+| Social | `x-explorer`, `reddit-explorer`, `bluesky-explorer`, `threads-explorer`, `instagram-explorer`, `facebook-explorer`, `linkedin-explorer`, `stocktwits-explorer`, `discord-explorer`, `telegram-explorer` |
+| Writing | `medium-explorer`, `substack-explorer`, `rss-explorer`, `seekingalpha-explorer`, `forum-explorer`, `stackexchange-explorer`, `hackernews-explorer`, `tradingview-explorer` |
+| Web | `web-searcher`, `google-searcher`, `web-reader`, `document-reader` |
+| Research and code | `paper-code-explorer`, `research-explorer`, `annas-archive-explorer`, `sec-edgar-explorer`, `github-explorer` |
 
-```bash
-# Database & Vector Store Configuration
-KNOWLEDGE_DB_PATH=data/knowledge.db
-CHROMA_PERSIST_DIR=data/chroma_db
-EMBEDDING_PROVIDER=hf
-EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+Platform skills share one contract (`search`, `profile`, `list`, `fetch`, `--ingest`); their code is in `finsocnet/adapters/`, the shared library in `finsocnet/core/`. Read the SKILL.md of a skill before using it.
 
-# Local Whisper Transcription Configuration
-WHISPER_MODEL=openai/whisper-large-v3-turbo
-WHISPER_DEVICE=auto
-WHISPER_COMPUTE_TYPE=int8
-AUDIO_DOWNLOAD_DIR=data/audio
-
-# Social Network Browser Sessions & Credentials (Optional)
-X_AUTH_TOKEN=
-X_USERNAME=
-X_PASSWORD=
-X_SESSION_FILE=data/sessions/x_session.json
-
-REDDIT_USERNAME=
-REDDIT_PASSWORD=
-REDDIT_SESSION_FILE=data/sessions/reddit_session.json
-
-MEDIUM_SID=
-MEDIUM_UID=
-MEDIUM_SESSION_FILE=data/sessions/medium_session.json
-
-# Web & Playwright Browser Configuration
-HEADLESS_BROWSER=true
-BROWSER_TIMEOUT_MS=30000
-```
-
----
-
-## 3. Browser Session & Credential Storage
-
-For social networks (X, Reddit, Medium), authenticated sessions are stored directly as browser storage state in `data/sessions/`:
-- **X (Twitter):** `data/sessions/x_session.json`
-- **Reddit:** `data/sessions/reddit_session.json`
-- **Medium:** `data/sessions/medium_session.json`
-
-You can authenticate using cookies/tokens OR username and password:
+## The workflows
 
 ```bash
-# X (Twitter)
-uv run .agents/skills/x-explorer/scripts/login_x.py --token "<AUTH_TOKEN>"
-uv run .agents/skills/x-explorer/scripts/login_x.py --user "<USERNAME>" --password "<PASSWORD>"
-uv run .agents/skills/x-explorer/scripts/login_x.py --interactive
+S=uv run finsocnet kb
+$S run start --skill market-idea-miner --goal "mine youtube:abc123def45" --harness claude-code --model <m>   # -> run id R
 
-# Reddit
-uv run .agents/skills/reddit-explorer/scripts/login_reddit.py --user "<USERNAME>" --password "<PASSWORD>"
-uv run .agents/skills/reddit-explorer/scripts/login_reddit.py --interactive
-
-# Medium
-uv run .agents/skills/medium-explorer/scripts/login_medium.py --sid "<SID_COOKIE>" --uid "<UID_COOKIE>"
-uv run .agents/skills/medium-explorer/scripts/login_medium.py --interactive
+# 1. fetch content (any platform skill; --ingest stores it)
+uv run .agents/skills/youtube-extractor/scripts/youtube.py fetch "<url>" --ingest --run R
+# 2. mine it (skill: market-idea-miner)
+$S content claim <content_id> --run R ; $S content chunks <content_id> ; $S content view <content_id> --from-seq A --to-seq B
+$S card validate --file cards.json                     # fix every error; vocabulary: $S vocab lookup "<phrase>"
+$S card candidates --file cards.json                   # you decide: same / refines / related / contradicts / new
+$S card commit --file decisions.json --run R           # atomic per decision, idempotent
+$S content done <content_id> --upto-seq B --cards N --run R
+# 3. answer questions (skill: knowledge-search): Query Card -> $S card search --query-card q.json ; weak answer -> $S gap add
+# 4. rulebooks (person-skill-synthesizer): $S person cards <id> ; $S skill upsert --file skill.json --run R ; $S skill get <id> --render markdown
+$S run end --run R --outcome success --stats '{...}'
 ```
 
----
+Exploration: `finsocnet explore add <url|@handle|person|query>` then the `source-explorer` skill (`kb queue next` → platform skill → miner). Improvement: `self-improver` (data fixes directly and reversibly; instruction changes only on a git branch with `finsocnet eval` results).
 
-## 4. Multi-Platform Operational Pipelines
+## Sessions and browsing
 
-### A. YouTube Pipeline
-```bash
-# 1. Catalog channel across all tabs (videos, shorts, streams)
-uv run .agents/skills/youtube-extractor/scripts/explore_channel.py "@Lewiskelly8" --tab all --save-json data/channels/lewis_kelly_full.json
+FinSocNet runs on a remote host; you never type passwords. The user logs in locally and ships the session: `finsocnet session export && finsocnet session push` (local machine) → `session_bridge.py import` (remote) → one agent Chrome (`agent_browser.py start`) that every browser-based skill attaches to. Exit code 3 (`LOGIN_REQUIRED` / `CHECKPOINT`) means: stop that platform and tell the user exactly which export to redo.
 
-# 2. Extract transcript with automatic local Whisper fallback
-uv run .agents/skills/youtube-extractor/scripts/extract_transcript.py "<VIDEO_URL_OR_ID>"
+## Output contract and exit codes
 
-# 3. Ingest content & auto-index chunks into Chroma
-uv run .agents/skills/knowledge-db/scripts/db.py ingest-content data/transcripts/<ID>.json --platform youtube
+Every script prints one JSON envelope `{"ok", "command", "data", "warnings", "meta"}` or `{"ok": false, "error": {"code", "message", "hint", "retry_after_sec"}}`. Exit 0 ok · 2 usage/`RUN_REQUIRED`/`UNSUPPORTED` · 3 login/checkpoint · 4 rate limit/budget · 5 not found · 6 validation (`error.details` lists every problem) · 7 browser unavailable · 8 conflict · 1 internal (log a `script_bug` lesson).
 
-# 4. Mine hypotheses directly into knowledge.db
-uv run .agents/skills/hypothesis-miner/scripts/extract_hypotheses.py data/transcripts/<ID>.json --ingest-db --platform youtube
-```
+## Commands
 
-### B. X (Twitter) Pipeline
-```bash
-# 1. Explore user profile, bio, and recent posts
-uv run .agents/skills/x-explorer/scripts/explore_user.py "@Qullamaggie" --ingest-db
+| Command | Where |
+|---|---|
+| `finsocnet kb …` (init, migrate, backup, doctor, stats, run, content, card, vocab, person, skill, queue, gap, history, decision, lesson, feedback) | remote host |
+| `finsocnet eval prepare\|score\|run` | remote host |
+| `finsocnet explore add`, `finsocnet persons review`, `finsocnet feedback` | remote host |
+| `finsocnet session init-local\|export\|push` | the user's own machine |
+| `finsocnet install <claude\|omp\|pi\|hermes\|codex\|openclaw\|shared\|all> [--uninstall]` | where a harness runs |
+| `finsocnet stats`, `skills`, `strategy <person>`, `tui` | remote host |
 
-# 2. Search posts, cashtags ($SPY, $NVDA), and topics on X
-uv run .agents/skills/x-explorer/scripts/search_x.py "breakout trading $NVDA" --limit 5
-```
+Slash commands (source in `commands/`): `/finsocnet`, `:search`, `:card`, `:person`, `:strategy`, `:compare`, `:explore`, `:explore-step`, `:mine`, `:gaps`, `:sessions`, `:improve`, `:feedback`, `:skills`, `:install-skill`.
 
-### C. Reddit Community Pipeline
-```bash
-# 1. Explore subreddit hot/top posts
-uv run .agents/skills/reddit-explorer/scripts/explore_community.py "RealDayTrading" --sort hot --limit 5
+## Development
 
-# 2. Search discussions across Reddit for creators or setups
-uv run .agents/skills/reddit-explorer/scripts/search_reddit.py "Qullamaggie 10 EMA strategy" --limit 5
-
-# 3. Read full thread with top community comments and ingest into database
-uv run .agents/skills/reddit-explorer/scripts/read_thread.py "<REDDIT_THREAD_URL>" --ingest-db
-```
-
-### D. Medium Pipeline
-```bash
-# 1. Explore topic tag (e.g. algorithmic-trading, trading, quantitative-finance)
-uv run .agents/skills/medium-explorer/scripts/explore_tag.py "algorithmic-trading" --limit 5
-
-# 2. Explore author profile
-uv run .agents/skills/medium-explorer/scripts/explore_author.py "@ztraderai" --ingest-db
-
-# 3. Read full article and ingest into knowledge.db
-uv run .agents/skills/medium-explorer/scripts/read_article.py "<MEDIUM_ARTICLE_URL>" --ingest-db
-```
-
-### E. Web Search & Dynamic Page Reading
-```bash
-# 1. Search the web via DuckDuckGo without API keys
-uv run .agents/skills/web-searcher/scripts/search_web.py "Kristjan Qullamaggie setups" --limit 5
-
-# 2. Render dynamic JS page and extract clean reader markdown
-uv run .agents/skills/web-reader/scripts/read_page.py "https://qullamaggie.com"
-
-# 3. Inspect page for embedded videos and caption tracks (.vtt/.srt)
-uv run .agents/skills/web-reader/scripts/inspect_video.py "https://qullamaggie.com"
-```
-
-### F. Anna's Archive Pipeline (Books & Research Papers)
-```bash
-# 1. Search Anna's Archive for trading books or textbooks (auto-ingests into knowledge.db)
-uv run .agents/skills/annas-archive-explorer/scripts/search_archive.py "Market Wizards" --ext pdf --ingest-db
-
-# 2. Inspect book description and download mirrors by MD5
-uv run .agents/skills/annas-archive-explorer/scripts/get_book_details.py "<MD5_HASH>"
-
-# 3. (Optional) Save DDoS-Guard clearance session
-uv run .agents/skills/annas-archive-explorer/scripts/session_manager.py --interactive
-```
-
-### G. arXiv & Papers With Code Pipeline
-```bash
-# 1. Search scientific papers with open-source GitHub code
-uv run .agents/skills/paper-code-explorer/scripts/search_papers.py "market microstructure trading" --has-code --ingest-db
-
-# 2. Inspect paper details, AI summary, and download PDF to data/papers/
-uv run .agents/skills/paper-code-explorer/scripts/get_paper.py "2610.34467" --auto-download --ingest-db
-
-# 3. Explore daily trending research papers
-uv run .agents/skills/paper-code-explorer/scripts/explore_trending.py --limit 5 --has-code
-```
----
-
-## 5. Semantic Vector Search & RAG Across Platforms
-
-Perform natural language queries across all ingested platforms:
-
-```bash
-# Semantic vector search over trading hypotheses
-uv run .agents/skills/knowledge-db/scripts/db.py vector-search "should I hold overnight or close same day?" --limit 3
-
-# Filter hypotheses by platform (youtube, x, reddit, medium)
-uv run .agents/skills/knowledge-db/scripts/db.py vector-search "SMC change of character" --platform youtube
-
-# Semantic RAG search across raw content and transcript chunks
-uv run .agents/skills/knowledge-db/scripts/db.py rag-search "data cleaning in backtesting" --platform medium
-
-# Check database distribution across platforms and categories
-uv run .agents/skills/knowledge-db/scripts/db.py stats
-```
-
----
-
-## 6. Synthesizing User Agent Skills
-
-Transform any creator's mined hypotheses from YouTube, X, Reddit, or Medium into a modular Agent Skill:
-
-```bash
-# From YouTube content
-uv run .agents/skills/user-skill-synthesizer/scripts/synthesize_skill.py "lewis-kelly-smc" \
-  --content-id "B1ALxAVtFfI" --platform youtube
-
-# From X user
-uv run .agents/skills/user-skill-synthesizer/scripts/synthesize_skill.py "x-breakout-strategy" \
-  --user-id "@alphatrader" --platform x
-
-# From Reddit user/community
-uv run .agents/skills/user-skill-synthesizer/scripts/synthesize_skill.py "real-day-trading-mindset" \
-  --content-id "reddit_1xg9xq1" --platform reddit
-
-# From Medium author
-uv run .agents/skills/user-skill-synthesizer/scripts/synthesize_skill.py "quant-data-cleaning" \
-  --content-id "<MEDIUM_CONTENT_ID>" --platform medium
-```
-
----
-
-## 7. Multi-Harness AI Agent Integration
-
-FinSocNet serves as a centralized trading knowledge storage and strategy distribution engine for external AI agents:
-
-```bash
-# One-line remote installation:
-curl -fsSL https://raw.githubusercontent.com/recursive-alpha/finsocnet/main/install.sh | bash
-
-# Register plugins across AI harnesses:
-finsocnet install all
-finsocnet install claude      # Claude Code (~/.claude/commands/finsocnet.md)
-finsocnet install omp         # OMP (~/.omp/agent/extensions/finsocnet.ts)
-finsocnet install pi          # Pi Coding Agent (~/.pi/agent/extensions/finsocnet.ts)
-finsocnet install hermes      # Hermes (~/.hermes/skills/research/finsocnet/)
-finsocnet install codex       # OpenAI Codex (~/.codex/skills/finsocnet/)
-finsocnet install openclaw    # OpenClaw (~/.openclaw/skills/finsocnet/)
-```
-
-### Slash Commands in AI Agents
-Agents can retrieve strategy rules, run vector searches, and inspect hypotheses directly via slash commands:
-- `/finsocnet`: View overall database metrics.
-- `/finsocnet:search <query>`: Semantic vector search over 90+ hypotheses.
-- `/finsocnet:strategy <name>`: Load full strategy rulebooks (e.g. `minervini`, `qullamaggie`, `lance`, `smb`, `lewis-kelly`, `humbled`, `dante`, `brandt`, `furey`).
-- `/finsocnet:explore <platform> <target>`: Explore and catalog new creators.
-- `/finsocnet:skills`: Inspect System Skills vs Improved Strategy Skills.
-- `/finsocnet:rag <query>`: Retrieve verbatim content chunks for deeper context.
-- `/finsocnet:view <id>`: Inspect exact hypothesis card with quote and timestamps.
+`uv run pytest` runs the offline suite (live tests: `-m live`). Config is in `.env` (see `.env.example`; no credentials), `config/*.yaml`. Implementation status and open questions: [`docs/spec/09-checklist.md`](docs/spec/09-checklist.md).

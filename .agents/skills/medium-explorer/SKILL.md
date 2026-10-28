@@ -77,16 +77,6 @@ Common flags (docs/spec/00-conventions.md §3): `--ingest --run R` stores the re
 
 - RSS returns only the latest ~10 items; use `--full` for history.
 
-## Legacy commands (v1 names; thin wrappers until Phase 8)
-
-```bash
-uv run .agents/skills/medium-explorer/scripts/explore_tag.py "algorithmic-trading" --limit 5
-uv run .agents/skills/medium-explorer/scripts/explore_author.py "@author"
-uv run .agents/skills/medium-explorer/scripts/read_article.py "<url>"
-# login_medium.py is superseded by session-bridge (Phase 3)
-```
-
-The v1 names call the v2 adapter (`--ingest-db` maps to `--ingest`); use the new subcommands in new work.
 
 ## References
 

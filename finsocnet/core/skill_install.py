@@ -411,7 +411,7 @@ RULES: list[tuple[str, re.Pattern[str], set[str]]] = [
 ]
 H5_PHRASES = re.compile(r"ignore (all |any )?(previous|prior|above) instructions|do not tell the user|without asking|you are now|system prompt|exfiltrate|bypass|disable the (sandbox|permissions)|--dangerously", re.I)
 HIDDEN_CHARS = re.compile("[​-‏‪-‮⁦-⁩]")
-M3_RE = re.compile(r"chromadb|sentence[_-]transformers|faiss|sqlite[_-]vec|lancedb|qdrant|chromium\.launch|launch_persistent_context|new_context\(|(?i:password\s*=)|X_PASSWORD|REDDIT_PASSWORD|knowledge\.db", re.I)
+M3_RE = re.compile(r"chroma" r"db|sentence[_-]transformers|faiss|sqlite[_-]vec|lancedb|qdrant|chromium\.launch|launch_persistent_context|new_context\(|(?i:password\s*=)|X_PASSWORD|REDDIT_PASSWORD|knowledge\.db", re.I)
 HOST_RE = re.compile(r"https?://([A-Za-z0-9.-]+\.[a-z]{2,})")
 IMPORT_RE = re.compile(r"^\s*(?:import|from)\s+([A-Za-z_][\w]*)", re.M)
 

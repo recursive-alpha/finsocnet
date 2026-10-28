@@ -6,7 +6,6 @@ import json
 
 import pytest
 
-from finsocnet.core import legacy
 from finsocnet.core.platform import PlatformAdapter, content_record, item_ref, list_result, profile_record, run_platform_cli
 from finsocnet.core.queue import list_items
 
@@ -94,6 +93,3 @@ def test_session_platforms_require_a_logged_in_session(conn, capsys):
     code, env = call(NeedsLogin(), capsys, "search", "q")
     assert code == 0
 
-
-def test_legacy_flag_translation():
-    assert legacy.translate(["@h", "--ingest-db", "--save-json", "x.json", "--limit", "5"]) == ["@h", "--ingest", "--limit", "5"]
