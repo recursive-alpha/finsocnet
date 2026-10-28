@@ -3,6 +3,7 @@
 # session test (see docs/spec/04 §9) and corrected here.
 # refresh_hours: how often an active source of the platform is re-crawled (default 24 for social, 168 for blogs/forums).
 x:
+  requires_session: true
   domains: [x.com, twitter.com]
   session_cookies: [auth_token, ct0]          # verify
   probe_url: https://x.com/home
@@ -16,6 +17,7 @@ reddit:
   logged_in_json_path: data.name
   refresh_hours: 24
 facebook:
+  requires_session: true
   domains: [facebook.com]
   session_cookies: [c_user, xs]
   probe_url: https://www.facebook.com/me
@@ -41,6 +43,7 @@ substack:
   probe_url: https://substack.com/api/v1/user/profile/self
   refresh_hours: 168
 discord:
+  requires_session: true
   domains: [discord.com]
   local_storage_keys: [token]
   probe_url: https://discord.com/channels/@me
@@ -52,6 +55,7 @@ telegram:
   probe_url: https://web.telegram.org/k/
   refresh_hours: 24
 linkedin:
+  requires_session: true
   domains: [linkedin.com]
   session_cookies: [li_at]
   probe_url: https://www.linkedin.com/feed/
@@ -59,6 +63,7 @@ linkedin:
   checkpoint_patterns: ["/checkpoint/"]
   refresh_hours: 168
 instagram:
+  requires_session: true
   domains: [instagram.com]
   session_cookies: [sessionid]
   probe_url: https://www.instagram.com/accounts/edit/

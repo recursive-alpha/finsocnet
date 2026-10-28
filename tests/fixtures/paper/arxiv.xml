@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:arxiv="http://arxiv.org/schemas/atom">
+  <title>arXiv Query Results (hand-written fixture, same shape as the live API)</title>
+  <entry>
+    <id>http://arxiv.org/abs/2401.01234v2</id>
+    <updated>2024-01-05T10:00:00Z</updated>
+    <published>2024-01-02T09:00:00Z</published>
+    <title>Momentum Crashes and Volatility Scaling in Equity Markets</title>
+    <summary>We study momentum strategies and show that scaling positions by realized volatility reduces drawdowns. Code is available at https://github.com/example/momentum-vol.</summary>
+    <author><name>Alice Quant</name></author>
+    <author><name>Bob Trader</name></author>
+    <arxiv:primary_category term="q-fin.TR"/>
+    <link href="http://arxiv.org/abs/2401.01234v2" rel="alternate" type="text/html"/>
+    <link title="pdf" href="http://arxiv.org/pdf/2401.01234v2" rel="related" type="application/pdf"/>
+    <category term="q-fin.TR"/>
+  </entry>
+</feed>

@@ -12,6 +12,7 @@ from typing import Any, Callable
 
 from finsocnet.core import cards as cards_mod, config, content as content_mod, migrations, persons as persons_mod, runs, vocab as vocab_mod
 from finsocnet.core import person_skills as skills_mod
+from finsocnet.core import queue as queue_mod
 from finsocnet.core import output
 from finsocnet.core.db import backup as db_backup
 from finsocnet.core.db import connect, default_backup_path, transaction
@@ -545,6 +546,58 @@ def cmd_skill_list(ctx: Ctx) -> Result:
     return Result({"skills": skills_mod.list_skills(ctx.conn(), ctx.args.person)})
 
 
+# --- exploration ----------------------------------------------------------------------------------------
+
+def cmd_queue_add(ctx: Ctx) -> Result:
+    a, run = ctx.args, ctx.run_id()
+    if a.file:
+        payload = read_json(a.file)
+        items = payload if isinstance(payload, list) else [payload]
+    else:
+        items = [{"target": a.target, "target_kind": a.target_kind, "platform": a.platform or "", "action": a.action, "origin": a.origin,
+                  "origin_ref": a.origin_ref, "reason": a.reason, "priority": a.priority}]
+    res = [queue_mod.add(ctx.conn(), i, run) for i in items]
+    return Result(res[0] if not a.file else {"items": res})
+
+
+def cmd_queue_next(ctx: Ctx) -> Result:
+    return Result({"items": queue_mod.next_items(ctx.conn(), ctx.args.limit, ctx.args.platform)})
+
+
+def cmd_queue_update(ctx: Ctx) -> Result:
+    ctx.run_id()
+    a = ctx.args
+    return Result(queue_mod.update(ctx.conn(), a.id, a.status, a.error, a.retry_after))
+
+
+def cmd_queue_list(ctx: Ctx) -> Result:
+    return Result({"items": queue_mod.list_items(ctx.conn(), ctx.args.status, ctx.args.limit)})
+
+
+def cmd_gap_add(ctx: Ctx) -> Result:
+    a, run = ctx.args, ctx.run_id()
+    return Result(queue_mod.gap_add(ctx.conn(), a.query, a.verdict, read_json(a.query_card) if a.query_card else None, run))
+
+
+def cmd_gap_list(ctx: Ctx) -> Result:
+    return Result({"gaps": queue_mod.gap_list(ctx.conn(), ctx.args.status, ctx.args.limit)})
+
+
+def cmd_gap_update(ctx: Ctx) -> Result:
+    ctx.run_id()
+    a = ctx.args
+    return Result(queue_mod.gap_update(ctx.conn(), a.id, a.status, [int(x) for x in a.filled_by.split(",")] if a.filled_by else None))
+
+
+def cmd_history_pending(ctx: Ctx) -> Result:
+    return Result({"entries": queue_mod.history_pending(ctx.conn(), ctx.args.limit)})
+
+
+def cmd_history_mark(ctx: Ctx) -> Result:
+    ctx.run_id()
+    return Result(queue_mod.history_mark(ctx.conn(), ctx.args.urls, ctx.args.triage))
+
+
 # --- parser ---------------------------------------------------------------------------------------------
 
 def _common() -> argparse.ArgumentParser:
@@ -801,6 +854,49 @@ def build_parser() -> _Parser:
     p.add_argument("--render", choices=["markdown"])
     p = leaf(g, ("skill", "list"), "list", cmd_skill_list)
     p.add_argument("--person")
+
+    g = group("queue", "exploration queue")
+    p = leaf(g, ("queue", "add"), "add", cmd_queue_add)
+    p.add_argument("--target")
+    p.add_argument("--target-kind", choices=queue_mod.TARGET_KINDS)
+    p.add_argument("--platform")
+    p.add_argument("--action", default="fetch", choices=queue_mod.ACTIONS)
+    p.add_argument("--origin", choices=queue_mod.ORIGINS)
+    p.add_argument("--origin-ref")
+    p.add_argument("--reason")
+    p.add_argument("--priority", type=float, default=0.5)
+    p.add_argument("--file")
+    p = leaf(g, ("queue", "next"), "next", cmd_queue_next)
+    p.add_argument("--limit", type=int, default=5)
+    p.add_argument("--platform")
+    p = leaf(g, ("queue", "update"), "update", cmd_queue_update)
+    p.add_argument("id", type=int)
+    p.add_argument("--status", required=True, choices=queue_mod.STATUSES)
+    p.add_argument("--error")
+    p.add_argument("--retry-after", type=int)
+    p = leaf(g, ("queue", "list"), "list", cmd_queue_list)
+    p.add_argument("--status", choices=queue_mod.STATUSES)
+    p.add_argument("--limit", type=int, default=100)
+
+    g = group("gap", "knowledge gaps")
+    p = leaf(g, ("gap", "add"), "add", cmd_gap_add)
+    p.add_argument("--query", required=True)
+    p.add_argument("--query-card")
+    p.add_argument("--verdict", required=True, choices=queue_mod.VERDICTS)
+    p = leaf(g, ("gap", "list"), "list", cmd_gap_list)
+    p.add_argument("--status", default="open", choices=[*queue_mod.GAP_STATUSES, "any"])
+    p.add_argument("--limit", type=int, default=100)
+    p = leaf(g, ("gap", "update"), "update", cmd_gap_update)
+    p.add_argument("id", type=int)
+    p.add_argument("--status", required=True, choices=queue_mod.GAP_STATUSES)
+    p.add_argument("--filled-by", help="comma-separated card ids")
+
+    g = group("history", "browsing history triage")
+    p = leaf(g, ("history", "pending"), "pending", cmd_history_pending)
+    p.add_argument("--limit", type=int, default=200)
+    p = leaf(g, ("history", "mark"), "mark", cmd_history_mark)
+    p.add_argument("urls", nargs="+")
+    p.add_argument("--triage", required=True, choices=["queued", "not_relevant", "pending"])
 
     root.set_defaults(_handlers=handlers)
     return root

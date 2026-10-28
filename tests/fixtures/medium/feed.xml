@@ -1,0 +1,291 @@
+<!DOCTYPE html><html xmlns:cc="http://creativecommons.org/ns#"><head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# medium-com: http://ogp.me/ns/fb/medium-com#"><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=contain"><title>Not Found – Medium</title><link rel="canonical" href="https://medium.com"><meta name="robots" content="index,follow"><meta name="title" content="Not Found – Medium"><meta name="referrer" content="unsafe-url"><meta name="description" content="We could not find what you were looking for on Medium."><meta name="theme-color" content="#000000"><meta property="og:title" content="Not Found – Medium"><meta property="twitter:title" content="Not Found – Medium"><meta property="og:url" content="https://medium.com"><meta property="fb:app_id" content="542599432471018"><meta property="og:description" content="We could not find what you were looking for on Medium."><meta name="twitter:description" content="We could not find what you were looking for on Medium."><meta name="twitter:image:src" content=""><meta name="twitter:site" content="@Medium"><meta property="og:site_name" content="Medium"><meta name="twitter:app:name:iphone" content="Medium"><meta name="twitter:app:id:iphone" content="828256236"><meta property="al:ios:app_name" content="Medium"><meta property="al:ios:app_store_id" content="828256236"><meta property="al:android:package" content="com.medium.reader"><meta property="al:android:app_name" content="Medium"><meta property="al:web:url" content="https://medium.com"><link rel="search" type="application/opensearchdescription+xml" title="Medium" href="/osd.xml" /><link rel="alternate" href="android-app://com.medium.reader/https/medium.com" /><style id="color-scheme-tokens">@supports (color: light-dark(#fff, #000)) {
+/**
+ * medium2's copy of lite's dark-mode palette, synced by hand.
+ *
+ * Source of truth: ts/lite/src/styles/color-scheme/color-scheme.css
+ *
+ * Do not edit token values here — change lite's copy and re-sync, by replacing everything
+ * below this comment with everything below the header comment in lite's file, except omit
+ * lite's `Hex values mirror global.ts` mapping comment — the declarations are authoritative.
+ *
+ * Nothing detects drift automatically, so a value changed only in lite disagrees with
+ * medium2 until someone notices. To compare the two, ignoring each file's header:
+ *
+ *   diff <(sed '1,/\*\//d' ts/lite/src/styles/color-scheme/color-scheme.css) \
+ *        <(sed '1,/\*\//d' medium2/lib/be/color-scheme.css)
+ *
+ * After syncing, check any added or changed token: if medium2's legacy light value differs
+ * from lite's, it needs a LEGACY_TOKENS entry in colorScheme.js. That review is the reason
+ * this is a deliberate manual step rather than a build rule — and keeping it manual is what
+ * keeps medium2 out of lite's build graph. medium2 is legacy and its surfaces move rarely.
+ *
+ * Two things read differently here than they do in lite:
+ *   - colorScheme.js wraps all of this in `@supports (color: light-dark(#fff, #000))` at
+ *     read time. medium2's consumers write `var(--token, literal)`, and that fallback only
+ *     fires when the token is undefined, so below the `light-dark()` floor the tokens must
+ *     not exist at all.
+ *   - medium2 sets `data-color-scheme` on `<html>` when the viewer's display_mode preference
+ *     is an explicit light or dark choice; system omits it so the OS drives resolution.
+ *     The `html[data-color-scheme=...]` rules below apply on those pages.
+ */
+:root {
+  color-scheme: light dark;
+  --invert-in-dark-mode: 0;
+  --blend-in-dark-mode: normal;
+  --color-bg-neutral-primary: #ffffff;
+  --color-bg-neutral-primary: light-dark(#ffffff, #171717);
+  --color-bg-neutral-secondary: #f2f2f2;
+  --color-bg-neutral-secondary: light-dark(#f2f2f2, #242424);
+  --color-bg-neutral-tertiary: #f9f9f9;
+  --color-bg-neutral-tertiary: light-dark(#f9f9f9, #1f1f1f);
+  --color-bg-neutral-quaternary: #242424;
+  --color-bg-neutral-quaternary: light-dark(#242424, #d2d2d2);
+  /* Surfaces that float above the page: tooltips, popovers, menus, dialogs, side panels.
+   * In dark mode these need to read as raised, so they sit a step lighter than
+   * `--color-bg-neutral-primary` rather than blending into it. In light mode the shadow
+   * already carries elevation, so the value matches the page. */
+  --color-bg-neutral-elevated: #ffffff;
+  --color-bg-neutral-elevated: light-dark(#ffffff, #1c1c1c);
+  /* Floating UI on an already-elevated host (responses sidebar, etc.). One step above
+   * `--color-bg-neutral-elevated` in dark mode so menus and cards do not blend in. */
+  --color-bg-neutral-elevated-stacked: #ffffff;
+  --color-bg-neutral-elevated-stacked: light-dark(#ffffff, #2b2b2b);
+  /* The elevated surface for floating UI that is deliberately inverted against the page in
+   * light mode (tooltips, toasts). Dark in BOTH schemes, so text on it must be pinned light
+   * (`foreground.neutral.quaternary`, or `Detail`'s `neutral.quaternary`) rather than taken
+   * from a flipping token, which would go near-black in dark mode and disappear. */
+  --color-bg-neutral-elevated-inverted: #242424;
+  --color-bg-neutral-elevated-inverted: light-dark(#242424, #1c1c1c);
+  /* Inverted surface for the BRAND button. The light values are the legacy
+   * `baseColor.fill.dark` / `.darker` grayscales, not palette constants, so that
+   * light mode renders exactly as it did before dark mode support. */
+  --color-bg-brand-primary: #191919;
+  --color-bg-brand-primary: light-dark(#191919, #ffffff);
+  --color-bg-brand-primary-hover: #080808;
+  --color-bg-brand-primary-hover: light-dark(#080808, #f2f2f2);
+  --color-bg-accent-secondary: #bbdbba;
+  --color-bg-accent-secondary: light-dark(#bbdbba, #156d12);
+  --color-bg-accent-secondary-hover: #9fcc9e;
+  --color-bg-accent-secondary-hover: light-dark(#9fcc9e, #10530e);
+  --color-bg-accent-tertiary: #d2e7d1;
+  --color-bg-accent-tertiary: light-dark(#d2e7d1, #10530e);
+  --color-bg-accent-quaternary: #e8f3e8;
+  --color-bg-accent-quaternary: light-dark(#e8f3e8, #0c3d0a);
+  --color-bg-error-primary: #c94a4a;
+  --color-bg-error-primary: light-dark(#c94a4a, #762323);
+  --color-bg-error-primary-hover: #b63636;
+  --color-bg-error-primary-hover: light-dark(#b63636, #451717);
+  --color-bg-utility-yellow-primary: #fffae1;
+  --color-bg-utility-yellow-primary: light-dark(#fffae1, #461f01);
+  --color-bg-utility-blue-primary: #e5f2ff;
+  --color-bg-utility-blue-primary: light-dark(#e5f2ff, #22214f);
+  /* Verified book author intro card (JAM-3265): light blue tint on web/apps;
+   * dark mode uses the neutral tertiary surface + border, not utility blue. */
+  --color-bg-verified-book-author-intro: #e5f2ff;
+  --color-bg-verified-book-author-intro: light-dark(#e5f2ff, #171717);
+  --color-border-verified-book-author-intro: transparent;
+  --color-border-verified-book-author-intro: light-dark(transparent, #2b2b2b);
+  --verified-book-author-intro-illustration-scale: 1;
+  --color-fg-neutral-primary: #242424;
+  --color-fg-neutral-primary: light-dark(#242424, #e5e5e5);
+  --color-fg-neutral-primary-hover: #000000;
+  --color-fg-neutral-primary-hover: light-dark(#000000, #ffffff);
+  --color-fg-neutral-secondary: #6b6b6b;
+  --color-fg-neutral-secondary: light-dark(#6b6b6b, #b3b3b3);
+  --color-fg-neutral-secondary-hover: #3f3f3f;
+  --color-fg-neutral-secondary-hover: light-dark(#3f3f3f, #d2d2d2);
+  --color-fg-neutral-tertiary: #ffffff;
+  --color-fg-neutral-tertiary: light-dark(#ffffff, #121212);
+  --color-fg-accent-primary: #1a8917;
+  --color-fg-accent-primary: light-dark(#1a8917, #6ab668);
+  --color-fg-accent-primary-hover: #156d12;
+  --color-fg-accent-primary-hover: light-dark(#156d12, #40993d);
+  --color-fg-error-primary: #c94a4a;
+  --color-fg-error-primary: light-dark(#c94a4a, #ce5a5a);
+  --color-fg-error-primary-hover: #b63636;
+  --color-fg-error-primary-hover: light-dark(#b63636, #c94a4a);
+  --color-fg-utility-blue-primary: #437aff;
+  --color-fg-utility-blue-primary: light-dark(#437aff, #3c9fff);
+  /* The LinkedIn mark carries brand blue (`linkedinBlue` in `deprecatedColors.ts`) in light
+   * mode only (JAM-3412): against any of the dark surfaces it only grazes the 3:1 non-text
+   * floor, so dark mode keeps the grey10 the mark inherited from `--color-fg-neutral-primary`
+   * before it had a color of its own. Move the two dark values together. */
+  --color-fg-social-linkedin: #0a66c2;
+  --color-fg-social-linkedin: light-dark(#0a66c2, #e5e5e5);
+  --color-border-neutral-primary: #f2f2f2;
+  --color-border-neutral-primary: light-dark(#f2f2f2, #3f3f3f);
+  /* No consumer in Lite today — every `border.neutral.primary` call site reads `.base`.
+   * Note the dark value is a step *darker* than the base above (grey83 against grey75), so
+   * it loses contrast against the page rather than gaining it the way the light pair does.
+   * Re-tone it before wiring this up to anything. */
+  --color-border-neutral-primary-hover: #e5e5e5;
+  --color-border-neutral-primary-hover: light-dark(#e5e5e5, #2b2b2b);
+  --color-border-neutral-secondary: #242424;
+  --color-border-neutral-secondary: light-dark(#242424, #d2d2d2);
+  --color-border-neutral-secondary-hover: #000000;
+  --color-border-neutral-secondary-hover: light-dark(#000000, #f9f9f9);
+  --color-border-neutral-tertiary: #e5e5e5;
+  --color-border-neutral-tertiary: light-dark(#e5e5e5, #3f3f3f);
+  --color-border-neutral-tertiary-hover: #d2d2d2;
+  --color-border-neutral-tertiary-hover: light-dark(#d2d2d2, #3f3f3f);
+  --color-border-brand-primary: #191919;
+  --color-border-brand-primary: light-dark(#191919, #ffffff);
+  --color-border-accent-primary: #1a8917;
+  --color-border-accent-primary: light-dark(#1a8917, #6ab668);
+  --color-border-accent-primary-hover: #156d12;
+  --color-border-accent-primary-hover: light-dark(#156d12, #40993d);
+  --color-border-error-primary: #c94a4a;
+  --color-border-error-primary: light-dark(#c94a4a, #762323);
+  --color-border-error-primary-hover: #b63636;
+  --color-border-error-primary-hover: light-dark(#b63636, #451717);
+  --color-chart-accent-primary: #1a8917;
+  --color-chart-accent-primary: light-dark(#1a8917, #84c082);
+  --color-chart-accent-secondary: #9fcc9e;
+  --color-chart-accent-secondary: light-dark(#9fcc9e, #1a8917);
+  --color-chart-accent-tertiary: #bbdbba;
+  --color-chart-accent-tertiary: light-dark(#bbdbba, #156d12);
+  --color-chart-accent-quaternary: #e8f3e8;
+  --color-chart-accent-quaternary: light-dark(#e8f3e8, #10530e);
+  --color-chart-utility-yellow-primary: #fea010;
+  --color-chart-utility-yellow-primary: light-dark(#fea010, #fea010);
+  --color-chart-utility-yellow-secondary: #ffc017;
+  --color-chart-utility-yellow-secondary: light-dark(#ffc017, #be5b04);
+  --color-chart-utility-yellow-tertiary: #faedaf;
+  --color-chart-utility-yellow-tertiary: light-dark(#faedaf, #be5b04);
+  --color-chart-utility-yellow-tertiary: #fffae1;
+  --color-chart-utility-yellow-tertiary: light-dark(#fffae1, #be5b04);
+  /* Neutral now rides the grey scale and flips with the scheme, like the other chart tokens. */
+  --color-chart-neutral-primary: #b3b3b3;
+  --color-chart-neutral-primary: light-dark(#b3b3b3, #d2d2d2);
+  --color-chart-neutral-secondary: #b3b3b3;
+  --color-chart-neutral-secondary: light-dark(#b3b3b3, #d2d2d2);
+  --color-chart-neutral-tertiary: #e5e5e5;
+  --color-chart-neutral-tertiary: light-dark(#e5e5e5, #6b6b6b);
+
+  /* The tint elevation shadows are drawn from — consumed only as a shadow color, by
+   * `popoverShadow` (see `src/util/color.ts`), which layers it at two alphas.
+   *
+   * `transparent` in dark mode removes the shadow outright. Elevation there is carried by
+   * `--color-bg-neutral-elevated` being a step lighter than the page, not by a cast shadow:
+   * a dark page gives a shadow almost nothing to fall on, and any tint light enough to see
+   * paints a halo *around* the surface instead of a shadow *under* it.
+   *
+   * Because this is a `<color>`, `light-dark()` handles it and no cascade switch is needed:
+   * it resolves per element, so a popover inside a light-pinned subtree (a landing page, a
+   * `PinColorSchemeWrapper`) correctly keeps its shadow. */
+  --color-shadow-elevated: #242424;
+  --color-shadow-elevated: light-dark(#242424, transparent);
+
+  /* Modal/dialog scrims. Must darken the page in both schemes — `neutral.primary`
+   * matches the page background and disappears as an overlay. */
+  --color-bg-scrim: #484848;
+  --color-bg-scrim: light-dark(#484848, #000000);
+
+  /* Submission status pills own their surface/text pairs rather than reusing
+   * `--color-bg-utility-*`. Those utility surfaces are shared with decorative
+   * callouts that carry no text, so re-toning one for a callout silently broke
+   * the contrast of every pill drawn on it (JAM-3268). Keep each pair together
+   * and change them together. */
+  --color-status-in-review-background: #e5f2ff;
+  --color-status-in-review-background: light-dark(#e5f2ff, #22214f);
+  --color-status-in-review-text: #437aff;
+  --color-status-in-review-text: light-dark(#437aff, #6ab7ff);
+  --color-status-edits-requested-background: #fffae1;
+  --color-status-edits-requested-background: light-dark(#fffae1, #461f01);
+  --color-status-edits-requested-text: #be5b04;
+  --color-status-edits-requested-text: light-dark(#be5b04, #fea010);
+
+  /* Custom Story Footer color palette */
+  --color-story-footer-bg-subtle: #f7f4ed;
+  --color-story-footer-bg-subtle: light-dark(#f7f4ed, #242424);
+  --color-story-footer-bg-contrast: #242424;
+  --color-story-footer-bg-contrast: light-dark(#242424, #dacfbe);
+  --color-story-footer-fg-subtle: #242424;
+  --color-story-footer-fg-subtle: light-dark(#242424, #d2d2d2);
+  --color-story-footer-fg-contrast: #ffffff;
+  --color-story-footer-fg-contrast: light-dark(#ffffff, #121212);
+  --color-story-footer-placeholder-light-grey: #d2d2d2;
+  --color-story-footer-placeholder-light-grey: light-dark(#d2d2d2, #242424);
+  --color-story-footer-placeholder-dark-grey: #6b6b6b;
+  --color-story-footer-placeholder-dark-grey: light-dark(#6b6b6b, #3f3f3f);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --invert-in-dark-mode: 1;
+    --blend-in-dark-mode: screen;
+  }
+}
+
+html[data-color-scheme='light'] {
+  color-scheme: light;
+  --invert-in-dark-mode: 0;
+  --blend-in-dark-mode: normal;
+}
+
+html[data-color-scheme='dark'] {
+  color-scheme: dark;
+  --invert-in-dark-mode: 1;
+  --blend-in-dark-mode: screen;
+}
+
+@media print {
+  :root,
+  html[data-color-scheme='dark'] {
+    color-scheme: light !important;
+    --invert-in-dark-mode: 0;
+    --blend-in-dark-mode: normal;
+  }
+
+  [data-color-scheme] {
+    color-scheme: light !important;
+  }
+}
+
+:root {
+  --m2-fg-lightest: light-dark(rgba(0, 0, 0, 0.05), rgba(255, 255, 255, 0.05));
+  --m2-fg-lighter: light-dark(rgba(0, 0, 0, 0.15), rgba(255, 255, 255, 0.15));
+  --m2-fg-light: light-dark(rgba(0, 0, 0, 0.3), rgba(255, 255, 255, 0.3));
+  --m2-fg-normal: light-dark(rgba(0, 0, 0, 0.54), rgba(255, 255, 255, 0.54));
+  --m2-fg-dark: light-dark(rgba(0, 0, 0, 0.68), rgba(255, 255, 255, 0.68));
+  --m2-fg-subtle: light-dark(rgba(0, 0, 0, 0.76), rgba(255, 255, 255, 0.76));
+  --m2-fg-darker: light-dark(rgba(0, 0, 0, 0.84), rgba(255, 255, 255, 0.84));
+  --m2-fg-darkest: light-dark(rgba(0, 0, 0, 0.9), rgba(255, 255, 255, 0.9));
+  --m2-fg-black: light-dark(#000000, #ffffff);
+  --m2-fg-body: var(--m2-fg-darker);
+  --m2-bg-overlay: light-dark(rgba(255, 255, 255, 0.97), rgba(23, 23, 23, 0.97));
+  --m2-bg-overlay-light: light-dark(rgba(255, 255, 255, 0.65), rgba(23, 23, 23, 0.65));
+  --m2-border-card: light-dark(rgba(0, 0, 0, 0.04), rgba(255, 255, 255, 0.04));
+  --m2-border-card-elevated: light-dark(rgba(0, 0, 0, 0.04), transparent);
+  --m2-shadow-elevated-in-page: light-dark(rgba(0, 0, 0, 0.05), transparent);
+  --m2-shadow-elevated-cover: light-dark(rgba(0, 0, 0, 0.08), transparent);
+  --m2-shadow-subtle: light-dark(rgba(0, 0, 0, 0.03), transparent);
+  --m2-border-card-inset: light-dark(rgba(0, 0, 0, 0.09), rgba(255, 255, 255, 0.09));
+  --m2-border-postPreview: light-dark(rgba(0, 0, 0, 0.1), rgba(255, 255, 255, 0.1));
+  --m2-border-publication-nav: light-dark(rgba(0, 0, 0, 0.1), rgba(255, 255, 255, 0.1));
+  --m2-border-browsable: light-dark(rgba(0, 0, 0, 0.0785), rgba(255, 255, 255, 0.0785));
+  --m2-border-popover: light-dark(rgba(0, 0, 0, 0.0785), transparent);
+  --m2-border-popover-heading: light-dark(rgba(0, 0, 0, 0.05), rgba(255, 255, 255, 0.1));
+  --m2-shadow-popover-blur: light-dark(0 1px 2px rgba(0, 0, 0, 0.25), none);
+  --m2-shadow-popover-ring: light-dark(0 0 1px rgba(0, 0, 0, 0.35), none);
+  --m2-shadow-popover-safari-blur: light-dark(0 1px 1px 1px rgba(0, 0, 0, 0.05), none);
+  --m2-shadow-popover-safari-ring: light-dark(0 0 1px 1px rgba(0, 0, 0, 0.15), none);
+  --m2-shadow-popover-arrow: light-dark(rgba(0, 0, 0, 0.84), transparent);
+  --m2-shadow-popover-arrow-normal: light-dark(rgba(0, 0, 0, 0.54), transparent);
+  --m2-bg-gray-lightest: light-dark(rgb(250, 250, 250), #1f1f1f);
+  --m2-bg-gray-lighter: light-dark(rgb(245, 245, 245), #1f1f1f);
+  --m2-bg-gray-light: light-dark(rgb(240, 240, 240), #242424);
+  --m2-bg-variants-expired: light-dark(rgb(247, 201, 209), #762323);
+  --m2-bg-table-danger: light-dark(#f2dede, #762323);
+  --m2-bg-table-danger-hover: light-dark(#ebcccc, #8f3a3a);
+  --m2-bg-brand-sky: light-dark(#e2eff8, transparent);
+  --m2-bg-design-system-page: light-dark(#f9f9f9, #171717);
+  --m2-bg-brand: light-dark(rgba(0, 0, 0, 0.84), #ffffff);
+  --m2-bg-brand-hover: light-dark(rgba(0, 0, 0, 0.9), #f2f2f2);
+  --m2-fg-on-brand: light-dark(rgba(255, 255, 255, 0.97), #171717);
+  --m2-bg-brand-hover-legacy: light-dark(#000000, #f2f2f2);
+  --m2-fg-placeholder: light-dark(rgb(179, 179, 177), rgba(255, 255, 255, 0.3));
+  --m2-fill-error-icon: light-dark(rgba(0, 0, 0, 0.15), #3f3f3f);
+}
+}
+</style><link rel="stylesheet" href="https://cdn-static-1.medium.com/_/fp/css/main-branding-base.X9SX4SCGRx_2Pzl4TTypkA.12.css"><script>!function(n,e){var t,o,i,c=[],f={passive:!0,capture:!0},r=new Date,a="pointerup",u="pointercancel";function p(n,c){t||(t=c,o=n,i=new Date,w(e),s())}function s(){o>=0&&o<i-r&&(c.forEach(function(n){n(o,t)}),c=[])}function l(t){if(t.cancelable){var o=(t.timeStamp>1e12?new Date:performance.now())-t.timeStamp;"pointerdown"==t.type?function(t,o){function i(){p(t,o),r()}function c(){r()}function r(){e(a,i,f),e(u,c,f)}n(a,i,f),n(u,c,f)}(o,t):p(o,t)}}function w(n){["click","mousedown","keydown","touchstart","pointerdown"].forEach(function(e){n(e,l,f)})}w(n),self.perfMetrics=self.perfMetrics||{},self.perfMetrics.onFirstInputDelay=function(n){c.push(n),s()}}(addEventListener,removeEventListener);</script><script>document.domain = document.domain;</script><script>var OB_startTime = new Date().getTime(); var OB_loadErrors = []; function _onerror(e) { OB_loadErrors.push(e) }; if (document.addEventListener) document.addEventListener("error", _onerror, true); else if (document.attachEvent) document.attachEvent("onerror", _onerror); function _asyncScript(u) {var d = document, f = d.getElementsByTagName("script")[0], s = d.createElement("script"); s.type = "text/javascript"; s.async = true; s.src = u; f.parentNode.insertBefore(s, f);}function _asyncStyles(u) {var d = document, f = d.getElementsByTagName("script")[0], s = d.createElement("link"); s.rel = "stylesheet"; s.href = u; f.parentNode.insertBefore(s, f); return s}</script><script>(function () {var height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight; var width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth; document.write("<style>section.section-image--fullBleed.is-backgrounded {padding-top: " + Math.round(1.1 * height) + "px;}section.section-image--fullScreen.is-backgrounded, section.section-image--coverFade.is-backgrounded {min-height: " + height + "px; padding-top: " + Math.round(0.5 * height) + "px;}.u-height100vh {height: " + height + "px !important;}.u-height110vh {height: " + Math.round(1.1 * height) + "px !important;}.u-minHeight100vh {min-height: " + height + "px !important;}.u-maxHeight100vh {max-height: " + height + "px !important;}section.section-image--coverFade {height: " + height + "px;}.section-aspectRatioViewportPlaceholder, .section-aspectRatioViewportCropPlaceholder {max-height: " + height + "px;}.section-aspectRatioViewportBottomSpacer, .section-aspectRatioViewportBottomPlaceholder {max-height: " + Math.round(0.5 * height) + "px;}.zoomable:before {top: " + (-1 * height) + "px; left: " + (-1 * width) + "px; padding: " + height + "px " + width + "px;}</style>");})()</script><!--[if lt IE 9]><script charset="UTF-8" src="https://cdn-static-1.medium.com/_/fp/js/shiv.RI2ePTZ5gFmMgLzG5bEVAA.12.js"></script><![endif]--><link rel="icon" href="https://miro.medium.com/v2/5d8de952517e8160e40ef9841c781cdc14a5db313057fa3c3de41c6f5b494b19" class="js-favicon"><link rel="apple-touch-icon" sizes="152x152" href="https://cdn-images-1.medium.com/fit/c/304/304/5d8de952517e8160e40ef9841c781cdc14a5db313057fa3c3de41c6f5b494b19"><link rel="apple-touch-icon" sizes="120x120" href="https://cdn-images-1.medium.com/fit/c/240/240/5d8de952517e8160e40ef9841c781cdc14a5db313057fa3c3de41c6f5b494b19"><link rel="apple-touch-icon" sizes="76x76" href="https://cdn-images-1.medium.com/fit/c/152/152/5d8de952517e8160e40ef9841c781cdc14a5db313057fa3c3de41c6f5b494b19"><link rel="apple-touch-icon" sizes="60x60" href="https://cdn-images-1.medium.com/fit/c/120/120/5d8de952517e8160e40ef9841c781cdc14a5db313057fa3c3de41c6f5b494b19"><link rel="mask-icon" href="https://cdn-static-1.medium.com/_/fp/icons/monogram-mask.KPLCSFEZviQN0jQ7veN2RQ.12.svg" color="#171717"></head><body itemscope class=" error-page error-404 v-unbound v-glyph v-glyph--m2-unbound-source-serif-pro is-noJs"><script>document.body.className = document.body.className.replace(/(^|\s)is-noJs(\s|$)/, "$1is-js$2")</script><div class="site-main" id="container"><div class="butterBar butterBar--error"></div><div class="surface"><div id="prerendered" class="screenContent"><div class="metabar u-clearfix u-backgroundTransparentBlack js-metabar"><div class="js-metabarMiddle metabar-inner u-marginAuto u-maxWidth1032 u-flexCenter u-justifyContentSpaceBetween u-height65 u-xs-height56 u-paddingHorizontal20"><div class="metabar-block u-flex1 u-flexCenter"><div class="js-metabarLogoLeft"><a href="https://medium.com/" data-log-event="home" class="siteNav-logo u-fillBlack u-flex0 u-flexCenter u-paddingTop0"><span class="svgIcon svgIcon--wordmarkMedium svgIcon--120x26px u-flex"><svg class="svgIcon-use" width="120" height="26" ><path d="M29.57 1.404l.036-.008V1.12h-7.27l-6.75 15.979-6.75-15.98H1.003v.278l.035.008c1.327.302 2 .752 2 2.374v18.993c0 1.623-.676 2.073-2.003 2.374L1 25.153v.279h5.315v-.278l-.035-.008c-1.327-.302-2-.751-2-2.374V4.88l8.67 20.552h.492l8.924-21.125V23.24c-.114 1.282-.782 1.677-1.983 1.95l-.036.009v.275h9.259V25.2l-.036-.008c-1.203-.274-1.886-.67-2-1.95l-.006-19.464h.006c0-1.622.674-2.072 2-2.374zm4.23 12.582c.15-3.412 1.367-5.875 3.41-5.918.629.01 1.157.219 1.568.62.872.852 1.282 2.634 1.219 5.298h-6.198zm-.092.962h10.85v-.046c-.03-2.61-.78-4.64-2.228-6.033-1.25-1.204-3.103-1.867-5.048-1.867h-.043c-1.01 0-2.248.246-3.13.693a7.316 7.316 0 00-2.623 2.086c-1.185 1.479-1.903 3.477-2.078 5.724a13.717 13.717 0 00-.04.755c-.004.195-.005.39-.001.587.117 5.087 2.846 9.153 7.692 9.153 4.254 0 6.73-3.132 7.348-7.336l-.312-.11c-1.085 2.259-3.034 3.628-5.252 3.461-3.028-.228-5.347-3.32-5.137-7.066m23.122 6.893c-.356.85-1.099 1.319-2.094 1.319-.995 0-1.905-.689-2.552-1.939-.694-1.342-1.06-3.24-1.06-5.487 0-4.678 1.445-7.704 3.68-7.704.937 0 1.674.468 2.026 1.284v12.527zm7.198 3.335c-1.327-.316-2-.787-2-2.492V0l-8.062 2.392v.293l.05-.004c1.111-.09 1.866.064 2.304.472.343.32.51.809.51 1.498v3.11C56.033 7.25 55.088 7 53.94 7c-2.326 0-4.453.987-5.986 2.779-1.599 1.867-2.444 4.42-2.444 7.38 0 5.287 2.584 8.84 6.43 8.84 2.25 0 4.06-1.242 4.888-3.336v2.811h7.233v-.29l-.035-.008zM70.94 3.085c0-1.65-1.236-2.896-2.875-2.896-1.632 0-2.908 1.272-2.908 2.896 0 1.624 1.278 2.896 2.908 2.896 1.64 0 2.875-1.245 2.875-2.896zm1.903 22.092c-1.327-.316-2-.787-2-2.492h-.006V7.055l-7.234 2.092v.284l.043.004c1.566.14 1.994.683 1.994 2.525v13.515h7.24v-.29l-.037-.008zm18.536 0c-1.327-.316-2-.787-2-2.492V7.055L82.49 9.078v.285l.04.004c1.28.136 1.65.71 1.65 2.56v9.88c-.426.85-1.227 1.356-2.196 1.39-1.573 0-2.439-1.07-2.439-3.012V7.055l-7.234 2.092v.284l.044.004c1.565.14 1.994.683 1.994 2.525v8.362a9.443 9.443 0 00.15 1.741l.13.57C75.243 24.845 76.848 26 79.362 26c2.129 0 3.996-1.328 4.818-3.405v2.885h7.233v-.291l-.034-.012zm28.102.298v-.291l-.035-.009c-1.44-.334-2.001-.964-2.001-2.248V12.295C117.445 8.98 115.597 7 112.5 7c-2.257 0-4.16 1.314-4.893 3.36-.582-2.168-2.257-3.36-4.734-3.36-2.175 0-3.88 1.156-4.612 3.11V7.056l-7.233 2.006v.286l.043.004c1.547.138 1.994.697 1.994 2.492v13.631h6.75v-.29l-.037-.01c-1.148-.271-1.519-.767-1.519-2.04V10.95c.304-.715.917-1.562 2.127-1.562 1.504 0 2.266 1.05 2.266 3.116v12.972h6.751v-.29l-.035-.01c-1.149-.271-1.52-.767-1.52-2.04V12.294a7.107 7.107 0 00-.095-1.21c.322-.777.97-1.696 2.23-1.696 1.524 0 2.265 1.02 2.265 3.116v12.972h7.233z"/></svg></span><span class="u-textScreenReader">Homepage</span></a></div></div></div></div><div class="metabar metabar--spacer js-metabarSpacer u-height65 u-xs-height56"></div><section class="container u-marginAuto u-maxWidth1000 u-marginTop60 u-xs-marginTop15 u-contentSerifRegular"><div class="row u-lineHeightTightest"><div class="col u-size6of12 u-xs-size12of12 u-xs-none"><img src=https:&#47;&#47;cdn&#45;images&#45;1.medium.com&#47;proxy&#47;1*8rgW0Qvy2bSGSBMlORMhQA.png class="u-invertInDarkMode u-width450 u-height450 u-md-size410x410 u-sm-size303x303 u-xs-size303x303 u-xxs-size242x242" /></div><div class="col u-size6of12 u-xs-size12of12 u-textColorDarker"><div class="u-textUppercase u-fontSize16 u-xs-fontSize14 u-xs-textAlignCenter u-contentSansRegular">Page Not Found</div><div class="u-marginTop11 u-textColorLight u-fontSize150 u-lineHeight174 u-md-fontSize130 u-md-lineHeight150 u-sm-fontSize90 u-sm-lineHeight104 u-xs-textAlignCenter m-fontMarketingBase">404</div><div class="u-marginTop11 u-fontSize64 u-lineHeight66 u-md-fontSize48 u-md-lineHeight52 u-sm-fontSize32 u-sm-lineHeight36 u-xs-textAlignCenter m-fontMarketingBase">Out of nothing, something.</div><div class="u-marginVertical20 u-none u-xs-block"><img src=https:&#47;&#47;cdn&#45;images&#45;1.medium.com&#47;proxy&#47;1*8rgW0Qvy2bSGSBMlORMhQA.png class="u-invertInDarkMode u-xs-size303x303 u-xxs-size242x242 u-xs-block u-marginLeftAuto u-marginRightAuto" /></div><div class="u-marginTop11 u-fontSize18 u-lineHeight24 u-sm-fontSize16 u-sm-lineHeight20 u-xs-textAlignCenter u-contentSansRegular">You can find (just about) anything on Medium — apparently even a page that doesn’t exist. Maybe these stories about finding what you didn’t know you were looking for will take you somewhere new?</div><div class="u-fontSize18 u-marginTop11 u-xs-textAlignCenter u-contentSansRegular"><a class=" link--underline"  href="https://medium.com">Home</a></div></div></div></section><section class="container u-clearfix u-backgroundNeutralPrimary u-marginTop50 u-paddingBottom60 u-xs-padding0"><div class="u-clearfix u-backgroundNeutralPrimary"><div class="row u-marginAuto u-maxWidth1032 u-paddingTop30 u-paddingBottom40"><div class="col u-padding8 u-xs-size12of12 u-size4of12"><div class="uiScale uiScale-ui--small uiScale-caption--regular u-height280 u-width100pct u-surfaceNeutralElevated u-borderBox u-borderRadius4 js-trackPostPresentation" data-post-id="fd482179acde" data-source="placement_card_footer_grid---------0-31" data-tracking-context="placement"><a class="link link--noUnderline u-baseColor--link"   href="https://medium.com/@jfpetersphoto/getting-lost-in-the-subtlety-of-the-landscape-fd482179acde?source=placement_card_footer_grid---------0-31" data-action-source="placement_card_footer_grid---------0-31"><div class="u-backgroundCover u-backgroundColorGrayLight u-height100 u-width100pct u-borderBottomLight u-borderRadiusTop4" style="background-image: url(&quot;https://cdn-images-1.medium.com/fit/c/400/120/1*41lmsrgI-J3FUN_8CeD8_Q.jpeg&quot;); background-position: 50% 50% !important;"></div></a><div class="u-padding15 u-borderBox u-flexColumn u-height180"><a class="link link--noUnderline u-baseColor--link u-flex1"   href="https://medium.com/@jfpetersphoto/getting-lost-in-the-subtlety-of-the-landscape-fd482179acde?source=placement_card_footer_grid---------0-31" data-action-source="placement_card_footer_grid---------0-31"><div class="uiScale uiScale-ui--regular uiScale-caption--small u-textColorNormal u-marginBottom7">Applause from Medium Staff</div><div class="ui-h3 ui-clamp2 u-textColorDarkest u-contentSansBold u-fontSize24 u-maxHeight2LineHeightTighter u-lineClamp2 u-textOverflowEllipsis u-letterSpacingTight u-paddingBottom2">Getting Lost in Canada</div></a><div class="u-paddingBottom10 u-flex0 u-flexCenter"><div class="u-flex1 u-minWidth0 u-marginRight10"><div class="u-flexCenter"><div class="postMetaInline-avatar u-flex0"><a class="link u-baseColor--link avatar"   href="https://medium.com/@jfpetersphoto" data-action="show-user-card" data-action-value="54fa451f60ac" data-action-type="hover" data-user-id="54fa451f60ac" dir="auto"><img  src="https://cdn-images-1.medium.com/fit/c/36/36/1*n9qO_wvh3fedEDcneQ-eyg.jpeg" class="avatar-image u-size36x36 u-xs-size32x32" alt="Go to the profile of John Francis Peters"></a></div><div class="postMetaInline postMetaInline-authorLockup ui-captionStrong u-flex1 u-noWrapWithEllipsis"><a class="ds-link ds-link--styleSubtle link link--darken link--darker"   href="https://medium.com/@jfpetersphoto?source=placement_card_footer_grid---------0-31" title="Go to the profile of John Francis Peters" aria-label="Go to the profile of John Francis Peters" data-action-source="placement_card_footer_grid---------0-31" data-user-id="54fa451f6
