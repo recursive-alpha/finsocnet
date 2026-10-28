@@ -249,3 +249,36 @@ def test_substack(mock_http):
     assert sb.pub_base("macro") == "https://macro.substack.com" and sb.subdomain("https://macro.substack.com") == "macro"
     paid = sb.build_record("https://x.substack.com", "x", {**post, "audience": "only_paid", "body_html": "<p>teaser</p>"}, [], None)
     assert paid["extra"]["truncated"] is True
+
+
+def test_web_search_backend_failure_is_rate_limited(monkeypatch):
+    import sys, types
+    from finsocnet.adapters import web_search as ws
+    from finsocnet.core.output import CliError
+
+    class Boom:
+        def text(self, *a, **k):
+            raise RuntimeError("DNSError: no records")
+
+    monkeypatch.setitem(sys.modules, "ddgs", types.SimpleNamespace(DDGS=Boom))
+    monkeypatch.setattr(ws.time, "sleep", lambda s: None)
+    with pytest.raises(CliError) as e:
+        ws.WebSearch().search("kelly")
+    assert e.value.code == "RATE_LIMITED" and e.value.retry_after_sec == 120
+
+
+def test_stackexchange_tag_url_lists_and_dispatches(monkeypatch):
+    from finsocnet.adapters import stackexchange as se
+    from finsocnet.core import dispatch
+
+    assert dispatch.classify("https://quant.stackexchange.com/questions/tagged/risk-management")["action"] == "list"
+    assert dispatch.classify("https://quant.stackexchange.com/questions/1234/some-title")["action"] == "fetch"
+    seen = {}
+
+    def fake_get(self, path, site, **params):
+        seen.update(path=path, site=site, params=params)
+        return {"items": [], "has_more": False}
+
+    monkeypatch.setattr(se.StackExchange, "_get", fake_get)
+    res = se.StackExchange().list("https://quant.stackexchange.com/questions/tagged/risk-management")
+    assert seen["site"] == "quant" and seen["params"]["tagged"] == "risk-management" and res["source"]["id"] == "stackexchange:tag:quant:risk-management"

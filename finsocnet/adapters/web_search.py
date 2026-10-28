@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import time
 from typing import Any
 
 from finsocnet.core import budgets, ids
 from finsocnet.core.db import connect
+from finsocnet.core.output import CliError
 from finsocnet.core.platform import PlatformAdapter, item_ref
 
 
@@ -31,5 +33,14 @@ class WebSearch(PlatformAdapter):
             pass
         q = f"site:{site} {query}" if site else query
         d = DDGS()
-        rows = d.news(q, region=region, timelimit=timelimit, max_results=limit) if news else d.text(q, region=region, timelimit=timelimit, max_results=limit)
-        return [to_ref(r) for r in rows][:limit]
+        last: Exception | None = None
+        for attempt in range(2):  # the backend fans out to several engines; one flaky engine should not fail the call
+            try:
+                rows = d.news(q, region=region, timelimit=timelimit, max_results=limit) if news else d.text(q, region=region, timelimit=timelimit, max_results=limit)
+                return [to_ref(r) for r in rows][:limit]
+            except Exception as e:  # noqa: BLE001 - ddgs raises DDGSException / TimeoutException / RatelimitException
+                last = e
+                if "No results found" in str(e) and "DNSError" not in str(e):
+                    return []
+                time.sleep(2 + attempt * 3)
+        raise CliError("RATE_LIMITED", f"web search backend failed: {str(last).splitlines()[0][:200]}", hint="The search engines throttled or were unreachable; retry later or use google-searcher / a platform skill's own search.", retry_after_sec=120) from None

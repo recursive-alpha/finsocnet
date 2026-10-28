@@ -118,6 +118,9 @@ class StackExchange(PlatformAdapter):
                               joined_at=iso(u.get("creation_date")), links=[u["website_url"]] if u.get("website_url") else [])
 
     def list(self, source, *, limit=50, cursor=None, since=None, site="quant", kind="questions", **_):
+        m = re.search(r"https?://(?:([a-z]+)\.stackexchange\.com|(stackoverflow)\.com)/(?:questions/tagged/([^/?#]+)|users/(\d+))", source)
+        if m:  # a tag or user page URL, as the explore queue stores it
+            site, source = (m.group(1) or m.group(2)), (m.group(3) or m.group(4))
         if source.isdigit():
             path, src = f"/users/{source}/{kind}", f"stackexchange:user:{site}:{source}"
         else:

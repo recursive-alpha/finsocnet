@@ -21,6 +21,7 @@ URL_RULES: list[tuple[str, str, str, str]] = [
     (r"substack\.com", "substack", "substack-explorer", "list"),
     (r"(discord\.com/channels|discord\.gg)/", "discord", "discord-explorer", "fetch"),
     (r"t\.me/", "telegram", "telegram-explorer", "list"),
+    (r"(stackexchange\.com|stackoverflow\.com)/(questions/tagged/|users/\d+)", "stackexchange", "stackexchange-explorer", "list"),
     (r"(stackexchange\.com|stackoverflow\.com)/(questions|q)/", "stackexchange", "stackexchange-explorer", "fetch"),
     (r"tradingview\.com/(chart|script)/", "tradingview", "tradingview-explorer", "fetch"),
     (r"tradingview\.com/u/", "tradingview", "tradingview-explorer", "profile"),
