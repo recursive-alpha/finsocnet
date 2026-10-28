@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "query_card.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "intent",
+    "subject",
+    "terms"
+  ],
+  "properties": {
+    "intent": {
+      "enum": [
+        "find_rules",
+        "find_setups",
+        "explain_concept",
+        "compare_people",
+        "find_evidence",
+        "find_contradictions",
+        "find_person_view"
+      ]
+    },
+    "question": {
+      "type": "string"
+    },
+    "subject": {
+      "type": "string"
+    },
+    "claim_pattern": {
+      "type": "string"
+    },
+    "terms": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(_[a-z0-9]+)*$"
+      },
+      "minItems": 1
+    },
+    "broader_terms": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "aliases": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "filters": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "array"
+        },
+        "domain": {
+          "type": "array"
+        },
+        "category": {
+          "type": "array"
+        },
+        "horizon": {
+          "type": "array"
+        },
+        "instruments": {
+          "type": "array"
+        },
+        "person_id": {
+          "type": "array"
+        },
+        "evidence_level_min": {
+          "enum": [
+            "anecdotal",
+            "claimed",
+            "backtested",
+            "audited"
+          ]
+        },
+        "min_persons": {
+          "type": "integer"
+        }
+      }
+    },
+    "fts_queries": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 6
+    }
+  }
+}

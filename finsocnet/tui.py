@@ -25,7 +25,6 @@ from textual.widgets import (
 )
 
 from finsocnet.db import get_db, get_hypothesis, get_stats, list_contents, list_creators, list_hypotheses
-from finsocnet.search import vector_search
 from finsocnet.skills import list_all_skills
 
 
@@ -171,24 +170,8 @@ class FinSocNetApp(App):
         t_hyp = self.query_one("#table_hypotheses", DataTable)
         t_hyp.clear()
 
-        if query:
-            # Semantic search
-            results = vector_search(query, limit=25)
-            if results:
-                for r in results:
-                    m = r["metadata"]
-                    t_hyp.add_row(
-                        str(m.get("hypothesis_id")),
-                        m.get("direction", "NEUTRAL"),
-                        m.get("category", "edge"),
-                        m.get("platform", "youtube"),
-                        m.get("title", ""),
-                        f"Score: {r['score']:.2f}",
-                        key=str(m.get("hypothesis_id")),
-                    )
-                return
-
-        rows = list_hypotheses(limit=50)
+        # Keyword filter only; the TUI moves to v2 card data in Phase 8.
+        rows = list_hypotheses(query=query or None, limit=50)
         for h in rows:
             t_hyp.add_row(
                 str(h["id"]),

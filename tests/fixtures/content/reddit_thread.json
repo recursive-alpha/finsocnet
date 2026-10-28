@@ -1,0 +1,58 @@
+{
+ "id": "reddit:1xg9xq1",
+ "platform": "reddit",
+ "content_type": "thread",
+ "source": {
+  "id": "reddit:subreddit:realdaytrading",
+  "kind": "subreddit",
+  "title": "r/RealDayTrading",
+  "url": "https://www.reddit.com/r/RealDayTrading/"
+ },
+ "url": "https://www.reddit.com/r/RealDayTrading/comments/1xg9xq1/sizing/",
+ "title": "How I size positions after a losing streak",
+ "author": {
+  "handle": "u/example_dt",
+  "platform_user_id": "t2_abc"
+ },
+ "published_at": "2026-09-14T13:02:11Z",
+ "language": "en",
+ "segments": [
+  {
+   "seq": 0,
+   "kind": "post",
+   "locator": {
+    "comment_id": "t3_1xg9xq1"
+   },
+   "author": {
+    "handle": "u/example_dt"
+   },
+   "text": "After a losing streak I cut my position size in half and wait for two green days before going back to full size. Drawdowns stopped snowballing."
+  },
+  {
+   "seq": 1,
+   "kind": "comment",
+   "locator": {
+    "comment_id": "t1_k1",
+    "parent_id": "t3_1xg9xq1",
+    "score": 87
+   },
+   "author": {
+    "handle": "u/other"
+   },
+   "text": "Same here. Not trading the first fifteen minutes fixed my overtrading problem completely."
+  }
+ ],
+ "metrics": {
+  "score": 412,
+  "comments": 2
+ },
+ "links": [
+  "https://example.com/sizing.pdf"
+ ],
+ "mentions": [
+  "u/someone",
+  "$SPY"
+ ],
+ "fetched_at": "2026-10-28T09:15:00Z",
+ "fetch_method": "json_endpoint"
+}

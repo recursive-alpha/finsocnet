@@ -4,16 +4,8 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
-
-# Local data, Chroma vector store, audio, and databases
-data/*.db
-data/*.sqlite
-data/chroma_db/
-data/audio/
-data/transcripts/
-data/papers/
-data/screenshots/
-data/sessions/
-data/books/
-data/raw/
 *.log
+
+# Runtime data (docs/spec/00-conventions.md §8): everything under data/ except the placeholder
+data/*
+!data/.gitkeep

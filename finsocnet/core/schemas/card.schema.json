@@ -1,0 +1,257 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "card.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "card_version",
+    "kind",
+    "domain",
+    "category",
+    "subject",
+    "claim",
+    "terms",
+    "evidence_level",
+    "citation"
+  ],
+  "properties": {
+    "card_version": {
+      "const": 1
+    },
+    "kind": {
+      "enum": [
+        "rule",
+        "setup",
+        "observation",
+        "mechanism",
+        "definition",
+        "metric",
+        "practice"
+      ]
+    },
+    "domain": {
+      "enum": [
+        "trading_strategy",
+        "stock_market",
+        "market_microstructure",
+        "macro_economics",
+        "valuation",
+        "risk_management",
+        "psychology",
+        "quant_research",
+        "derivatives",
+        "crypto",
+        "forex",
+        "fixed_income",
+        "general_finance"
+      ]
+    },
+    "category": {
+      "enum": [
+        "setup_and_screening",
+        "entry_and_execution",
+        "trade_management",
+        "risk_and_sizing",
+        "psychology_and_review",
+        "market_dynamics",
+        "concept",
+        "research_method"
+      ]
+    },
+    "subject": {
+      "type": "string",
+      "minLength": 5,
+      "maxLength": 120
+    },
+    "claim": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 600
+    },
+    "conditions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 200
+      },
+      "maxItems": 12
+    },
+    "action": {
+      "enum": [
+        "LONG",
+        "SHORT",
+        "ADD",
+        "EXIT",
+        "EXIT_PARTIAL",
+        "AVOID",
+        "HOLD",
+        "SIZE",
+        "NONE"
+      ]
+    },
+    "horizon": {
+      "enum": [
+        "intraday",
+        "overnight",
+        "swing_days",
+        "swing_weeks",
+        "position",
+        "n/a"
+      ]
+    },
+    "instruments": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "equities",
+          "small_caps",
+          "etfs",
+          "indices",
+          "futures",
+          "options",
+          "forex",
+          "crypto",
+          "bonds",
+          "commodities",
+          "any"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "regime": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(_[a-z0-9]+)*$"
+      },
+      "uniqueItems": true
+    },
+    "terms": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 15,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(_[a-z0-9]+)*$"
+      }
+    },
+    "aliases": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 80
+      },
+      "maxItems": 20
+    },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 40
+      },
+      "maxItems": 20
+    },
+    "numbers": {
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "number",
+          "string"
+        ]
+      },
+      "propertyNames": {
+        "pattern": "^[a-z0-9]+(_[a-z0-9]+)*$"
+      }
+    },
+    "evidence_level": {
+      "enum": [
+        "anecdotal",
+        "claimed",
+        "backtested",
+        "audited"
+      ]
+    },
+    "invalidation": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 300
+    },
+    "notes": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 500
+    },
+    "citation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "content_id",
+        "segment_seq",
+        "quote",
+        "speaker"
+      ],
+      "properties": {
+        "content_id": {
+          "type": "string"
+        },
+        "segment_seq": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "quote": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 1200
+        },
+        "speaker": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "confidence"
+          ],
+          "properties": {
+            "person_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "handle": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "role": {
+              "enum": [
+                "owner",
+                "guest",
+                "host",
+                "co_host",
+                "author",
+                "co_author",
+                "commenter",
+                "member",
+                "unknown"
+              ]
+            },
+            "confidence": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -4,28 +4,54 @@ build-backend = "hatchling.build"
 
 [project]
 name = "finsocnet"
-version = "0.3.0"
-description = "FinSocNet: Multi-Platform Financial Social Intelligence, Trading Strategy Synthesizer & Terminal UI"
+version = "2.0.0.dev0"
+description = "FinSocNet: agent-operated financial knowledge network (SQLite + FTS5, Knowledge Cards)"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "youtube-transcript-api>=1.0.0",
     "yt-dlp>=2024.1.0",
-    "python-dotenv>=1.0.0",
-    "chromadb>=0.5.0",
-    "sentence-transformers>=3.0.0",
+    "youtube-transcript-api>=1.0.0",
     "faster-whisper>=1.0.0",
-    "prompt-toolkit>=3.0.53",
-    "textual>=8.2.8",
-    "duckduckgo-search>=7.0.0",
-    "ddgs>=9.0.0",
     "playwright>=1.40.0",
+    "httpx>=0.27.0",
+    "jsonschema>=4.18.0",
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0.0",
+    "ddgs>=9.0.0",
+    "feedparser>=6.0.0",
+    "trafilatura>=1.12.0",
+    "markdownify>=0.13.0",
+    "pymupdf>=1.24.0",
+    "ebooklib>=0.18",
+    "python-docx>=1.1.0",
+    "pyrage>=1.2.0",
+    "textual>=8.2.8",
+    "prompt-toolkit>=3.0.53",
 ]
 
 [project.scripts]
 finsocnet = "finsocnet.cli:main"
 
 [project.optional-dependencies]
+# Session export on the user's own machine (docs/spec/04-sessions-browser.md).
+# ccl_chromium_reader is not published on PyPI; Phase 3 decides how to vendor or install it (see 04 §9).
+local = [
+    "rookiepy>=0.5.0",
+]
+ocr = [
+    "ocrmypdf>=16.0.0",
+]
 dev = [
     "pytest>=8.0.0",
+    "respx>=0.21.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["finsocnet"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-m 'not live'"
+markers = [
+    "live: hits real platforms; run manually with `uv run pytest -m live -k <platform>`",
 ]

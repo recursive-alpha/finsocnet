@@ -26,13 +26,7 @@ def get_db(db_path: Path = DEFAULT_DB_PATH) -> sqlite3.Connection:
     conn.execute("PRAGMA journal_mode = WAL;")
     conn.execute("PRAGMA busy_timeout = 60000;")
 
-    # Run pending migrations
-    try:
-        from finsocnet.migrations import auto_migrate
-        auto_migrate(conn)
-    except Exception:
-        pass
-
+    # v1 helper kept until Phase 8: migrations are explicit now (`finsocnet kb migrate`), never run implicitly.
     return conn
 
 

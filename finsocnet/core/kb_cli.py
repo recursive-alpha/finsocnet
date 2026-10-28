@@ -1,0 +1,521 @@
+"""`finsocnet kb …`: the database CLI (docs/spec/01-database.md §6). Every command prints one JSON envelope."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sqlite3
+import sys
+import time
+from pathlib import Path
+from typing import Any, Callable
+
+from finsocnet.core import config, content as content_mod, migrations, runs
+from finsocnet.core import output
+from finsocnet.core.db import backup as db_backup
+from finsocnet.core.db import connect, default_backup_path, transaction
+from finsocnet.core.output import CliError, Result
+
+SQLITE_MIN = (3, 38, 0)
+
+
+class _Parser(argparse.ArgumentParser):
+    def error(self, message: str):  # type: ignore[override]
+        raise CliError("USAGE", message)
+
+
+class Ctx:
+    """Per-invocation state: lazily opened connection and the resolved run id."""
+
+    def __init__(self, args: argparse.Namespace) -> None:
+        self.args = args
+        self._conn: sqlite3.Connection | None = None
+
+    @property
+    def db_path(self) -> Path:
+        return config.resolve_path(self.args.db) if getattr(self.args, "db", None) else config.db_path()
+
+    def conn(self, create: bool = False, require_v2: bool = True) -> sqlite3.Connection:
+        if self._conn is None:
+            if not create and not self.db_path.exists():
+                raise CliError("NOT_FOUND", f"database {self.db_path} does not exist", "Create it with `finsocnet kb init`.")
+            self._conn = connect(self.db_path)
+        if require_v2 and not create:
+            has = self._conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='agent_runs'").fetchone()
+            if not has:
+                raise CliError("CONFLICT", "database is not on the v2 schema",
+                               "Run `finsocnet kb migrate` (a backup is taken first; confirm with the user for the real database).")
+        return self._conn
+
+    def run_id(self) -> int:
+        return runs.resolve_run(self.conn(), getattr(self.args, "run", None))
+
+    def close(self) -> None:
+        if self._conn is not None:
+            self._conn.close()
+
+
+Handler = Callable[[Ctx], Result | Any]
+
+
+def read_json(path: str | None) -> Any:
+    if not path:
+        raise CliError("USAGE", "missing --file (use '-' for stdin)")
+    try:
+        text = sys.stdin.read() if path == "-" else Path(path).read_text(encoding="utf-8")
+        return json.loads(text)
+    except FileNotFoundError:
+        raise CliError("NOT_FOUND", f"file {path} not found")
+    except ValueError as e:
+        raise CliError("VALIDATION_ERROR", f"{path} is not valid JSON: {e}")
+
+
+def parse_json_arg(text: str | None, what: str) -> Any:
+    if text is None:
+        return None
+    try:
+        return json.loads(text)
+    except ValueError as e:
+        raise CliError("USAGE", f"{what} must be valid JSON: {e}")
+
+
+# --- admin ----------------------------------------------------------------------------------------------
+
+def cmd_init(ctx: Ctx) -> Result:
+    conn = ctx.conn(create=True, require_v2=False)
+    res = migrations.migrate(conn)
+    return Result({"db": str(ctx.db_path), "applied": res["applied"], "backups": res["backups"], "summaries": res["summaries"]}, res["warnings"])
+
+
+def cmd_migrate(ctx: Ctx) -> Result:
+    conn = ctx.conn(require_v2=False)
+    res = migrations.migrate(conn, dry_run=ctx.args.dry_run)
+    return Result({"pending": res["pending"], "applied": res["applied"], "backups": res["backups"], "summaries": res["summaries"]}, res["warnings"])
+
+
+def cmd_backup(ctx: Ctx) -> Result:
+    conn = ctx.conn(require_v2=False)
+    dest = config.resolve_path(ctx.args.to) if ctx.args.to else default_backup_path(ctx.db_path)
+    return Result({"path": str(db_backup(conn, dest))})
+
+
+FTS_EXTERNAL = ("segments_fts", "person_skills_fts")
+FTS_STANDALONE = ("persons_fts", "vocabulary_fts", "knowledge_cards_fts")
+
+
+def repair_fts(conn: sqlite3.Connection) -> list[str]:
+    """Rebuild every FTS index from its source tables."""
+    rebuilt = []
+    with transaction(conn):
+        for t in FTS_EXTERNAL:
+            conn.execute(f"INSERT INTO {t}({t}) VALUES ('rebuild')")
+            rebuilt.append(t)
+        # Standalone indices are derived by triggers: clear them, then fire the UPDATE triggers once per row.
+        conn.execute("DELETE FROM knowledge_cards_fts")
+        conn.execute("UPDATE knowledge_cards SET id = id")
+        conn.execute("DELETE FROM persons_fts")
+        conn.execute("UPDATE persons SET id = id")
+        conn.execute("DELETE FROM vocabulary_fts")
+        conn.execute("UPDATE vocabulary SET term = term")
+        rebuilt += list(FTS_STANDALONE)
+    return rebuilt
+
+
+def cmd_doctor(ctx: Ctx) -> Result:
+    conn = ctx.conn(require_v2=False)
+    warnings: list[str] = []
+    if ctx.args.repair_fts:
+        if not conn.execute("SELECT 1 FROM sqlite_master WHERE name = 'agent_runs'").fetchone():
+            raise CliError("CONFLICT", "database is not on the v2 schema", "Run `finsocnet kb migrate` first.")
+        warnings.append("rebuilt FTS indices: " + ", ".join(repair_fts(conn)))
+    ver = sqlite3.sqlite_version_info
+    if ver < SQLITE_MIN:
+        warnings.append(f"SQLite {sqlite3.sqlite_version} < 3.38 (JSON functions / FTS5 may be missing)")
+    integrity = conn.execute("PRAGMA integrity_check").fetchone()[0]
+    tables = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    v2 = "agent_runs" in tables
+    fts_ok: dict[str, Any] = {}
+    orphans: dict[str, int] = {}
+    if v2:
+        for t in (*FTS_EXTERNAL, *FTS_STANDALONE):
+            try:
+                conn.execute(f"INSERT INTO {t}({t}) VALUES ('integrity-check')")
+                fts_ok[t] = "ok"
+            except sqlite3.DatabaseError as e:
+                fts_ok[t] = f"FAILED: {e}"
+        cards = conn.execute("SELECT COUNT(*) FROM knowledge_cards").fetchone()[0]
+        indexed = conn.execute("SELECT COUNT(*) FROM knowledge_cards_fts").fetchone()[0]
+        if cards != indexed:
+            fts_ok["knowledge_cards_fts"] = f"FAILED: {indexed} indexed rows for {cards} cards"
+        fk = conn.execute("PRAGMA foreign_key_check").fetchall()
+        orphans["foreign_key_violations"] = len([v for v in fk if not str(v[0]).startswith("legacy_")])
+        legacy_fk = len(fk) - orphans["foreign_key_violations"]
+        if legacy_fk:
+            warnings.append(f"{legacy_fk} pre-existing foreign-key orphan(s) in legacy_* tables (dropped with them in Phase 2)")
+        orphans["active_cards_without_citations"] = conn.execute(
+            "SELECT COUNT(*) FROM knowledge_cards k WHERE status = 'active' AND NOT EXISTS (SELECT 1 FROM card_citations c WHERE c.card_id = k.id)").fetchone()[0]
+        orphans["processing_contents"] = conn.execute("SELECT COUNT(*) FROM contents WHERE process_status = 'processing'").fetchone()[0]
+        for k, v in orphans.items():
+            if v:
+                warnings.append(f"{k}: {v}")
+    else:
+        warnings.append("database is on the v1 schema; run `finsocnet kb migrate`")
+    ok = integrity == "ok" and all(v == "ok" for v in fts_ok.values()) and not orphans.get("foreign_key_violations")
+    data = {"ok": ok, "sqlite_version": sqlite3.sqlite_version, "schema": "v2" if v2 else "v1", "integrity": integrity,
+            "fts_integrity": fts_ok, "orphans": orphans, "migrations": migrations.status(conn)}
+    return Result(data, warnings)
+
+
+def _count_by(conn: sqlite3.Connection, sql: str) -> dict[str, int]:
+    return {str(r[0]): r[1] for r in conn.execute(sql)}
+
+
+STAT_TABLES = ["sources", "contents", "content_segments", "knowledge_cards", "card_citations", "card_links",
+               "dedup_decisions", "vocabulary", "persons", "person_aliases", "person_appearances", "person_skills",
+               "explore_queue", "knowledge_gaps", "agent_runs", "lessons", "feedback", "browser_sessions"]
+
+
+def cmd_stats(ctx: Ctx) -> Result:
+    conn = ctx.conn()
+    data: dict[str, Any] = {"tables": {t: conn.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0] for t in STAT_TABLES}}
+    data["contents_by_status"] = _count_by(conn, "SELECT process_status, COUNT(*) FROM contents GROUP BY 1")
+    data["contents_by_platform"] = _count_by(conn, "SELECT platform, COUNT(*) FROM contents GROUP BY 1")
+    data["cards_by_status"] = _count_by(conn, "SELECT status, COUNT(*) FROM knowledge_cards GROUP BY 1")
+    data["cards_by_category"] = _count_by(conn, "SELECT category, COUNT(*) FROM knowledge_cards WHERE status = 'active' GROUP BY 1")
+    data["top_persons"] = [dict(r) for r in conn.execute(
+        "SELECT p.id, p.canonical_name, s.cards, s.appearances FROM person_stats s JOIN persons p ON p.id = s.person_id ORDER BY s.cards DESC, p.id LIMIT 10")]
+    data["open_gaps"] = conn.execute("SELECT COUNT(*) FROM knowledge_gaps WHERE status = 'open'").fetchone()[0]
+    data["queue_by_status"] = _count_by(conn, "SELECT status, COUNT(*) FROM explore_queue GROUP BY 1")
+    data["sessions"] = {"domains": conn.execute("SELECT COUNT(*) FROM browser_sessions").fetchone()[0],
+                        "by_login_state": _count_by(conn, "SELECT login_state, COUNT(*) FROM browser_sessions GROUP BY 1")}
+    return Result(data)
+
+
+def cmd_prune(ctx: Ctx) -> Result:
+    """Prune per 01 §4: processed audio > 30 days, budget_usage > 7 days, work dirs > 90 days."""
+    conn = ctx.conn()
+    now = time.time()
+    audio: list[Path] = []
+    adir = config.data_dir() / "audio"
+    if adir.exists():
+        for f in adir.iterdir():
+            if f.is_file() and now - f.stat().st_mtime > 30 * 86400:
+                row = conn.execute("SELECT process_status FROM contents WHERE id IN (?, ?)", (f"youtube:{f.stem}", f"audio:{f.stem}")).fetchone()
+                if row and row["process_status"] == "processed":
+                    audio.append(f)
+    work: list[Path] = []
+    wdir = config.data_dir() / "work"
+    if wdir.exists():
+        work = [d for d in wdir.iterdir() if d.is_dir() and now - d.stat().st_mtime > 90 * 86400]
+    cutoff = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now - 7 * 86400))
+    budget_rows = conn.execute("SELECT COUNT(*) FROM budget_usage WHERE window_start < ?", (cutoff,)).fetchone()[0]
+    if not ctx.args.dry_run:
+        import shutil
+        for f in audio:
+            f.unlink(missing_ok=True)
+        for d in work:
+            shutil.rmtree(d, ignore_errors=True)
+        with transaction(conn):
+            conn.execute("DELETE FROM budget_usage WHERE window_start < ?", (cutoff,))
+    return Result({"dry_run": ctx.args.dry_run, "audio_files": [str(p) for p in audio], "work_dirs": [str(p) for p in work],
+                   "budget_usage_rows": budget_rows})
+
+
+# --- runs, lessons, feedback ----------------------------------------------------------------------------
+
+def cmd_run_start(ctx: Ctx) -> Result:
+    a = ctx.args
+    return Result({"run_id": runs.start_run(ctx.conn(), a.skill, a.goal, a.harness, a.model, a.parent)})
+
+
+def cmd_run_end(ctx: Ctx) -> Result:
+    a = ctx.args
+    return Result(runs.end_run(ctx.conn(), ctx.run_id(), a.outcome, parse_json_arg(a.stats, "--stats"), parse_json_arg(a.errors, "--errors")))
+
+
+def cmd_run_list(ctx: Ctx) -> Result:
+    a = ctx.args
+    return Result({"runs": runs.list_runs(ctx.conn(), a.skill, a.since, a.limit)})
+
+
+def cmd_lesson_add(ctx: Ctx) -> Result:
+    a = ctx.args
+    return Result({"lesson_id": runs.add_lesson(ctx.conn(), ctx.run_id(), a.skill, a.kind, a.observation, a.evidence, a.proposal)})
+
+
+def cmd_lesson_list(ctx: Ctx) -> Result:
+    return Result({"lessons": runs.list_lessons(ctx.conn(), ctx.args.status, ctx.args.skill, ctx.args.limit)})
+
+
+def cmd_lesson_update(ctx: Ctx) -> Result:
+    ctx.run_id()
+    return Result(runs.update_lesson(ctx.conn(), ctx.args.id, ctx.args.status, ctx.args.ref))
+
+
+def cmd_feedback_add(ctx: Ctx) -> Result:
+    a = ctx.args
+    return Result({"feedback_id": runs.add_feedback(ctx.conn(), a.target_type, a.target_id, a.rating, a.comment)})
+
+
+def cmd_feedback_list(ctx: Ctx) -> Result:
+    return Result({"feedback": runs.list_feedback(ctx.conn(), ctx.args.status, ctx.args.limit)})
+
+
+def cmd_feedback_handle(ctx: Ctx) -> Result:
+    ctx.run_id()
+    return Result(runs.handle_feedback(ctx.conn(), ctx.args.id))
+
+
+# --- sources --------------------------------------------------------------------------------------------
+
+def cmd_source_upsert(ctx: Ctx) -> Result:
+    conn = ctx.conn()
+    ctx.run_id()
+    payload = read_json(ctx.args.file)
+    items = payload if isinstance(payload, list) else [payload]
+    results = []
+    with transaction(conn):
+        for src in items:
+            results.append(content_mod.upsert_source(conn, src))
+    return Result({"sources": results})
+
+
+def cmd_source_get(ctx: Ctx) -> Result:
+    return Result(content_mod.get_source(ctx.conn(), ctx.args.id))
+
+
+def cmd_source_list(ctx: Ctx) -> Result:
+    a = ctx.args
+    return Result({"sources": content_mod.list_sources(ctx.conn(), a.platform, a.person, a.status, a.limit)})
+
+
+def cmd_source_cursor(ctx: Ctx) -> Result:
+    ctx.run_id()
+    conn = ctx.conn()
+    with transaction(conn):
+        res = content_mod.set_source_cursor(conn, ctx.args.id, ctx.args.set)
+    return Result(res)
+
+
+# --- contents -------------------------------------------------------------------------------------------
+
+def cmd_content_add(ctx: Ctx) -> Result:
+    run_id = ctx.run_id()
+    payload = read_json(ctx.args.file)
+    records = payload if isinstance(payload, list) else [payload]
+    conn = ctx.conn()
+    results, warnings = [], []
+    for rec in records:
+        r = content_mod.add_content(conn, rec, run_id)
+        warnings.extend(f"{r['id']}: {w}" for w in r.pop("warnings", []))
+        results.append(r)
+    return Result(results[0] if len(results) == 1 and not isinstance(payload, list) else {"contents": results}, warnings)
+
+
+def cmd_content_get(ctx: Ctx) -> Result:
+    return Result(content_mod.get_content(ctx.conn(), ctx.args.id, ctx.args.meta_only))
+
+
+def cmd_content_view(ctx: Ctx) -> Result:
+    a = ctx.args
+    return Result(content_mod.view_content(ctx.conn(), a.id, a.from_seq, a.to_seq))
+
+
+def cmd_content_chunks(ctx: Ctx) -> Result:
+    a = ctx.args
+    return Result({"chunks": content_mod.chunks(ctx.conn(), a.id, a.max_chars, a.overlap)})
+
+
+def cmd_content_list(ctx: Ctx) -> Result:
+    a = ctx.args
+    return Result({"contents": content_mod.list_contents(ctx.conn(), a.status, a.platform, a.source, a.person, a.limit)})
+
+
+def cmd_content_claim(ctx: Ctx) -> Result:
+    return Result(content_mod.claim_content(ctx.conn(), ctx.args.id, ctx.run_id(), ctx.args.reprocess))
+
+
+def cmd_content_done(ctx: Ctx) -> Result:
+    a = ctx.args
+    return Result(content_mod.set_done(ctx.conn(), a.id, a.upto_seq, a.cards, a.transformer, ctx.run_id()))
+
+
+def cmd_content_fail(ctx: Ctx) -> Result:
+    ctx.run_id()
+    return Result(content_mod.set_failed(ctx.conn(), ctx.args.id, ctx.args.error))
+
+
+def cmd_content_link_duplicate(ctx: Ctx) -> Result:
+    ctx.run_id()
+    return Result(content_mod.link_duplicate(ctx.conn(), ctx.args.id, ctx.args.of))
+
+
+def cmd_content_search(ctx: Ctx) -> Result:
+    a = ctx.args
+    hits = content_mod.search_segments(ctx.conn(), a.text, a.platform, a.person, a.content, a.limit)
+    return Result({"hits": hits})
+
+
+# --- parser ---------------------------------------------------------------------------------------------
+
+def _common() -> argparse.ArgumentParser:
+    p = _Parser(add_help=False)
+    p.add_argument("--db", help="database path (default: KNOWLEDGE_DB_PATH)")
+    p.add_argument("--run", type=int, help="run id (or env FINSOCNET_RUN_ID); required by write commands")
+    p.add_argument("--format", choices=["json", "text"], default="json")
+    return p
+
+
+def build_parser() -> _Parser:
+    root = _Parser(prog="finsocnet kb", description="FinSocNet database CLI (SQLite + FTS5)")
+    groups = root.add_subparsers(dest="group", required=True, parser_class=_Parser)
+    common = _common()
+    handlers: dict[tuple[str, ...], Handler] = {}
+
+    def leaf(subs, path: tuple[str, ...], name: str, handler: Handler, help_: str = "") -> argparse.ArgumentParser:
+        p = subs.add_parser(name, parents=[common], help=help_)
+        handlers[path] = handler
+        return p
+
+    def group(name: str, help_: str = ""):
+        g = groups.add_parser(name, help=help_)
+        return g.add_subparsers(dest="cmd", required=True, parser_class=_Parser)
+
+    def top(name: str, handler: Handler, help_: str = "") -> argparse.ArgumentParser:
+        p = groups.add_parser(name, parents=[common], help=help_)
+        p.set_defaults(cmd=None)
+        handlers[(name,)] = handler
+        return p
+
+    top("init", cmd_init, "create the database and run migrations")
+    p = top("migrate", cmd_migrate, "apply pending migrations")
+    p.add_argument("--dry-run", action="store_true")
+    p = top("backup", cmd_backup, "copy the database")
+    p.add_argument("--to")
+    p = top("doctor", cmd_doctor, "health check")
+    p.add_argument("--repair-fts", action="store_true", help="rebuild all FTS indices before checking")
+    top("stats", cmd_stats, "counts and distributions")
+    p = top("prune", cmd_prune, "prune cache files and old rows (01 §4)")
+    p.add_argument("--dry-run", action="store_true")
+
+    g = group("run", "agent runs")
+    p = leaf(g, ("run", "start"), "start", cmd_run_start)
+    p.add_argument("--skill", required=True)
+    p.add_argument("--goal")
+    p.add_argument("--harness")
+    p.add_argument("--model")
+    p.add_argument("--parent", type=int)
+    p = leaf(g, ("run", "end"), "end", cmd_run_end)
+    p.add_argument("--outcome", required=True, choices=runs.OUTCOMES)
+    p.add_argument("--stats")
+    p.add_argument("--errors")
+    p = leaf(g, ("run", "list"), "list", cmd_run_list)
+    p.add_argument("--skill")
+    p.add_argument("--since")
+    p.add_argument("--limit", type=int, default=20)
+
+    g = group("lesson", "lessons learned")
+    p = leaf(g, ("lesson", "add"), "add", cmd_lesson_add)
+    p.add_argument("--skill", required=True)
+    p.add_argument("--kind", required=True, choices=runs.LESSON_KINDS)
+    p.add_argument("--observation", required=True)
+    p.add_argument("--evidence")
+    p.add_argument("--proposal")
+    p = leaf(g, ("lesson", "list"), "list", cmd_lesson_list)
+    p.add_argument("--status", choices=runs.LESSON_STATUSES)
+    p.add_argument("--skill")
+    p.add_argument("--limit", type=int, default=50)
+    p = leaf(g, ("lesson", "update"), "update", cmd_lesson_update)
+    p.add_argument("id", type=int)
+    p.add_argument("--status", choices=runs.LESSON_STATUSES)
+    p.add_argument("--ref")
+
+    g = group("feedback", "user feedback")
+    p = leaf(g, ("feedback", "add"), "add", cmd_feedback_add)
+    p.add_argument("--target-type", required=True, choices=runs.FEEDBACK_TARGETS)
+    p.add_argument("--target-id", required=True)
+    p.add_argument("--rating", required=True, type=int, choices=[-1, 0, 1])
+    p.add_argument("--comment")
+    p = leaf(g, ("feedback", "list"), "list", cmd_feedback_list)
+    p.add_argument("--status", choices=["open", "handled"])
+    p.add_argument("--limit", type=int, default=50)
+    p = leaf(g, ("feedback", "handle"), "handle", cmd_feedback_handle)
+    p.add_argument("id", type=int)
+
+    g = group("source", "sources")
+    p = leaf(g, ("source", "upsert"), "upsert", cmd_source_upsert)
+    p.add_argument("--file", required=True)
+    p = leaf(g, ("source", "get"), "get", cmd_source_get)
+    p.add_argument("id")
+    p = leaf(g, ("source", "list"), "list", cmd_source_list)
+    p.add_argument("--platform")
+    p.add_argument("--person")
+    p.add_argument("--status")
+    p.add_argument("--limit", type=int, default=100)
+    p = leaf(g, ("source", "cursor"), "cursor", cmd_source_cursor)
+    p.add_argument("id")
+    p.add_argument("--set", required=True)
+
+    g = group("content", "contents and segments")
+    p = leaf(g, ("content", "add"), "add", cmd_content_add)
+    p.add_argument("--file", required=True, help="ContentRecord JSON (or array); '-' for stdin")
+    p = leaf(g, ("content", "get"), "get", cmd_content_get)
+    p.add_argument("id")
+    p.add_argument("--meta-only", action="store_true")
+    p = leaf(g, ("content", "view"), "view", cmd_content_view)
+    p.add_argument("id")
+    p.add_argument("--from-seq", type=int)
+    p.add_argument("--to-seq", type=int)
+    p = leaf(g, ("content", "chunks"), "chunks", cmd_content_chunks)
+    p.add_argument("id")
+    p.add_argument("--max-chars", type=int, default=12000)
+    p.add_argument("--overlap", type=int, default=2)
+    p = leaf(g, ("content", "list"), "list", cmd_content_list)
+    p.add_argument("--status")
+    p.add_argument("--platform")
+    p.add_argument("--source")
+    p.add_argument("--person")
+    p.add_argument("--limit", type=int, default=50)
+    p = leaf(g, ("content", "claim"), "claim", cmd_content_claim)
+    p.add_argument("id")
+    p.add_argument("--reprocess", action="store_true", help="mine an already processed content again")
+    p = leaf(g, ("content", "done"), "done", cmd_content_done)
+    p.add_argument("id")
+    p.add_argument("--upto-seq", type=int, required=True)
+    p.add_argument("--cards", type=int, required=True)
+    p.add_argument("--transformer")
+    p = leaf(g, ("content", "fail"), "fail", cmd_content_fail)
+    p.add_argument("id")
+    p.add_argument("--error", required=True)
+    p = leaf(g, ("content", "link-duplicate"), "link-duplicate", cmd_content_link_duplicate)
+    p.add_argument("id")
+    p.add_argument("--of", required=True)
+    p = leaf(g, ("content", "search"), "search", cmd_content_search)
+    p.add_argument("text")
+    p.add_argument("--platform")
+    p.add_argument("--person")
+    p.add_argument("--content")
+    p.add_argument("--limit", type=int, default=20)
+
+    root.set_defaults(_handlers=handlers)
+    return root
+
+
+def main(argv: list[str] | None = None) -> None:
+    output.begin()
+    output.setup_logging(config.log_level())
+    argv = list(sys.argv[1:] if argv is None else argv)
+    fmt = "text" if "--format" in argv and argv[argv.index("--format") + 1:][:1] == ["text"] else "json"
+    parser = build_parser()
+    try:
+        args = parser.parse_args(argv)
+    except CliError as e:
+        output.fail("kb", e.code, e.message, e.hint, fmt=fmt)
+        return
+    path = (args.group,) if args.cmd is None else (args.group, args.cmd)
+    handler = parser.get_default("_handlers")[path]
+    ctx = Ctx(args)
+    try:
+        output.run_command("kb." + ".".join(path), lambda: handler(ctx), fmt)
+    finally:
+        ctx.close()

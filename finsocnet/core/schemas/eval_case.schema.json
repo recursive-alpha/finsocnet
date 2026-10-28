@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "eval_case.schema.json",
+  "oneOf": [
+    {
+      "title": "dedup case",
+      "type": "object",
+      "required": [
+        "new_card",
+        "candidates",
+        "expected_decision"
+      ],
+      "properties": {
+        "new_card": {
+          "$ref": "card.schema.json"
+        },
+        "candidates": {
+          "type": "array"
+        },
+        "expected_decision": {
+          "enum": [
+            "same",
+            "refines",
+            "related",
+            "contradicts",
+            "new"
+          ]
+        },
+        "expected_target": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      }
+    },
+    {
+      "title": "search case",
+      "type": "object",
+      "required": [
+        "question",
+        "expected_card_refs"
+      ],
+      "properties": {
+        "question": {
+          "type": "string"
+        },
+        "expected_card_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "must_not": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "title": "attribution case",
+      "type": "object",
+      "required": [
+        "chunk_view",
+        "cast",
+        "expected"
+      ],
+      "properties": {
+        "chunk_view": {
+          "type": "string"
+        },
+        "cast": {
+          "type": "array"
+        },
+        "expected": {
+          "type": "object"
+        }
+      }
+    },
+    {
+      "title": "transform input",
+      "type": "object",
+      "required": [
+        "chunk_view",
+        "platform"
+      ],
+      "properties": {
+        "content_id": {
+          "type": "string"
+        },
+        "chunk_view": {
+          "type": "string"
+        },
+        "cast": {
+          "type": "array"
+        },
+        "platform": {
+          "type": "string"
+        }
+      }
+    }
+  ]
+}

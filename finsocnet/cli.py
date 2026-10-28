@@ -15,8 +15,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from finsocnet.db import get_db, get_hypothesis, get_stats, list_contents, list_creators, list_hypotheses
-from finsocnet.migrations import auto_migrate, get_migration_status
-from finsocnet.search import rag_search, vector_search
 from finsocnet.skills import list_all_skills
 
 
@@ -105,32 +103,7 @@ def view_hypothesis_card(hyp_id: int):
     print("=" * 80 + "\n")
 
 
-def search_command(query: str, limit: int = 10, category: Optional[str] = None, direction: Optional[str] = None, platform: Optional[str] = None):
-    # Try semantic vector search first
-    v_results = vector_search(query, limit=limit, category=category, direction=direction, platform=platform)
 
-    if v_results:
-        print("\n" + "=" * 85)
-        print(f"SEMANTIC VECTOR SEARCH: '{query}' ({len(v_results)} results)")
-        print("=" * 85)
-        for r in v_results:
-            m = r["metadata"]
-            print(f"[Score: {r['score']:.4f}] #{m.get('hypothesis_id')} [{m.get('direction')}] {m.get('title')} ({m.get('category')}) - {m.get('platform')}")
-            print(f"  Holding: {m.get('holding_period')}")
-            lines = r['document'].splitlines()
-            for l in lines[3:6]:
-                print(f"  {l}")
-            print("-" * 85)
-    else:
-        # Fallback to SQL keyword search
-        h_results = list_hypotheses(query=query, category=category, direction=direction, platform=platform, limit=limit)
-        print("\n" + "=" * 85)
-        print(f"KEYWORD SEARCH: '{query}' ({len(h_results)} results)")
-        print("=" * 85)
-        for h in h_results:
-            print(f"#{h['id']} [{h['direction']}] {h['title']} ({h['user_name']} - {h['category']})")
-            print(f"  {h['hypothesis_statement'][:140]}...")
-            print("-" * 85)
 def load_strategy_rulebook(name: str):
     # Person rulebooks moved to legacy/ until they are converted into person_skills (docs/spec/08-phases.md, Phase 2).
     skills_root = Path(__file__).resolve().parent.parent / "legacy" / "person-skills"
@@ -232,22 +205,22 @@ def run_explore_command(platform: str, target: str, limit: int = 10, ingest: boo
 
 
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] == "kb":
+        from finsocnet.core.kb_cli import main as kb_main
+        kb_main(sys.argv[2:])
+        return
+
     parser = argparse.ArgumentParser(
         prog="finsocnet",
         description="FinSocNet: Multi-Platform Financial Social Intelligence & Trading Strategy Synthesizer",
     )
     sub = parser.add_subparsers(dest="cmd")
 
+    # kb (handled before argparse: `finsocnet kb <group> <command> …`, see docs/spec/01-database.md §6)
+    sub.add_parser("kb", help="Database CLI: runs, contents, cards, vocabulary, persons (finsocnet kb --help)")
+
     # tui (default when no args)
     sub.add_parser("tui", help="Launch the interactive Terminal UI")
-
-    # search
-    search_p = sub.add_parser("search", help="Semantic vector search for trading hypotheses")
-    search_p.add_argument("query", help="Natural language query")
-    search_p.add_argument("--limit", "-n", type=int, default=10, help="Max results")
-    search_p.add_argument("--category", "-c", help="Filter by category")
-    search_p.add_argument("--direction", "-d", choices=["LONG", "SHORT", "NEUTRAL", "BOTH"])
-    search_p.add_argument("--platform", "-p", help="Filter by platform (youtube, x, reddit, medium, arxiv)")
 
     # view
     view_p = sub.add_parser("view", help="View detailed hypothesis card by ID")
@@ -278,12 +251,6 @@ def main():
     # stats
     sub.add_parser("stats", help="Display summary database metrics")
 
-    # rag
-    rag_p = sub.add_parser("rag", help="RAG search across raw transcript and content chunks")
-    rag_p.add_argument("query", help="Natural language query")
-    rag_p.add_argument("--limit", "-n", type=int, default=5)
-    rag_p.add_argument("--platform", "-p", help="Filter by platform")
-
     # migrate
     mig_p = sub.add_parser("migrate", help="Run or inspect database migrations")
     mig_p.add_argument("--status", action="store_true", help="Display migration status")
@@ -312,8 +279,6 @@ def main():
 
     if args.cmd == "stats":
         print_stats()
-    elif args.cmd == "search":
-        search_command(args.query, limit=args.limit, category=args.category, direction=args.direction, platform=args.platform)
     elif args.cmd == "view":
         view_hypothesis_card(args.id)
     elif args.cmd == "list":
@@ -331,32 +296,20 @@ def main():
         print_contents(platform=args.platform, content_type=args.type, limit=args.limit)
     elif args.cmd == "skills":
         print_skills(skill_type=args.type)
-    elif args.cmd == "rag":
-        res = rag_search(args.query, limit=args.limit, platform=args.platform)
-        print("\n" + "=" * 85)
-        print(f"RAG CHUNK RETRIEVAL: '{args.query}' ({len(res)} chunks)")
-        print("=" * 85)
-        for r in res:
-            m = r["metadata"]
-            print(f"[Score: {r['score']:.4f}] {m.get('title')} [{m.get('platform')}] at [{m.get('timestamp_formatted')}]")
-            print(f"  {r['document']}")
-            print("-" * 85)
     elif args.cmd == "migrate":
-        conn = get_db()
+        from finsocnet.core import migrations as core_migrations
+        from finsocnet.core.db import connect
+        conn = connect()
         if args.status:
-            status = get_migration_status(conn)
             print("=" * 65)
             print(f"{'Version':<8} | {'Migration Name':<35} | {'Status':<10}")
             print("-" * 65)
-            for s in status:
-                print(f"{s['version']:<8} | {s['filename']:<35} | {s['status'].upper():<10}")
+            for st in core_migrations.status(conn):
+                print(f"{st['version']:<8} | {st['filename']:<35} | {st['status'].upper():<10}")
             print("=" * 65)
         else:
-            new_m = auto_migrate(conn, verbose=True)
-            if not new_m:
-                print("Database is already up to date. No pending migrations.")
-            else:
-                print(f"Applied {len(new_m)} migrations: {new_m}")
+            res = core_migrations.migrate(conn)
+            print(f"Applied: {res['applied']}" if res["applied"] else "Database is already up to date. No pending migrations.")
         conn.close()
     elif args.cmd == "strategy":
         load_strategy_rulebook(args.name)

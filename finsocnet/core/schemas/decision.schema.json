@@ -1,0 +1,158 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "decision.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "new_card",
+    "candidate_ids",
+    "decision",
+    "rationale"
+  ],
+  "properties": {
+    "new_card": {
+      "$ref": "card.schema.json"
+    },
+    "candidate_ids": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "decision": {
+      "enum": [
+        "same",
+        "refines",
+        "related",
+        "contradicts",
+        "new"
+      ]
+    },
+    "target_card_id": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "updates": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "conditions_add": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "numbers_set": {
+          "type": "object"
+        },
+        "aliases_add": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "terms_add": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(_[a-z0-9]+)*$"
+          }
+        },
+        "entities_add": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes_append": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "evidence_level_upgrade": {
+          "enum": [
+            "anecdotal",
+            "claimed",
+            "backtested",
+            "audited",
+            null
+          ]
+        },
+        "invalidation_set": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "to_card",
+          "relation"
+        ],
+        "properties": {
+          "to_card": {
+            "type": "integer"
+          },
+          "relation": {
+            "enum": [
+              "related",
+              "contradicts",
+              "prerequisite",
+              "example_of",
+              "refines"
+            ]
+          },
+          "rationale": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 3
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "enum": [
+              "same",
+              "refines"
+            ]
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "then": {
+        "required": [
+          "target_card_id"
+        ],
+        "properties": {
+          "target_card_id": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  ]
+}

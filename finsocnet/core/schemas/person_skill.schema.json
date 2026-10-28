@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "person_skill.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "person_id",
+    "skill_name",
+    "category",
+    "title",
+    "content_markdown",
+    "rules"
+  ],
+  "properties": {
+    "person_id": {
+      "type": "string"
+    },
+    "skill_name": {
+      "type": "string"
+    },
+    "category": {
+      "enum": [
+        "overview",
+        "setup_and_screening",
+        "entry_and_execution",
+        "trade_management",
+        "risk_and_sizing",
+        "psychology_and_review",
+        "checklists"
+      ]
+    },
+    "title": {
+      "type": "string"
+    },
+    "summary": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "content_markdown": {
+      "type": "string"
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "rule",
+          "card_ids"
+        ],
+        "properties": {
+          "rule": {
+            "type": "string"
+          },
+          "card_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "minItems": 1
+          }
+        }
+      }
+    }
+  }
+}

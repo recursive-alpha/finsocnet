@@ -7,14 +7,14 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P0"
-  status: planned
+  status: partial
   phase: "0"
   spec: docs/spec/01-database.md
 ---
 
 # Knowledge DB (`finsocnet kb`)
 
-> **Status: planned — built in Phase 0.** The v1 scripts in `scripts/` (`db.py`, `vector_store.py`, `ingest_idea.py`) are deprecated and removed in Phase 0. Never use their `vector-search` or `rag-search` commands (ADR-001).
+> **Status: Phase 0 built.** Available now: `init, migrate, backup, doctor, stats, prune`, `run`, `lesson`, `feedback`, `source`, `content`. The `vocab`, `card`, `decision` (Phase 1), `person`/`skill` (Phase 2) and `queue`/`gap`/`history` (Phase 5) groups are specified below but not implemented yet; a call to them returns a `USAGE` error. The v1 scripts and their vector/RAG commands are gone (ADR-001).
 
 One SQLite file, `data/knowledge.db`, holds everything: relational tables plus FTS5 full-text indices. There is no Chroma, no vector table and no embedding model. Semantic judgment is done by you, the agent, using the knowledge skills.
 

@@ -1,6 +1,6 @@
 # 09 — Status Checklist (done / missing)
 
-> **Last checked:** 2026-10-28, against the working tree (uncommitted), not a release.
+> **Last checked:** 2026-10-28, branch `v2/phase-0-foundation` (Phase 0 done; Phases 1–8 not started).
 > **Who updates it:** the implementing agent ticks items at the end of each phase (same branch as the phase) and updates the date; the reviewer checks the ticks against the acceptance tests in `08-phases.md`.
 > Legend: `[x]` done and verified · `[~]` partly done (note says what is left) · `[ ]` missing.
 
@@ -8,7 +8,7 @@
 
 | Phase | Spec | SKILL.md + references | Code | Tests / acceptance |
 |---|---|---|---|---|
-| 0 Foundation and cleanup | [x] | [x] knowledge-db | [ ] | [ ] |
+| 0 Foundation and cleanup | [x] | [x] knowledge-db | [x] | [~] 30 tests green; migration 003 run on a copy, real DB awaiting your approval |
 | 1 Knowledge core | [x] | [x] transformer, dedup, search, miner | [ ] | [ ] |
 | 2 Persons and legacy conversion | [x] | [x] matcher, synthesizer, explorer | [~] v1 `match_person.py` only | [ ] |
 | 3 Agent browser and session bridge | [x] | [x] agent-browser, session-bridge | [ ] | [ ] |
@@ -18,7 +18,7 @@
 | 7 P3 platform skills (7) | [x] | [x] all 7 | [ ] | [ ] |
 | 8 Harness integration and docs | [x] | [x] finsocnet | [~] v1 installer and commands | [ ] |
 
-Bottom line: the **spec and every skill's instructions are written** (45 skills); **no v2 code exists yet**. v1 still runs for YouTube, audio, X, Reddit, Medium, web, Anna's Archive, arXiv, persons and the `finsocnet` CLI.
+Bottom line: the **spec and every skill's instructions are written** (45 skills); **Phase 0 code exists** (`finsocnet/core`, `kb` admin/run/lesson/feedback/source/content, migration 003). Phases 1–8 are not implemented. The real `data/knowledge.db` is still on the v1 schema (migration waits for your approval); v1 platform scripts still run except their `--ingest-db` paths, which called the removed `knowledge-db/scripts/db.py` and return in Phase 4.
 
 ---
 
@@ -52,25 +52,29 @@ Bottom line: the **spec and every skill's instructions are written** (45 skills)
 ## 2. Missing
 
 ### 2.0 Known problems in the current tree (fix in the phase shown)
-1. [ ] **Vector code still present** (ADR-001) — Phase 0: `finsocnet/search.py`, `knowledge-db/scripts/{db.py, vector_store.py, ingest_idea.py}`, `scripts/embed_server.py`. Note: `vector_store.py` (modified) and `ingest_idea.py` (new) have **uncommitted user changes**; ask before deleting.
-2. [ ] **`pyproject.toml`** still depends on `chromadb`, `sentence-transformers`, `duckduckgo-search` — Phase 0.
+1. [x] **Vector code removed** (ADR-001): `finsocnet/search.py`, `knowledge-db/scripts/{db.py, vector_store.py, ingest_idea.py}`, `scripts/embed_server.py` deleted in Phase 0 (the tree was clean, so no uncommitted work was lost; they stay in git history). Side effect: the v1 `search`/`rag` CLI commands and the TUI's semantic search are gone, and `--ingest-db` in 6 v1 platform scripts is broken until Phase 4.
+2. [x] **`pyproject.toml`** v2 dependencies; `chromadb`, `sentence-transformers`, `duckduckgo-search` removed; groups `local`, `ocr`, `dev`. `ccl_chromium_reader` is not on PyPI and is left out of `local` (decide in Phase 3, 04 §9).
 3. [ ] **`finsocnet skills` misclassifies** new core skills (agent-browser, discord-explorer, …) as `IMPROVED`, because `finsocnet/skills.py` `SYSTEM_SKILL_NAMES` is the v1 list — Phase 5 task 6 (core vs installed).
 4. [ ] **38 `chromium.launch` / `new_context(` calls** in v1 skill scripts (ADR-006) — Phase 4.
 5. [ ] **Password login scripts** `login_x.py`, `login_reddit.py`, `login_medium.py` still present (ADR-005) — Phase 3/4. Still the only v1 login path, so they stay until session-bridge works.
 6. [ ] **Stale docs**: `README.md`, `AGENTS.md` (Chroma, hypothesis-miner, password login, `vector-search`/`rag-search`), `commands/claude/finsocnet.md` — Phase 8.
 7. [ ] **v1 CLI commands to remove**: `search` (vector), `rag`, `view`, `list` (hypotheses) — Phase 8 (07 §1).
-8. [ ] **`.gitignore`** has per-folder rules instead of all of `data/`; `data/persons/*.json` shows as untracked — Phase 0.
+8. [x] **`.gitignore`** ignores all of `data/` except `.gitkeep`. Files already tracked under `data/` (channels, hypotheses, persons, reddit) stay tracked; untrack them with `git rm --cached` if you want them out of the repo.
 9. [x] Spec paths for legacy files fixed: 08 Phase 2 task 4 and 00 §8 now point to `legacy/`.
 
 ### 2.1 Phase 0 — Foundation
-- [ ] `finsocnet/core/`: `config`, `db`, `output`, `ids`, `normalize`, `records`, `migrations`, `runs`.
-- [ ] JSON Schemas: `content_record`, `card`, `query_card`, `decision`, `person`, `person_skill`, `eval_case`, `skill_review`.
-- [ ] `migrations/003_v2_schema.sql` + `003_v2_schema.py`.
-- [ ] `kb` admin and content commands (`init, migrate, backup, doctor, stats, run, lesson, source, content …`).
-- [ ] `pyproject.toml` deps + optional groups `local`, `ocr`, `dev`.
-- [ ] `.env.example` (00 §6), `.gitignore`.
-- [ ] `tests/` (does not exist yet): v1 fixture DB generator, transcript fixtures, migration tests.
-- [ ] Migration 003 run on a **copy** of `data/knowledge.db`, summary reviewed by the user.
+- [x] `finsocnet/core/`: `config`, `db`, `output`, `ids`, `normalize`, `records`, `migrations`, `runs`, plus `content`, `fts`, `kb_cli`.
+- [x] JSON Schemas: `content_record`, `card`, `query_card`, `decision`, `person`, `person_skill`, `eval_case` (`skill_review` comes with Phase 5).
+- [x] `migrations/003_v2_schema.sql` + `003_v2_schema.py`.
+- [x] `kb` admin and content commands (`init, migrate, backup, doctor [--repair-fts], stats, prune, run, lesson, feedback, source, content …`).
+- [x] `pyproject.toml` deps + optional groups.
+- [x] `.env.example` (00 §6), `.gitignore`.
+- [x] `tests/`: v1 fixture DB generator, two transcript fixtures, migration, content, envelope, schema and normalization tests (30).
+- [~] Migration 003 run on a **copy** of `data/knowledge.db` (result below); **the real DB is not migrated** until you approve.
+
+Migration 003 on the copy of the real DB (2026-10-28): 9 persons, 19 sources (2 `needs_review`: `youtube:handle:lewiskelly8`, `x:user:x_trader`), 5636 contents (27 `new`, 5600 `metadata_only`, 9 `needs_review`: 3 books with non-md5 ids, 5 arXiv stubs, 1 X stub), 404 transcript/paragraph segments, 18 appearances, 15 aliases, `legacy_hypotheses` and `legacy_skills` kept. `kb doctor` OK. 57 foreign-key orphans exist in `legacy_hypotheses`/`legacy_skills` before the migration (their `user_id` holds person ids); they are left untouched and go away with the legacy tables in Phase 2.
+
+Deviations to review: (a) the runner ignores FK violations in `legacy_*` tables because of those orphans; (b) a brand-new database gets no pre-migration backups; (c) `kb content claim` stores its claim in `contents.extra_json._claim` (no column exists) and has a `--reprocess` flag; (d) `kb content done` keeps `processing` while more segments remain, instead of resetting to `new`, so the claim survives between chunks.
 
 ### 2.2 Phase 1 — Knowledge core
 - [x] Skill docs and references (see 1.2).

@@ -1,0 +1,280 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "content_record.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "platform",
+    "content_type",
+    "segments"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z]+:.+"
+    },
+    "platform": {
+      "enum": [
+        "youtube",
+        "podcast",
+        "x",
+        "reddit",
+        "medium",
+        "substack",
+        "web",
+        "google",
+        "file",
+        "book",
+        "arxiv",
+        "paper",
+        "discord",
+        "telegram",
+        "stackexchange",
+        "forum",
+        "tradingview",
+        "facebook",
+        "rss",
+        "sec",
+        "github",
+        "bluesky",
+        "stocktwits",
+        "tiktok",
+        "instagram",
+        "threads",
+        "linkedin",
+        "seekingalpha",
+        "hackernews"
+      ]
+    },
+    "content_type": {
+      "enum": [
+        "video",
+        "short",
+        "stream",
+        "episode",
+        "post",
+        "thread",
+        "chat_window",
+        "article",
+        "paper",
+        "book",
+        "filing",
+        "page",
+        "question",
+        "repo",
+        "file",
+        "idea",
+        "script"
+      ]
+    },
+    "source": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": true,
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "person_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "requires_session": {
+          "type": "boolean"
+        }
+      }
+    },
+    "url": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "title": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "author": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "handle": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "display_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "platform_user_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "profile_url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "published_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "language": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "description": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "duration_sec": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "segments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "seq",
+          "kind",
+          "text"
+        ],
+        "properties": {
+          "seq": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "kind": {
+            "enum": [
+              "transcript",
+              "post",
+              "comment",
+              "reply",
+              "message",
+              "paragraph",
+              "page",
+              "code",
+              "caption",
+              "answer",
+              "question"
+            ]
+          },
+          "locator": {
+            "type": "object"
+          },
+          "author": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "speaker_hint": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "metrics": {
+      "type": "object"
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "mentions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "media": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "parent_content_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "raw_path": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "fetched_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "fetch_method": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "extra": {
+      "type": "object"
+    }
+  }
+}
