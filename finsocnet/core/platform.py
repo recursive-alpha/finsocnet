@@ -292,7 +292,7 @@ def run_platform_cli(adapter: PlatformAdapter, extra: dict[str, tuple[Callable[[
                     if args.save_cursor and (res.get("source") or {}).get("id"):
                         from finsocnet.core.db import transaction
                         with transaction(conn):
-                            content.upsert_source(conn, {"id": res["source"]["id"], "title": res["source"].get("title")})
+                            content.upsert_source(conn, {"id": res["source"]["id"], "title": _new_source_title(conn, res["source"])})
                             content.set_source_cursor(conn, res["source"]["id"], res.get("next_cursor"))
                 return Result(data)
             rec = adapter.fetch(args.item, **_opts(args, skip))
@@ -318,13 +318,20 @@ def run_platform_cli(adapter: PlatformAdapter, extra: dict[str, tuple[Callable[[
 _CONTENT_TYPES = {"video", "short", "stream", "episode", "post", "thread", "chat_window", "article", "paper", "book", "filing", "page", "question", "repo", "file", "idea", "script"}
 
 
+def _new_source_title(conn: Any, src: dict[str, Any]) -> str | None:
+    """A listing only knows a slug-like title: use it for a source we have never seen, never over the title a `profile --ingest` stored."""
+    if conn.execute("SELECT 1 FROM sources WHERE id = ?", (src["id"],)).fetchone():
+        return None
+    return src.get("title")
+
+
 def _catalog_items(conn: Any, platform: str, res: dict[str, Any], run_id: int) -> dict[str, Any]:
     """`list --catalog`: every listed item that is not stored yet becomes a metadata-only content (no segments, status `metadata_only`)."""
     src = res.get("source") or {}
     source = None
     if src.get("id"):
         parts = src["id"].split(":")
-        source = {"id": src["id"], "kind": parts[1] if len(parts) > 2 else "source", "title": src.get("title")}
+        source = {"id": src["id"], "kind": parts[1] if len(parts) > 2 else "source", "title": _new_source_title(conn, src)}
     counts = {"created": 0, "existing": 0, "failed": 0}
     errors: list[str] = []
     for it in res["items"]:

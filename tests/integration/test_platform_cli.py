@@ -135,3 +135,9 @@ def test_list_catalog_stores_every_item_as_metadata_only_content(conn, run_id, c
     code, env = call(Fake(), capsys, "list", "r/test", "--catalog", "--run", str(run_id))  # a second pass adds nothing
     assert env["data"]["cataloged"]["created"] == 0 and env["data"]["cataloged"]["existing"] == 2
     assert conn.execute("SELECT COUNT(*) FROM contents").fetchone()[0] == 2
+
+
+def test_listing_does_not_overwrite_the_profile_title_of_a_source(conn, run_id, capsys):
+    conn.execute("INSERT INTO sources (id, platform, kind, title) VALUES ('reddit:subreddit:test', 'reddit', 'subreddit', 'The Real Title')")
+    call(Fake(), capsys, "list", "r/test", "--catalog", "--save-cursor", "--run", str(run_id))
+    assert conn.execute("SELECT title FROM sources WHERE id = 'reddit:subreddit:test'").fetchone()[0] == "The Real Title"

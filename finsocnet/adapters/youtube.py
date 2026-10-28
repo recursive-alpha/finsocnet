@@ -144,8 +144,14 @@ class YouTube(PlatformAdapter):
 
     def fetch(self, item, *, no_whisper=False, metadata_only=False, **_):
         vid = video_id(item)
-        with _ydl() as y:
-            info = y.extract_info(f"https://www.youtube.com/watch?v={vid}", download=False)
+        try:
+            with _ydl() as y:
+                info = y.extract_info(f"https://www.youtube.com/watch?v={vid}", download=False)
+        except Exception as e:  # noqa: BLE001 - yt-dlp raises DownloadError for everything
+            if "not a bot" in str(e) or "Sign in to confirm" in str(e):
+                raise CliError("CHECKPOINT", "YouTube asks this IP to prove it is not a bot (too many requests)",
+                               "wait an hour, or export a logged-in YouTube session (finsocnet session export && push, then session_bridge import) so data/sessions/cookies.txt is used", retry_after_sec=3600) from e
+            raise
         raw = save_raw("youtube", vid, info if isinstance(info, dict) else {})
         if metadata_only:
             return video_record(info, None, None, None, raw)

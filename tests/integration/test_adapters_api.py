@@ -302,3 +302,22 @@ def test_youtube_channel_ids_are_not_treated_as_handles():
     assert youtube.channel_url("@qullamaggie") == "https://www.youtube.com/@qullamaggie" and youtube.channel_url("qullamaggie") == "https://www.youtube.com/@qullamaggie"
     assert youtube.channel_url("UCsomething") == "https://www.youtube.com/@UCsomething"  # too short for an id
     assert youtube.channel_url("https://www.youtube.com/@x/videos") == "https://www.youtube.com/@x/videos"
+
+
+def test_youtube_bot_check_is_a_checkpoint_not_an_internal_error(monkeypatch):
+    from finsocnet.adapters import youtube
+    from finsocnet.core.output import CliError
+
+    class Boom:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+        def extract_info(self, *a, **k):
+            raise RuntimeError("ERROR: [youtube] abc: Sign in to confirm you’re not a bot. Use --cookies")
+    monkeypatch.setattr(youtube, "_ydl", lambda *a, **k: Boom())
+    with pytest.raises(CliError) as e:
+        youtube.YouTube().fetch("dQw4w9WgXcQ")
+    assert e.value.code == "CHECKPOINT" and "session" in e.value.hint
