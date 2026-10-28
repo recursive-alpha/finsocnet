@@ -1,6 +1,6 @@
 # 09 — Status Checklist (done / missing)
 
-> **Last checked:** 2026-10-28, on `main` (all eight phases implemented; 181 offline tests green). What is **not** done is listed under 2.x and 3.
+> **Last checked:** 2026-10-28, on `main` (all eight phases implemented; 196 offline tests green). What is **not** done is listed under 2.x and 3.
 > **Who updates it:** the implementing agent ticks items at the end of each phase (same branch as the phase) and updates the date; the reviewer checks the ticks against the acceptance tests in `08-phases.md`.
 > Legend: `[x]` done and verified · `[~]` partly done (note says what is left) · `[ ]` missing.
 
@@ -13,12 +13,12 @@
 | 2 Persons and legacy conversion | [x] | [x] matcher, synthesizer, explorer | [x] | [~] conversion done; deleting the legacy folders waits for your approval of `docs/improvements/legacy-conversion.md` |
 | 3 Agent browser and session bridge | [x] | [x] agent-browser, session-bridge | [x] | [~] 15 tests incl. a real headless Chromium; live check with your accounts pending |
 | 4 P1 platform skills (15) | [x] | [x] all 15 | [x] | [~] fixture tests for every adapter; live checks with your accounts pending (see platform notes) |
-| 5 Explore, self-improve, eval, skill installer | [x] | [x] source-explorer, self-improver, skill-installer | [x] | [~] eval sets below the spec minimum (see 2.6); unattended explore run not demonstrated |
+| 5 Explore, self-improve, eval, skill installer | [x] | [x] source-explorer, self-improver, skill-installer | [x] | [x] eval sets at the spec minimums (author-run, so a regression baseline only); 10 explore steps, the gap loop and a self-improver branch proposal demonstrated (2.6) |
 | 6 P2 platform skills (11) | [x] | [x] all 11 | [x] | [~] 5 verified against live APIs/pages, 6 hand-written fixtures only |
 | 7 P3 platform skills (7) | [x] | [x] all 7 | [x] | [~] hackernews verified live, the rest hand-written fixtures |
 | 8 Harness integration and docs | [x] | [x] finsocnet | [x] | [~] repo invariants and installer tested; real harness smoke test pending |
 
-Bottom line: **all eight phases are implemented on `main`**, 45 skills, 181 offline tests (including a real headless Chromium for the session bridge and web reader). Not done, because it needs you, your accounts or time: live checks of the session-gated adapters, the unattended explore / self-improve demonstrations, larger evaluation sets, the user review of the legacy conversion (and the deletion of `legacy/`), and the answers in section 3.
+Bottom line: **all eight phases are implemented on `main`**, 45 skills, 181 offline tests (including a real headless Chromium for the session bridge and web reader). Not done, because it needs you, your accounts or time: live checks of the session-gated adapters, the user review of the legacy conversion (and the deletion of `legacy/`), and the answers in section 3.
 
 ---
 
@@ -118,8 +118,12 @@ Notes: `session_bridge.py keygen` was run once while testing and created `~/.con
 - [x] `core/queue.py` and `kb queue|gap|history`, `kb feedback`; `finsocnet explore add|show`, `finsocnet persons review`, `finsocnet feedback`; URL dispatch rules (`core/dispatch.py`, 06 §1.3).
 - [x] `evals/search/fixture_db.sql` (68 fictional cards) and `eval prepare|score` for transform, dedup, search and attribution; `kb ... --since 7d` accepted.
 - [x] Skill installer: `core/skill_install.py` (B1-B6, H1-H8, M1-M4 scanner, safe archive extraction, review verification, lock file, update/remove/outdated), `skill_installer.py`, `skill_review.schema.json`, `config/skills.lock.json`, `finsocnet/skills.py` core/installed split, 18 offline tests (no staged file is ever passed to a subprocess; test-enforced).
-- [~] Eval sets are **below the minimum** of 06 §3.1: transform 10 (30), dedup 15 (40), search 15 (30), attribution 15 (15 ok). Results from the author of the cases: transform validity 1.0, recall 1.0; dedup accuracy 1.0, wrong-merge 0.0; search recall@10 1.0; attribution 1.0. They are not independent evidence. Plan: have the user review and extend the golden cases before trusting the numbers.
-- [ ] **Not demonstrated:** 10 unattended explore steps, a gap filled by exploration, and a self-improver run with a branch proposal. These need real content from the platforms and the user's review.
+- [x] Eval sets at the 06 §3.1 minimums: transform 30, dedup 40, search 30, attribution 15. Baseline outputs `evals/baseline/2026-10-28/`, scores `docs/improvements/eval-2026-10-28/`: transform 1.0/1.0/1.0, dedup 1.0 (wrong-merge 0.0), attribution 1.0, search recall@10 0.956 (4 misses kept, not tuned away). The author of the cases also wrote the outputs, so this is a regression baseline, not independent evidence.
+- [x] **Demonstrated on the real database (2026-10-28):**
+  - Gap loop: search on pairs trading found only generic stop cards (run 28) -> `gap add` (gap 1) -> queue item from the gap -> StackExchange search and 3 fetches (run 29) -> 9 cards, 4 new vocabulary terms -> the re-run query ranks them (run 30) -> gap `filled` by cards 59-67.
+  - 10 explore steps (runs 37-46) from 6 seeds (3 queries, a tag URL, 2 platform queries): 19 queue items, 18 done, 1 deferred for a day (Anna's Archive check, exit 3 handled as the rules say), none left `in_progress`; 16 pages/threads/papers fetched, 5 mined (22 cards in total). Search results were reviewed and the weak ones not enqueued, with the reason on the item.
+  - Defects found by the run and fixed: web-search backend error returned INTERNAL (now RATE_LIMITED), StackExchange `list` ignored tag URLs and dispatch classified them as `fetch`, browser navigation errors returned INTERNAL.
+  - Self-improver run 47: sweep of 30 decisions, agreement 0.80 (< 0.85), 4 reversible link fixes (new `kb card link|unlink`), 3 decisions overturned, 1 branch proposal `self-improve/20261028-commit-status-and-related-links` with before/after table in its `docs/improvements/` file. Not merged.
 
 ### 2.7 Phase 6 — P2 platform skills
 - [x] `stackexchange, rss, forum (discourse/xenforo/generic), telegram (public), discord (user/bot), tradingview, facebook, sec, research, github, bluesky`.
@@ -149,8 +153,8 @@ Notes: `session_bridge.py keygen` was run once while testing and created `~/.con
 | No person skill folders in `.agents/skills/` | [x] test |
 | Session bridge: no credentials in `.env`, secret-leak test, re-export protocol | [x]; real export/import with your browser pending |
 | Agent browser: no launch in skills, budgets and checkpoints enforced | [x] |
-| Explore -> gap -> fill loop demonstrated | [ ] not demonstrated |
-| Self-improver proposals only as branches with eval reports | [ ] not demonstrated (the rule is in the skill; no run yet) |
+| Explore -> gap -> fill loop demonstrated | [x] gap 1, runs 28-30 |
+| Self-improver proposals only as branches with eval reports | [x] run 47, branch not merged |
 | Rulebooks timestamp-free, citations keep locators | [x] validator-enforced |
 | agentskills.io: valid frontmatter, description <= 1024, referenced scripts exist | [x] test |
 | Skill installs: every folder is core or locked (hashes match or `locally_modified`) | [x] test + installer tests |
@@ -162,10 +166,10 @@ Notes: `session_bridge.py keygen` was run once while testing and created `~/.con
 
 | # | What | Why it waits |
 |---|---|---|
-| 1 | Approve `docs/improvements/legacy-conversion.md` (rules dropped because no stored source supports them), then delete `legacy/person-skills/`, `legacy/meta-skills/`, `legacy/scripts/`; migration `004_drop_legacy.sql` (drops the `legacy_*` tables except `legacy_id_map`) is **not written yet** | destructive; the spec requires your approval |
+| 1 | Approve `docs/improvements/legacy-conversion.md` (rules dropped because no stored source supports them), then delete `legacy/person-skills/`, `legacy/meta-skills/`, `legacy/scripts/`; migration `004_drop_legacy.sql` (drops the `legacy_*` tables except `legacy_id_map`) is **not written yet** (deliberately: it drops data, so it waits for your yes) | destructive; the spec requires your approval |
 | 2 | SPEC §9 Q1 all-domain cookie import vs a default banking denylist (implemented as specified: import everything, `--exclude` available) | your risk decision |
 | 3 | SPEC §9 Q2 ToS risk for Discord, Facebook, LinkedIn, Instagram (adapters exist with strict budgets and warnings) | your risk decision; do not run them on your main account |
 | 4 | Q3 private-group members as `private_source`, Q4 no UA spoofing (implemented), Q5 English cards with source-language quotes (implemented), Q6 model pinning (not pinned), Q7 bulk ingest of books (supported, not exercised) | defaults were used |
 | 5 | A real run with your accounts: `session export` -> `push` -> `verify --all`; then one `fetch --ingest` per platform; correct `config/platforms.yaml` cookie names and the selectors listed in each `references/platform_notes.md` | needs your browser sessions |
-| 6 | Review and extend the golden evaluation sets (transform 10/30, dedup 15/40, search 15/30); the numbers in this file were produced by the same agent that wrote the cases | independent review |
+| 6 | Review the golden evaluation sets (now at the minimums) and the self-improver branch `self-improve/20261028-commit-status-and-related-links` (merge or reject); the numbers in this file were produced by the same agent that wrote the cases | independent review |
 | 7 | Try `finsocnet install <your harness>` | no harness available here |
