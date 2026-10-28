@@ -122,7 +122,7 @@ def validate_card(conn: sqlite3.Connection, card: dict[str, Any], legacy: bool =
             problems.append(_problem(f"/conditions/{i}", "VALIDATION_ERROR", "timestamps are not allowed", "remove the time reference"))
 
     if cit:
-        problems.extend(_check_citation(conn, cit, legacy_cit))
+        problems.extend(_check_citation(conn, cit, legacy_cit, legacy, warnings))
 
     # warnings
     if claim:
@@ -139,7 +139,7 @@ def validate_card(conn: sqlite3.Connection, card: dict[str, Any], legacy: bool =
     return problems, warnings
 
 
-def _check_citation(conn: sqlite3.Connection, cit: dict[str, Any], legacy_cit: bool) -> list[dict[str, Any]]:
+def _check_citation(conn: sqlite3.Connection, cit: dict[str, Any], legacy_cit: bool, legacy: bool, warnings: list[str]) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     cid, seq, quote = cit.get("content_id"), cit.get("segment_seq"), cit.get("quote") or ""
     content = conn.execute("SELECT id FROM contents WHERE id = ?", (cid,)).fetchone() if cid else None
@@ -155,9 +155,12 @@ def _check_citation(conn: sqlite3.Connection, cit: dict[str, Any], legacy_cit: b
         if not rows or rows[0]["seq"] != seq:
             out.append(_problem("/citation/segment_seq", "VALIDATION_ERROR", f"segment {seq} of {cid} does not exist"))
         elif not quote_in(quote, " ".join(r["text"] for r in rows)):
-            out.append(_problem("/citation/quote", "QUOTE_NOT_FOUND",
-                                f"quote not found in segments {seq}..{rows[-1]['seq']} (case and punctuation are ignored, words are not)",
-                                "copy the quote exactly from the segment text"))
+            if legacy:  # --legacy relaxes only the quote check; the citation is stored with quote_verified = 0
+                warnings.append(f"legacy citation: quote not found in segment {seq} of {cid} (stored unverified)")
+            else:
+                out.append(_problem("/citation/quote", "QUOTE_NOT_FOUND",
+                                    f"quote not found in segments {seq}..{rows[-1]['seq']} (case and punctuation are ignored, words are not)",
+                                    "copy the quote exactly from the segment text"))
     sp = cit.get("speaker") or {}
     pid = sp.get("person_id")
     if pid and conn.execute("SELECT 1 FROM persons WHERE id = ?", (pid,)).fetchone() is None:
@@ -399,12 +402,14 @@ def _insert_citation(conn: sqlite3.Connection, card_id: int, cit: dict[str, Any]
         locator = loads(r["locator_json"], {}) if r else locator
     sp = cit["speaker"]
     role = sp["role"]
+    verified = 0 if seq is None else int(quote_in(cit["quote"], " ".join(
+        r[0] for r in conn.execute("SELECT text FROM content_segments WHERE content_id = ? AND seq BETWEEN ? AND ? ORDER BY seq", (cit["content_id"], seq, seq + SEG_LOOKAHEAD)))))
     cur = conn.execute(
         """INSERT OR IGNORE INTO card_citations (card_id, content_id, segment_seq, locator_json, person_id, author_handle,
                speaker_role, attribution_confidence, quote, quote_verified, stance, run_id)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (card_id, cit["content_id"], seq, dumps(locator), sp.get("person_id"), sp.get("handle"), role, sp["confidence"],
-         cit["quote"], 0 if seq is None else 1, stance, run_id),
+         cit["quote"], verified, stance, run_id),
     )
     if sp.get("person_id") and role != "unknown":
         _ensure_appearance(conn, sp["person_id"], cit["content_id"], role, sp["confidence"], run_id)

@@ -1,0 +1,21 @@
+{
+ "chunk_view": "CONTENT podcast:evalatt000002 | episode | \"Defense first with Example Guest\" | 2026-09-02\nPEOPLE  example-host (host), example-guest (guest)\nSEGMENTS 0-3 of 0-3\n[#0 | 00:00-00:20 | speaker ?] Welcome to the show. Today my guest is Example Guest, thanks for joining.\n[#1 | 00:20-00:40 | speaker ?] Thanks for having me, happy to be here.\n[#2 | 00:40-01:00 | speaker ?] So how do you size after a losing streak?\n[#3 | 01:00-01:20 | speaker ?] I cut size in half after three red days and only go back to full after two green days.",
+ "cast": [
+  {
+   "person_id": "example-host",
+   "role": "host",
+   "name": "Example Host"
+  },
+  {
+   "person_id": "example-guest",
+   "role": "guest",
+   "name": "Example Guest"
+  }
+ ],
+ "expected": {
+  "0": "example-host",
+  "1": "example-guest",
+  "2": "example-host",
+  "3": "example-guest"
+ }
+}

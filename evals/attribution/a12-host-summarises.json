@@ -1,0 +1,20 @@
+{
+ "chunk_view": "CONTENT podcast:evalatt000012 | episode | \"Summary\" | 2026-09-02\nPEOPLE  example-host (host), example-guest (guest)\nSEGMENTS 0-2 of 0-2\n[#0 | 00:00-00:20 | speaker ?] So to summarise, you cut size after three red days.\n[#1 | 00:20-00:40 | speaker ?] Exactly, and I only restore size after two green days.\n[#2 | 00:40-01:00 | speaker ?] Great, thank you for your time today.",
+ "cast": [
+  {
+   "person_id": "example-host",
+   "role": "host",
+   "name": "Example Host"
+  },
+  {
+   "person_id": "example-guest",
+   "role": "guest",
+   "name": "Example Guest"
+  }
+ ],
+ "expected": {
+  "0": "example-host",
+  "1": "example-guest",
+  "2": "example-host"
+ }
+}

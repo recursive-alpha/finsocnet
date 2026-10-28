@@ -1,0 +1,26 @@
+{
+ "chunk_view": "CONTENT podcast:evalatt000007 | episode | \"Two views\" | 2026-09-02\nPEOPLE  example-host (host), sam-guest (guest), riley-guest (guest)\nSEGMENTS 0-4 of 0-4\n[#0 | 00:00-00:20 | speaker ?] Welcome Sam and Riley.\n[#1 | 00:20-00:40 | speaker ?] Thanks, I'm Sam and I think breakouts fail more than people admit.\n[#2 | 00:40-01:00 | speaker ?] I'm Riley and I disagree, in strong markets they work.\n[#3 | 01:00-01:20 | speaker ?] Sam, why do they fail?\n[#4 | 01:20-01:40 | speaker ?] Because most are bought late, that's my experience.",
+ "cast": [
+  {
+   "person_id": "example-host",
+   "role": "host"
+  },
+  {
+   "person_id": "sam-guest",
+   "role": "guest",
+   "name": "Sam"
+  },
+  {
+   "person_id": "riley-guest",
+   "role": "guest",
+   "name": "Riley"
+  }
+ ],
+ "expected": {
+  "0": "example-host",
+  "1": "sam-guest",
+  "2": "riley-guest",
+  "3": "example-host",
+  "4": "sam-guest"
+ }
+}

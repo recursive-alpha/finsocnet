@@ -1,0 +1,22 @@
+{
+ "chunk_view": "CONTENT podcast:evalatt000003 | episode | \"Tape reading talk\" | 2026-09-02\nPEOPLE  example-host (host), example-guest (guest)\nSEGMENTS 0-4 of 0-4\n[#0 | 00:00-00:20 | speaker ?] Welcome back. Joining me is Example Guest, a prop trader of twelve years.\n[#1 | 00:20-00:40 | speaker ?] Glad to be here, Alex.\n[#2 | 00:40-01:00 | speaker ?] Tell me about your first year.\n[#3 | 01:00-01:20 | speaker ?] My first year I lost money every month because I traded without a plan, thanks Alex for the question.\n[#4 | 01:20-01:40 | speaker ?] And what changed?",
+ "cast": [
+  {
+   "person_id": "example-host",
+   "role": "host",
+   "name": "Example Host"
+  },
+  {
+   "person_id": "example-guest",
+   "role": "guest",
+   "name": "Example Guest"
+  }
+ ],
+ "expected": {
+  "0": "example-host",
+  "1": "example-guest",
+  "2": "example-host",
+  "3": "example-guest",
+  "4": "example-host"
+ }
+}

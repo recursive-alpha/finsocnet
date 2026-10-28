@@ -97,3 +97,14 @@ def test_vocab_and_card_cli_flow(repo, capsys, tmp_path):
     assert len(env["data"]["decisions"]) == 1
     code, env = kb(capsys, "card", "retire", "1", "--db", db, "--run", run, "--reason", "test")
     assert code == 0 and env["data"]["status"] == "retired"
+
+
+def test_attribution_golden_set_and_scoring(evals, tmp_path):
+    cases = eval_cli.case_files("attribution")
+    assert len(cases) >= 10
+    for name, path in cases:
+        case = eval_cli.read(path)
+        (tmp_path / f"{name}.attribution.json").write_text(json.dumps(case["expected"]))
+    assert eval_cli.score_attribution(tmp_path)["metrics"]["accuracy"] == 1.0
+    (tmp_path / "a02-interview-qa.attribution.json").write_text(json.dumps({"0": "example-guest", "1": "example-guest", "2": "example-guest", "3": "example-guest"}))
+    assert eval_cli.score_attribution(tmp_path)["metrics"]["accuracy"] < 1.0

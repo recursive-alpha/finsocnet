@@ -1,0 +1,14 @@
+{
+ "chunk_view": "CONTENT youtube:evalatt0008 | video | \"What the books say\" | 2026-09-02\nPEOPLE  example-owner (owner)\nSEGMENTS 0-2 of 0-2\n[#0 | 00:00-00:20 | speaker ?] As one famous trader once said, cut your losses short and let winners run.\n[#1 | 00:20-00:40 | speaker ?] I agree with that and here is how I apply it every day.\n[#2 | 00:40-01:00 | speaker ?] I exit at the first close below the 10 day.",
+ "cast": [
+  {
+   "person_id": "example-owner",
+   "role": "owner"
+  }
+ ],
+ "expected": {
+  "0": "example-owner",
+  "1": "example-owner",
+  "2": "example-owner"
+ }
+}

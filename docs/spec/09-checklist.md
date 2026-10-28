@@ -10,7 +10,7 @@
 |---|---|---|---|---|
 | 0 Foundation and cleanup | [x] | [x] knowledge-db | [x] | [~] 30 tests green; migration 003 run on a copy, real DB awaiting your approval |
 | 1 Knowledge core | [x] | [x] transformer, dedup, search, miner | [x] | [~] 69 tests green; agent acceptance runs happen with the legacy conversion (Phase 2) |
-| 2 Persons and legacy conversion | [x] | [x] matcher, synthesizer, explorer | [~] v1 `match_person.py` only | [ ] |
+| 2 Persons and legacy conversion | [x] | [x] matcher, synthesizer, explorer | [x] | [~] conversion done; deleting the legacy folders waits for your approval of `docs/improvements/legacy-conversion.md` |
 | 3 Agent browser and session bridge | [x] | [x] agent-browser, session-bridge | [ ] | [ ] |
 | 4 P1 platform skills (15) | [x] | [x] all 15 | [~] v1 scripts in 9 skills | [ ] |
 | 5 Explore, self-improve, eval, skill installer | [x] | [x] source-explorer, self-improver, skill-installer | [ ] | [ ] |
@@ -87,12 +87,14 @@ Deviations to review: (a) the runner ignores FK violations in `legacy_*` tables 
 Deviations to review: (a) the tag-stuffing check also looks at `subject` (spec example E8 only passes that way); (b) `card.schema.json` allows an optional `citation.locator` (needed for legacy citations); (c) `kb card commit` exits 0 with per-item `status: error` entries and a warning per failed decision, instead of a non-zero exit; (d) `kb card candidates` also returns `siblings`.
 
 ### 2.3 Phase 2 — Persons and legacy conversion
-- [x] Skill docs (see 1.2).
-- [~] `person-matcher`: v1 `match_person.py list|get|match` works; v2 `kb person …` missing.
-- [ ] `finsocnet/core/persons.py`, `person_skills.py`; `kb person|skill …`.
-- [ ] Convert 66 legacy hypotheses and 9 legacy rulebooks to cards + `person_skills`; `docs/improvements/legacy-conversion.md`.
-- [ ] After user approval: delete `legacy/person-skills/`, `legacy/meta-skills/`; migration `004_drop_legacy.sql`.
-- [ ] Attribution eval ≥ 10 cases, accuracy ≥ 0.85.
+- [x] Skill docs; the v1 `match_person.py` is removed (`kb person candidates` replaces it).
+- [x] `finsocnet/core/persons.py`, `person_skills.py`; `kb person|skill …`.
+- [x] The real `data/knowledge.db` is migrated to v2 (backup: `data/backups/knowledge-20261028T034532Z-pre-003.db`); vocabulary seed (344 terms) plus 7 terms added during the conversion.
+- [x] Legacy conversion: 58 cards (66 hypotheses: 46 converted, 11 duplicates, 9 not converted), 9 rulebooks in `person_skills`; `docs/improvements/legacy-conversion.md`. `finsocnet strategy <name>` now reads `person_skills`.
+- [ ] **Waiting on you:** approve the comparison (lost rules, hypotheses that the source does not support), then delete `legacy/person-skills/`, `legacy/meta-skills/`, `legacy/scripts/` and apply migration `004_drop_legacy.sql` (not written yet; it needs your OK first).
+- [x] `evals/attribution` (12 cases); agent accuracy 1.0 on the set (author-scored, not independent).
+
+Deviation to review: the spec asks for a card for every legacy rule, "with a legacy citation if needed". Where the stored source text contradicts or does not contain the rule, I created no card, because a citation would attribute an unsupported claim to a real person. Details and the list of dropped rules are in the conversion document. The two arXiv stub cards (11, 12) use `--legacy` and are stored with `quote_verified = 0`.
 
 ### 2.4 Phase 3 — Agent browser and session bridge
 - [x] Skill docs (see 1.2).

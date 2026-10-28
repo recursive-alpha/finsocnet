@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P1"
-  status: planned
+  status: ready
   phase: "2"
   spec: docs/spec/03-pipelines.md
 ---
 
 # Person Skills Explorer
-
-> **Status: planned — built in Phase 2.** Until then `uv run finsocnet strategy <name>` prints the legacy rulebooks from `legacy/person-skills/` (dante, qullamaggie, lance, minervini, brandt, smb, humbled, lewis, furey). Replaces the v1 `skill-explorer`.
 
 ## Commands
 

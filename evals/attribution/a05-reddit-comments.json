@@ -1,0 +1,20 @@
+{
+ "chunk_view": "CONTENT reddit:evalatt05 | thread | \"Sizing after losses\" | 2026-09-14\nSEGMENTS 0-2 of 0-2\n[#0 | comment t3_a | u/poster_one | score 12] After a losing streak I cut size in half.\n[#1 | comment t1_b | u/reply_two | score 5] Same here, it saves my account.\n[#2 | comment t1_c | u/poster_one | score 1] Glad it works for you too.",
+ "cast": [
+  {
+   "person_id": "reddit-poster-one",
+   "role": "author",
+   "handle": "u/poster_one"
+  },
+  {
+   "person_id": "reddit-reply-two",
+   "role": "commenter",
+   "handle": "u/reply_two"
+  }
+ ],
+ "expected": {
+  "0": "reddit-poster-one",
+  "1": "reddit-reply-two",
+  "2": "reddit-poster-one"
+ }
+}

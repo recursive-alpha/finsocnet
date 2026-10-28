@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P1"
-  status: partial
+  status: ready
   phase: "2"
   spec: docs/spec/03-pipelines.md
 ---
 
 # Person Matcher
-
-> **Status: partial.** v2 commands (`kb person …`) are built in Phase 2. Until then the v1 script works for listing and title matching: `uv run .agents/skills/person-matcher/scripts/match_person.py list|get <id>|match --title "…" --channel "…"`.
 
 Knowledge belongs to people, not channels. One person can own a YouTube channel, guest on podcasts, post on X and write a book; all of it resolves to one `persons` row.
 

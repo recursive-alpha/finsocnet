@@ -1,0 +1,20 @@
+{
+ "chunk_view": "CONTENT discord:1:2026-10-27 | chat_window | \"#trade-ideas 2026-10-27\" | 2026-10-27\nSEGMENTS 0-2 of 0-2\n[#0 | message m1 | alice_t] Anyone holding earnings tomorrow?\n[#1 | message m2 | bob_q] I hold only with a hedge.\n[#2 | message m3 | alice_t] Smart, I'll do the same.",
+ "cast": [
+  {
+   "person_id": "discord-alice-t",
+   "role": "member",
+   "handle": "alice_t"
+  },
+  {
+   "person_id": "discord-bob-q",
+   "role": "member",
+   "handle": "bob_q"
+  }
+ ],
+ "expected": {
+  "0": "discord-alice-t",
+  "1": "discord-bob-q",
+  "2": "discord-alice-t"
+ }
+}

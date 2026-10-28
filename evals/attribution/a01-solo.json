@@ -1,0 +1,14 @@
+{
+ "chunk_view": "CONTENT youtube:evalatt0001 | video | \"My swing rules\" | 2026-09-02\nPEOPLE  example-owner (owner)\nSEGMENTS 0-2 of 0-2\n[#0 | 00:00-00:20 | speaker ?] I wait for the first pullback after the breakout.\n[#1 | 00:20-00:40 | speaker ?] Then I add if it holds the 20 day.\n[#2 | 00:40-01:00 | speaker ?] My stop sits under the low.",
+ "cast": [
+  {
+   "person_id": "example-owner",
+   "role": "owner"
+  }
+ ],
+ "expected": {
+  "0": "example-owner",
+  "1": "example-owner",
+  "2": "example-owner"
+ }
+}

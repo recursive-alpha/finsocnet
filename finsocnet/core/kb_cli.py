@@ -10,7 +10,8 @@ import time
 from pathlib import Path
 from typing import Any, Callable
 
-from finsocnet.core import cards as cards_mod, config, content as content_mod, migrations, runs, vocab as vocab_mod
+from finsocnet.core import cards as cards_mod, config, content as content_mod, migrations, persons as persons_mod, runs, vocab as vocab_mod
+from finsocnet.core import person_skills as skills_mod
 from finsocnet.core import output
 from finsocnet.core.db import backup as db_backup
 from finsocnet.core.db import connect, default_backup_path, transaction
@@ -476,6 +477,74 @@ def cmd_decision_review(ctx: Ctx) -> Result:
     return Result(cards_mod.review_decision(ctx.conn(), a.id, a.verdict, a.note))
 
 
+# --- persons and rulebooks ------------------------------------------------------------------------------
+
+def cmd_person_candidates(ctx: Ctx) -> Result:
+    a = ctx.args
+    if not (a.name or a.handle):
+        raise CliError("USAGE", "give --name and/or --handle")
+    return Result({"candidates": persons_mod.candidates(ctx.conn(), a.name, a.handle, a.platform, a.context, a.content)})
+
+
+def cmd_person_upsert(ctx: Ctx) -> Result:
+    conn, run = ctx.conn(), ctx.run_id()
+    payload = read_json(ctx.args.file)
+    items = payload if isinstance(payload, list) else [payload]
+    res = [persons_mod.upsert(conn, p, run) for p in items]
+    return Result(res[0] if not isinstance(payload, list) else {"persons": res})
+
+
+def cmd_person_alias_add(ctx: Ctx) -> Result:
+    ctx.run_id()
+    a = ctx.args
+    return Result(persons_mod.alias_add(ctx.conn(), a.person, a.alias, a.platform or ""))
+
+
+def cmd_person_appearance_add(ctx: Ctx) -> Result:
+    run = ctx.run_id()
+    payload = read_json(ctx.args.file)
+    res = [persons_mod.add_appearance(ctx.conn(), p, run) for p in (payload if isinstance(payload, list) else [payload])]
+    return Result(res[0] if not isinstance(payload, list) else {"appearances": res})
+
+
+def cmd_person_get(ctx: Ctx) -> Result:
+    return Result(persons_mod.get(ctx.conn(), ctx.args.id))
+
+
+def cmd_person_list(ctx: Ctx) -> Result:
+    key = "needs_review" if ctx.args.needs_review else "persons"
+    return Result({key: persons_mod.list_persons(ctx.conn(), ctx.args.needs_review, ctx.args.limit)})
+
+
+def cmd_person_cards(ctx: Ctx) -> Result:
+    return Result(persons_mod.person_cards(ctx.conn(), ctx.args.id, ctx.args.category))
+
+
+def cmd_person_merge(ctx: Ctx) -> Result:
+    return Result(persons_mod.merge(ctx.conn(), ctx.args.src, ctx.args.dst, ctx.run_id()))
+
+
+def cmd_skill_upsert(ctx: Ctx) -> Result:
+    conn, run = ctx.conn(), ctx.run_id()
+    payload = read_json(ctx.args.file)
+    res = [skills_mod.upsert_skill(conn, s, run) for s in (payload if isinstance(payload, list) else [payload])]
+    return Result(res[0] if not isinstance(payload, list) else {"skills": res})
+
+
+def cmd_skill_get(ctx: Ctx) -> Result:
+    a = ctx.args
+    if a.render == "markdown":
+        return Result({"person_id": a.person, "markdown": skills_mod.render_markdown(ctx.conn(), a.person, a.skill_name, a.category)})
+    rows = skills_mod.get_skills(ctx.conn(), a.person, a.skill_name, a.category)
+    if not rows:
+        raise CliError("NOT_FOUND", f"no rulebook for {a.person}")
+    return Result({"skills": rows})
+
+
+def cmd_skill_list(ctx: Ctx) -> Result:
+    return Result({"skills": skills_mod.list_skills(ctx.conn(), ctx.args.person)})
+
+
 # --- parser ---------------------------------------------------------------------------------------------
 
 def _common() -> argparse.ArgumentParser:
@@ -691,6 +760,48 @@ def build_parser() -> _Parser:
     p.add_argument("--verdict", required=True, choices=["agreed", "overturned"])
     p.add_argument("--note")
 
+    g = group("person", "canonical persons")
+    p = leaf(g, ("person", "candidates"), "candidates", cmd_person_candidates)
+    p.add_argument("--name")
+    p.add_argument("--handle")
+    p.add_argument("--platform")
+    p.add_argument("--context")
+    p.add_argument("--content", help="content id: its source owner counts as a signal")
+    p = leaf(g, ("person", "upsert"), "upsert", cmd_person_upsert)
+    p.add_argument("--file", required=True)
+    for noun, handler, extra in (("alias", cmd_person_alias_add, "alias"), ("appearance", cmd_person_appearance_add, "appearance")):
+        ng = g.add_parser(noun, help=f"{noun} commands").add_subparsers(dest="sub", required=True, parser_class=_Parser)
+        handlers[("person", noun, "add")] = handler
+        p = ng.add_parser("add", parents=[common])
+        if noun == "alias":
+            p.add_argument("--person", required=True)
+            p.add_argument("--alias", required=True)
+            p.add_argument("--platform")
+        else:
+            p.add_argument("--file", required=True)
+    p = leaf(g, ("person", "get"), "get", cmd_person_get)
+    p.add_argument("id")
+    p = leaf(g, ("person", "list"), "list", cmd_person_list)
+    p.add_argument("--needs-review", action="store_true")
+    p.add_argument("--limit", type=int, default=100)
+    p = leaf(g, ("person", "cards"), "cards", cmd_person_cards)
+    p.add_argument("id")
+    p.add_argument("--category")
+    p = leaf(g, ("person", "merge"), "merge", cmd_person_merge)
+    p.add_argument("--from", dest="src", required=True)
+    p.add_argument("--into", dest="dst", required=True)
+
+    g = group("skill", "person rulebooks")
+    p = leaf(g, ("skill", "upsert"), "upsert", cmd_skill_upsert)
+    p.add_argument("--file", required=True)
+    p = leaf(g, ("skill", "get"), "get", cmd_skill_get)
+    p.add_argument("person")
+    p.add_argument("--skill-name")
+    p.add_argument("--category")
+    p.add_argument("--render", choices=["markdown"])
+    p = leaf(g, ("skill", "list"), "list", cmd_skill_list)
+    p.add_argument("--person")
+
     root.set_defaults(_handlers=handlers)
     return root
 
@@ -706,7 +817,7 @@ def main(argv: list[str] | None = None) -> None:
     except CliError as e:
         output.fail("kb", e.code, e.message, e.hint, fmt=fmt)
         return
-    path = (args.group,) if args.cmd is None else (args.group, args.cmd)
+    path = tuple(x for x in (args.group, args.cmd, getattr(args, "sub", None)) if x)
     handler = parser.get_default("_handlers")[path]
     ctx = Ctx(args)
     try:

@@ -1,0 +1,13 @@
+{
+ "chunk_view": "CONTENT book:evalatt0009 | book | \"Market Notes\" | 2020-01-01\nSEGMENTS 0-1 of 0-1\n[#0 | page 12] When real yields rise, long-duration growth stocks de-rate first.\n[#1 | page 13] The author's note: this is a mechanism, not a forecast.",
+ "cast": [
+  {
+   "person_id": "example-author",
+   "role": "author"
+  }
+ ],
+ "expected": {
+  "0": "example-author",
+  "1": "example-author"
+ }
+}

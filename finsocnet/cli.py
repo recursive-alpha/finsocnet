@@ -104,7 +104,28 @@ def view_hypothesis_card(hyp_id: int):
 
 
 
+def load_db_rulebook(name: str) -> bool:
+    """Print the person's rulebook from `person_skills` (v2). Returns False when the DB has none."""
+    try:
+        from finsocnet.core import person_skills, persons
+        from finsocnet.core.db import connect
+        conn = connect()
+        if not conn.execute("SELECT 1 FROM sqlite_master WHERE name = 'person_skills'").fetchone():
+            return False
+        key = name.lower().strip()
+        row = conn.execute("SELECT id FROM persons WHERE id = ? OR id LIKE ?", (key, f"%{key}%")).fetchone()
+        pid = row["id"] if row else (persons.candidates(conn, name=name, handle=name)[:1] or [{}])[0].get("person", {}).get("id")
+        if not pid or not person_skills.get_skills(conn, pid):
+            return False
+        print(person_skills.render_markdown(conn, pid))
+        return True
+    except Exception:
+        return False
+
+
 def load_strategy_rulebook(name: str):
+    if load_db_rulebook(name):
+        return
     # Person rulebooks moved to legacy/ until they are converted into person_skills (docs/spec/08-phases.md, Phase 2).
     skills_root = Path(__file__).resolve().parent.parent / "legacy" / "person-skills"
     key = name.lower().strip()

@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P1"
-  status: planned
+  status: ready
   phase: "2"
   spec: docs/spec/03-pipelines.md
 ---
 
 # Person Skill Synthesizer
-
-> **Status: planned — built in Phase 2.** Person rulebooks are database rows (`person_skills`), not folders under `.agents/skills/` (SPEC principle P7). The old folders are in `legacy/person-skills/` until Phase 2 converts them. Replaces the v1 `skill-curator` and `user-skill-synthesizer` (in `legacy/meta-skills/`).
 
 ## Procedure
 

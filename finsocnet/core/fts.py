@@ -11,7 +11,9 @@ STOPWORDS = frozenset(
     few how just me more most my no nor not now off once only other out over own same should some such too
     under until up very while would""".split()
 )
-GRAMMAR_KEYWORDS = frozenset("IF THEN AND OR WHEN TENDS TO CAUSES BECAUSE IS HAS IMPROVES HURTS WITHIN UNTIL".split())
+GRAMMAR_KEYWORDS = frozenset(
+    "IF THEN AND OR WHEN TENDS TO CAUSES BECAUSE IS HAS IMPROVES HURTS WITHIN UNTIL LONG SHORT ADD EXIT EXIT_PARTIAL AVOID HOLD SIZE NONE".split()
+)
 
 _WORD = re.compile(r"[\w']+", re.UNICODE)
 
