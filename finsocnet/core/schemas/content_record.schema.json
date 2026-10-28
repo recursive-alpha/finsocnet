@@ -12,40 +12,12 @@
   "properties": {
     "id": {
       "type": "string",
-      "pattern": "^[a-z]+:.+"
+      "pattern": "^[a-z][a-z0-9-]*:.+"
     },
     "platform": {
-      "enum": [
-        "youtube",
-        "podcast",
-        "x",
-        "reddit",
-        "medium",
-        "substack",
-        "web",
-        "google",
-        "file",
-        "book",
-        "arxiv",
-        "paper",
-        "discord",
-        "telegram",
-        "stackexchange",
-        "forum",
-        "tradingview",
-        "facebook",
-        "rss",
-        "sec",
-        "github",
-        "bluesky",
-        "stocktwits",
-        "tiktok",
-        "instagram",
-        "threads",
-        "linkedin",
-        "seekingalpha",
-        "hackernews"
-      ]
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,24}$",
+      "description": "a built-in platform or one created by platform-skill-builder (config/sites/<name>.yaml); the allowed names are checked by records.schema_errors"
     },
     "content_type": {
       "enum": [

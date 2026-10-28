@@ -44,6 +44,25 @@ URL_RULES: list[tuple[str, str, str, str]] = [
 ]
 
 
+def custom_rules() -> list[tuple[str, str, str, str]]:
+    """Rules of the platforms created by platform-skill-builder: `dispatch:` entries of config/sites/*.yaml, then one catch-all per domain."""
+    import yaml
+    d = config.repo_root() / "config" / "sites"
+    out: list[tuple[str, str, str, str]] = []
+    for p in sorted(d.glob("*.yaml")) if d.is_dir() else []:
+        try:
+            r = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+        except yaml.YAMLError:
+            continue
+        name, skill = r.get("name") or p.stem, r.get("skill") or f"{r.get('name') or p.stem}-explorer"
+        for rule in r.get("dispatch") or []:
+            out.append((rule["pattern"], name, skill, rule.get("action", "fetch")))
+        host = urlsplit(r.get("base_url", "")).netloc.removeprefix("www.")
+        if host:
+            out.append((re.escape(host) + r"(/|$)", name, skill, r.get("default_action", "list")))
+    return out
+
+
 def forum_hosts() -> set[str]:
     try:
         import yaml
@@ -60,7 +79,7 @@ def classify(target: str, known_person_ids: set[str] | None = None) -> dict[str,
         host = urlsplit(t).netloc.lower().removeprefix("www.")
         if host in forum_hosts():
             return {"target_kind": "url", "platform": "forum", "skill": "forum-explorer", "action": "fetch"}
-        for rx, platform, skill, action in URL_RULES:
+        for rx, platform, skill, action in [*custom_rules(), *URL_RULES]:
             if re.search(rx, t):
                 return {"target_kind": "url", "platform": platform, "skill": skill, "action": action}
         return {"target_kind": "url", "platform": "web", "skill": "web-reader", "action": "fetch"}

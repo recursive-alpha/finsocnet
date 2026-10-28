@@ -40,6 +40,10 @@ def schema_errors(name: str, instance: Any) -> list[dict[str, str]]:
     for e in sorted(validator(name).iter_errors(instance), key=lambda e: list(e.absolute_path)):
         path = "/" + "/".join(str(p) for p in e.absolute_path)
         out.append({"path": path, "problem": e.message})
+    if name == "content_record" and isinstance(instance, dict) and isinstance(instance.get("platform"), str):
+        from finsocnet.core import ids
+        if instance["platform"] not in ids.known_platforms():
+            out.append({"path": "/platform", "problem": f"unknown platform {instance['platform']!r}: built-in ones or a recipe in config/sites/"})
     return out
 
 

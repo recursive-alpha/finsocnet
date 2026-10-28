@@ -29,6 +29,7 @@ dependencies = [
     "prompt-toolkit>=3.0.53",
     "fastembed>=0.9.1",
     "pillow>=13.0.0",
+    "cssselect>=1.6.0",
 ]
 
 [project.scripts]

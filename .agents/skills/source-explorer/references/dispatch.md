@@ -36,7 +36,8 @@ Check rows top to bottom; the first match wins. Script paths are `.agents/skills
 | `news.ycombinator.com/item?id=…` | hackernews-explorer | `hackernews.py fetch` |
 | URL ending `.pdf`, `.epub`, `.docx`, or a local path | document-reader | `document.py fetch` |
 | Twitch/Vimeo/Rumble/Kick video URL | audio-transcriber + web-reader | `web.py fetch` for metadata, `transcribe.py` for speech |
-| any other URL | web-reader | `web.py discover`, then `fetch` |
+| a site that custom recipes cover (`config/sites/<name>.yaml`) | `<name>-explorer` | its `list` / `fetch` (rules come from the recipe's `dispatch`) |
+| any other URL | web-reader | `web.py discover`, then `fetch`; if the site deserves repeated exploration (lists, search, many pages), run `platform-skill-builder` to give it its own skill |
 | `target_kind = query` | web-searcher (default) or google-searcher (when DuckDuckGo results are thin or operators like `inurl:` are needed) | `search` → enqueue results |
 | `target_kind = person` | person-matcher + platform `profile` on every known alias; then web-searcher "<name> trader" to find other platforms | |
 | `target_kind = book` | annas-archive-explorer | `annas.py search` → agent picks edition → `download` → document-reader |

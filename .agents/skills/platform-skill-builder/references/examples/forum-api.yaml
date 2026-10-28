@@ -1,0 +1,30 @@
+# A JSON API (mode api). Paths are dotted; "$." is optional. {id} in fetch.url is the id found by `id.from_url`.
+name: examplehub
+title: Example Hub
+base_url: https://hub.example
+mode: api
+source_kind: community
+content_type: post
+language: en
+id: {from_url: "/posts/(\\d+)"}
+budget: {per_minute: 20, per_hour: 400, per_day: 4000, min_delay_ms: 500, max_delay_ms: 1500}
+search:
+  url: "/api/v1/search?q={query}"
+  items: results
+  fields: {url: permalink, title: title, author: user.name, date: created_at, snippet: excerpt}
+list:
+  url: "/api/v1/boards/{source}/posts?cursor={cursor}"
+  items: data.posts
+  next: data.next_cursor
+  fields: {url: permalink, title: title, author: user.name, date: created_at}
+profile:
+  url: "/api/v1/users/{target}"
+  fields: {name: display_name, bio: about, avatar: avatar_url, followers: followers_count}
+fetch:
+  url: "/api/v1/posts/{id}"
+  title: data.title
+  author: data.user.name
+  date: data.created_at
+  body: data.body_html
+dispatch:
+  - {pattern: "hub\\.example/posts/\\d+", action: fetch}

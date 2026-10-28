@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import sqlite3
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -154,7 +155,10 @@ def _mark_known(conn: Any, items: list[dict[str, Any]]) -> None:
     known: set[str] = set()
     for i in range(0, len(ids), 500):
         chunk = ids[i:i + 500]
-        known |= {r[0] for r in conn.execute(f"SELECT id FROM contents WHERE id IN ({','.join('?' * len(chunk))})", chunk)}
+        try:
+            known |= {r[0] for r in conn.execute(f"SELECT id FROM contents WHERE id IN ({','.join('?' * len(chunk))})", chunk)}
+        except sqlite3.OperationalError:  # a database that was never migrated: nothing is known yet
+            return
     for it in items:
         it["known"] = it["id"] in known
 

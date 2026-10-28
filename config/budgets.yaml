@@ -11,3 +11,4 @@ seekingalpha:  {per_minute: 2,   per_hour: 30,    per_day: 150,   min_delay_ms: 
 tiktok:        {per_minute: 4,   per_hour: 60,    per_day: 400,   min_delay_ms: 3000, max_delay_ms: 8000}
 stackexchange: {per_minute: 25,  per_hour: 1000,  per_day: 9000,  min_delay_ms: 100,  max_delay_ms: 300}
 sec:           {per_minute: 300, per_hour: 10000, per_day: 50000, min_delay_ms: 110,  max_delay_ms: 200}
+probe:         {per_minute: 90,  per_hour: 600,   per_day: 3000,  min_delay_ms: 100,  max_delay_ms: 300}

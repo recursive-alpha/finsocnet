@@ -1,0 +1,16 @@
+name: simonw-blog
+title: Simon Willison's Weblog
+base_url: https://simonwillison.net
+mode: feed                # list/search come from the Atom feed, fetch loads the page over plain HTTP
+source_kind: blog
+content_type: article
+language: en
+id: {from_url: "simonwillison\\.net/(\\d{4}/\\w{3}/\\d{1,2}/[\\w-]+)"}
+budget: {per_minute: 10, per_hour: 200, per_day: 1500, min_delay_ms: 1000, max_delay_ms: 2500}
+list:
+  url: "https://simonwillison.net/atom/everything/"
+fetch:
+  title: "title"
+  body: "div.entry"
+dispatch:
+  - {pattern: "simonwillison\\.net/\\d{4}/\\w{3}/\\d{1,2}/", action: fetch}

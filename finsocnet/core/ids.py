@@ -15,12 +15,23 @@ PLATFORMS = (
     "hackernews"
 ).split()
 
+def custom_platforms() -> list[str]:
+    """Platforms added by `platform-skill-builder`: one recipe file `config/sites/<name>.yaml` each."""
+    from finsocnet.core import config
+    d = config.repo_root() / "config" / "sites"
+    return sorted(p.stem for p in d.glob("*.yaml")) if d.is_dir() else []
+
+
+def known_platforms() -> list[str]:
+    return [*PLATFORMS, *[p for p in custom_platforms() if p not in PLATFORMS]]
+
+
 _TRACKING = re.compile(r"^(utm_.*|fbclid|gclid|ref|ref_src)$")
 
 
 def _check_platform(platform: str) -> str:
     p = platform.lower()
-    if p not in PLATFORMS:
+    if p not in PLATFORMS and p not in custom_platforms():
         raise ValueError(f"unknown platform {platform!r}")
     return p
 
