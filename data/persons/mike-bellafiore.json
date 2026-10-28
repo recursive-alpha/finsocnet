@@ -1,0 +1,36 @@
+{
+  "id": "mike-bellafiore",
+  "canonical_name": "Mike Bellafiore",
+  "moniker": "Bella (SMB Capital)",
+  "bio": "Co-founder of SMB Capital in New York City and Miami, author of One Good Trade and The PlayBook. Mentor to dozens of 7- and 8-figure proprietary equity traders since 2005.",
+  "avatar_url": "https://www.smbtraining.com/wp-content/uploads/2019/04/mike-bellafiore.jpg",
+  "trading_style": "Proprietary Breakout Trading, Stocks in Play, Order Flow Tape Reading",
+  "verified_records": "Trained dozens of 7-figure and 8-figure prop traders since 2005",
+  "primary_markets": "US Equities, ETFs, Crypto",
+  "appearances": [
+    {
+      "platform": "youtube",
+      "platform_id": "UCg3B_joekBGJ1s_4fRjsMKA",
+      "handle_or_name": "@smbcapital",
+      "role": "owner",
+      "content_id": "M1o0XqCaDiE",
+      "content_title": "How Pro Traders Know Which Breakouts to Trade"
+    },
+    {
+      "platform": "youtube",
+      "platform_id": "UCcIvNGMBSQWwo1v3n-ZRBCw",
+      "handle_or_name": "@HumbledTraderOfficial",
+      "role": "guest",
+      "content_id": "vddGzcP3nko",
+      "content_title": "Mentor of Millionaires shares Secrets to Success in Trading @SMB Capital"
+    },
+    {
+      "platform": "x",
+      "platform_id": "x_mikebellafiore",
+      "handle_or_name": "@MikeBellafiore",
+      "role": "owner",
+      "content_id": "",
+      "content_title": ""
+    }
+  ]
+}
