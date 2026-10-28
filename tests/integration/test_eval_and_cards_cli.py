@@ -37,17 +37,21 @@ def test_dedup_scoring_and_wrong_merge(evals, tmp_path):
 
 def test_transform_scoring_counts_missing_invalid_and_no_card(evals, tmp_path):
     rep = eval_cli.score_transform(tmp_path)  # no outputs at all
-    assert rep["metrics"]["recall"] == 0.0 and len(rep["failures"]) == 10
-    (tmp_path / "t03-sponsor-nocard.cards.json").write_text("[]")
+    cases = eval_cli.case_files("transform")
+    assert rep["metrics"]["recall"] == 0.0 and len(rep["failures"]) == len(cases)
+    no_card = [n for n, p in cases if not eval_cli.read(p / "expected.json")["cards"]]
+    assert len(no_card) >= 2
+    for n in no_card:
+        (tmp_path / f"{n}.cards.json").write_text("[]")
     (tmp_path / "t09-ticker-prediction-nocard.cards.json").write_text(json.dumps([make_card()]))
     rep = eval_cli.score_transform(tmp_path)
-    assert rep["metrics"]["no_card_accuracy"] == 0.5
+    assert rep["metrics"]["no_card_accuracy"] == round((len(no_card) - 1) / len(no_card), 3)
     assert any("expected no cards" in f["reason"] for f in rep["failures"])
 
 
 def test_prepare_writes_inputs_without_answers(evals, tmp_path):
     res = eval_cli.prepare("dedup", tmp_path)
-    assert res["cases"] == 15
+    assert res["cases"] == len(eval_cli.case_files("dedup")) >= 40
     data = json.loads((tmp_path / "d01-same-paraphrase.input.json").read_text())
     assert "expected_decision" not in data and data["candidates"]
 
