@@ -146,13 +146,18 @@ class Forum(PlatformAdapter):
     def list(self, source, *, limit=30, cursor=None, since=None, **_):
         host = host_of(source)
         engine = next((f["engine"] for f in known_forums() if f["host"] == host), "generic")
+        html = None
+        if engine == "generic":  # host not in forums.yaml: detect the engine from the page itself
+            _f, html = _browser.load_html("forum", re.sub(r"/page-\d+$", "", source.rstrip("/")) + (f"/page-{int(cursor)}" if cursor and int(cursor) > 1 else ""))
+            engine = detect_engine(html, source)
         if engine == "discourse":
             d = _browser.load_json("forum", source.rstrip("/") + (".json" if not source.endswith(".json") else "") + (f"?page={cursor}" if cursor else ""))
             topics = d.get("topic_list", {}).get("topics", [])
             items = [item_ref(f"https://{host}/t/{t['slug']}/{t['id']}", content_id(host, str(t["id"])), "thread", t.get("title"), None, t.get("created_at"), None, {"posts": t.get("posts_count"), "views": t.get("views")}) for t in topics]
             return list_result(items[:limit], str(int(cursor or 0) + 1) if topics else None, {"id": f"forum:board:{host}:{source.rstrip('/').split('/')[-1]}"})
         page = int(cursor or 1)
-        _f, html = _browser.load_html("forum", re.sub(r"/page-\d+$", "", source.rstrip("/")) + (f"/page-{page}" if page > 1 else ""))
+        if html is None:
+            _f, html = _browser.load_html("forum", re.sub(r"/page-\d+$", "", source.rstrip("/")) + (f"/page-{page}" if page > 1 else ""))
         root = lhtml.fromstring(html)
         items, seen = [], set()
         for a in root.xpath("//a[contains(@href,'/threads/')]"):

@@ -20,3 +20,7 @@ Implementation details for the adapter. Update this file (and add `kb lesson add
 ## Phase 4 implementation notes (2026-10-28)
 
 NOT verified live (hand-written fixtures in the documented shape); check selectors/endpoints on the first real run and correct them here. Engines: Discourse JSON, XenForo HTML, generic fallback (first page only). `config/forums.yaml` lists the known forums; engines are to be confirmed with `forum.py detect <url>`.
+
+## Live check 2026-10-28
+
+Discourse board `https://meta.discourse.org/c/support/6` lists and fetches through the agent browser. Hosts not in `config/forums.yaml` are detected from the page (`detect_engine`) on `list`. A host that does not resolve returns `NOT_FOUND` (exit 5); `browser.goto` maps navigation errors to the envelope.

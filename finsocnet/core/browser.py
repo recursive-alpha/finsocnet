@@ -141,7 +141,15 @@ def page(platform: str, *, block: tuple[str, ...] = ("media", "font")) -> Iterat
 
 def goto(pg: Any, platform: str, url: str, *, wait: str = "domcontentloaded", timeout_ms: int = 30000) -> None:
     """Navigate, pause like a person, then run `check_page`. Use this instead of `page.goto` in adapters."""
-    pg.goto(url, wait_until=wait, timeout=timeout_ms)
+    try:
+        pg.goto(url, wait_until=wait, timeout=timeout_ms)
+    except Exception as e:  # noqa: BLE001 - playwright Error/TimeoutError, mapped to the envelope instead of INTERNAL
+        msg = str(e).splitlines()[0]
+        if "ERR_NAME_NOT_RESOLVED" in msg or "ERR_CONNECTION_REFUSED" in msg:
+            raise CliError("NOT_FOUND", f"cannot reach {url}: {msg}", hint="Host does not resolve or refuses connections; check the URL.") from None
+        if "Timeout" in type(e).__name__ or "Timeout" in msg:
+            raise CliError("BROWSER_UNAVAILABLE", f"{url} did not load in {timeout_ms // 1000}s", hint="Retry once; if it repeats the site is slow or blocking this network.", retry_after_sec=60) from None
+        raise CliError("BROWSER_UNAVAILABLE", f"navigation failed: {msg}", hint="Check `agent_browser.py status`; restart with `agent_browser.py start`.") from None
     human_pause(platform)
     check_page(platform, pg)
 
