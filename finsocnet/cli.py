@@ -132,7 +132,8 @@ def search_command(query: str, limit: int = 10, category: Optional[str] = None, 
             print(f"  {h['hypothesis_statement'][:140]}...")
             print("-" * 85)
 def load_strategy_rulebook(name: str):
-    skills_root = Path(__file__).resolve().parent.parent / ".agents" / "skills"
+    # Person rulebooks moved to legacy/ until they are converted into person_skills (docs/spec/08-phases.md, Phase 2).
+    skills_root = Path(__file__).resolve().parent.parent / "legacy" / "person-skills"
     key = name.lower().strip()
     alias_map = {
         "minervini": "mark-minervini-vcp",
