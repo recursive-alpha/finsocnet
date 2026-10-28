@@ -85,7 +85,10 @@ class Research(PlatformAdapter):
         aid = target.rsplit("/", 1)[-1]
         a = self._oa(f"/authors/{aid}") if re.match(r"A\d+", aid) else self._oa("/authors", search=target)["results"][0]
         return profile_record("paper", f"paper:author:{a['id'].rsplit('/', 1)[-1]}", a["display_name"], display_name=a["display_name"], followers=None, profile_url=a["id"],
-                              bio=", ".join(i["display_name"] for i in a.get("last_known_institutions", []) if i.get("display_name")) or None)
+                              bio="; ".join(x for x in (", ".join(i["display_name"] for i in (a.get("last_known_institutions") or []) if i.get("display_name")),
+                                                      f"{a['works_count']} works" if a.get("works_count") else "",
+                                                      "topics: " + ", ".join(t["display_name"] for t in (a.get("topics") or [])[:4])
+                                                      if a.get("topics") else "") if x) or None)
 
     def fetch(self, item, *, pdf=False, **_):
         key = item.strip()
