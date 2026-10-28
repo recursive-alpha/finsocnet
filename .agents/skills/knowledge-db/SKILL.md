@@ -1,52 +1,76 @@
 ---
 name: knowledge-db
-description: Manage SQLite database (knowledge.db) and Chroma vector store for user profiles, content transcripts, trading hypotheses, and experiences across platforms (YouTube, TikTok, Facebook, X). Supports semantic vector search and RAG via Hugging Face embeddings.
+description: The FinSocNet database CLI (`finsocnet kb`) over the single SQLite file data/knowledge.db — runs, contents and segments, Knowledge Cards, citations, vocabulary, persons, person rulebooks, explore queue, gaps, lessons, feedback, backups, migrations and stats. Use whenever another FinSocNet skill needs to read or write data, to check database health or statistics, to back up or migrate the database, or to start and end an agent run. SQLite only, no vector store.
 license: MIT
+compatibility: Requires the FinSocNet repository with uv, Python ≥ 3.11 and SQLite ≥ 3.38 (FTS5 + JSON1).
 metadata:
+  author: finsocnet
   version: "2.0.0"
-  author: "finsocnet"
+  priority: "P0"
+  status: planned
+  phase: "0"
+  spec: docs/spec/01-database.md
 ---
 
-# Knowledge Database
+# Knowledge DB (`finsocnet kb`)
 
-Cross-platform relational and vector store for user/creator profiles, content transcripts, experiences, and structured hypotheses extracted from YouTube, TikTok, Facebook, X, and more.
+> **Status: planned — built in Phase 0.** The v1 scripts in `scripts/` (`db.py`, `vector_store.py`, `ingest_idea.py`) are deprecated and removed in Phase 0. Never use their `vector-search` or `rag-search` commands (ADR-001).
 
-## Core Tables
-1. **`users`**: User/creator profile, handle, platform (`youtube`, `tiktok`, `facebook`, `x`, `podcast`), profile URL, and topics.
-2. **`contents`**: Content ID, user ID, platform, title, URL, type (`video`, `post`, `thread`, `audio`), duration, description, transcript path.
-3. **`hypotheses`**: Discrete trading rules, setups, holding periods, statistical claims, verbatim quotes, and timestamps.
-4. **`skills`**: Catalog of synthesized Agent Skills mapped to users and platforms.
+One SQLite file, `data/knowledge.db`, holds everything: relational tables plus FTS5 full-text indices. There is no Chroma, no vector table and no embedding model. Semantic judgment is done by you, the agent, using the knowledge skills.
 
-## Vector Collections (Chroma)
-- **`hypotheses`**: Embedded hypothesis statements, setups, and quotes using `sentence-transformers/all-MiniLM-L6-v2`.
-- **`content_chunks`**: Embedded ~30-second text/transcript chunks for semantic RAG retrieval.
+## When to use
 
-## Usage
+- Any FinSocNet workflow: start/end a run, store content, validate/commit cards, look up vocabulary, manage persons, queue exploration.
+- "How big is the knowledge base?", "show stats", "back up the database", "migrate the database", "is the DB healthy?".
 
-### 1. Ingest Video or Content Transcript
-```bash
-uv run .agents/skills/knowledge-db/scripts/db.py ingest-content data/transcripts/<content_id>.json --platform youtube
-```
+## Rules
 
-### 2. Ingest Hypotheses into Database & Vector Store
-```bash
-uv run .agents/skills/knowledge-db/scripts/db.py ingest-hypotheses data/hypotheses/<content_id>_hypotheses.json --platform youtube
-```
+1. Every workflow starts with `kb run start` and ends with `kb run end`. Every write command needs `--run <run_id>` (or `FINSOCNET_RUN_ID`).
+2. Never write to `knowledge.db` with raw SQL or `sqlite3`. Read-only `sqlite3` queries for debugging are fine.
+3. Never delete contents, segments, citations or decisions. Use statuses (`retire`, `fail`, `merged`).
+4. Every command prints one JSON envelope: `{"ok", "command", "data", "warnings", "meta"}` or `{"ok": false, "error": {"code", "message", "hint"}}`. Read `error.hint` before retrying.
+5. Before any migration, a backup is made automatically; still confirm with the user before migrating the real database.
 
-### 3. Query & Vector Search
-```bash
-# Keyword / SQL filter
-uv run .agents/skills/knowledge-db/scripts/db.py search --query "overnight" --platform youtube
+## Commands
 
-# Semantic vector search on hypotheses
-uv run .agents/skills/knowledge-db/scripts/db.py vector-search "should I hold overnight or close same day?" --limit 3
+All commands: `uv run finsocnet kb <group> <command> …` (same as `uv run .agents/skills/knowledge-db/scripts/kb.py …`). W = write, needs `--run`.
 
-# RAG search across content transcript chunks
-uv run .agents/skills/knowledge-db/scripts/db.py rag-search "semiconductor high ADR focus group" --limit 3
+| Group | Commands |
+|---|---|
+| admin | `init`, `migrate [--dry-run]`, `backup [--to PATH]`, `doctor`, `stats`, `prune [--dry-run]` |
+| run | `run start --skill S --goal G --harness H --model M [--parent R]` → `{run_id}`; `run end --run R --outcome success\|partial\|failed\|aborted [--stats JSON]`; `run list` |
+| lesson / feedback | `lesson add --skill S --kind K --observation T [--evidence] [--proposal]` W; `lesson list\|update`; `feedback add\|list\|handle` |
+| source | `source upsert --file F` W; `source get\|list`; `source cursor ID --set C` W |
+| content | `content add --file F` W; `get ID`; `view ID [--from-seq A --to-seq B]`; `chunks ID [--max-chars 12000] [--overlap 2]`; `list [--status] [--platform]`; `claim ID` W; `done ID --upto-seq N --cards N` W; `fail ID --error T` W; `link-duplicate ID --of OTHER` W; `search "<text>" [--content ID] [--person P]` |
+| vocab | `vocab lookup "<phrase>"`; `vocab add --file F` W; `vocab update\|merge` W; `vocab list\|export` |
+| card | `card validate --file F`; `card candidates --file F [--limit 10]`; `card commit --file F` W; `card search --query-card F \| --text Q`; `card get ID [--citations --links --history]`; `card list`; `card update\|merge\|retire\|undo` W; `citation attribute ID --person P --role R --confidence C` W |
+| decision | `decision list [--reviewed none]`; `decision review ID --verdict agreed\|overturned` W |
+| person / skill | `person candidates\|upsert\|alias add\|appearance add\|get\|list\|cards\|merge`; `skill upsert\|get\|list` |
+| queue / gap / history | `queue add\|next\|update\|list`; `gap add\|list\|update`; `history pending\|mark` |
 
-# Database stats
-uv run .agents/skills/knowledge-db/scripts/db.py stats
-```
+Full reference with outputs: `docs/spec/01-database.md` §6.
 
-## References
-See [references/schema.sql](references/schema.sql) and [references/schema_guide.md](references/schema_guide.md) for table schemas and index details.
+## Procedures
+
+**Health check**
+1. `kb doctor` — expect `integrity: ok` and every FTS table `ok`.
+2. If an FTS table is not ok: `kb doctor --repair-fts` (rebuilds from source tables), then `kb doctor` again.
+3. Report `kb stats` to the user in a short table.
+
+**Migration**
+1. `kb migrate --dry-run` and show the pending list to the user.
+2. After approval: `kb migrate`. A backup path is printed; tell the user where it is.
+3. `kb doctor`.
+
+## Error codes
+
+| Exit | Code | Do |
+|---|---|---|
+| 2 | `RUN_REQUIRED`, `USAGE` | add `--run` / fix arguments |
+| 6 | `VALIDATION_ERROR`, `VOCAB_UNKNOWN`, `QUOTE_NOT_FOUND`, `GRAMMAR_ERROR` | fix the JSON using `error.details[].suggestion` |
+| 8 | `CONFLICT` | refetch (e.g. rerun candidates) and decide again |
+| 1 | `INTERNAL` | `kb lesson add --kind script_bug` with the error, continue with the next item |
+
+## Why SQLite only
+
+See `SPEC.md` ADR-001: one transaction for card + citations + links + index + decision, no second store to drift, the vocabulary-based card format makes lexical search work, and the agent makes the semantic decisions. Do not add Chroma, embeddings or a vector extension.

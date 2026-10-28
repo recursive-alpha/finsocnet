@@ -1,231 +1,219 @@
 #!/usr/bin/env python3
 """
-Vector Store integration using Chroma and open-source Hugging Face embeddings
-(sentence-transformers/all-MiniLM-L6-v2) for semantic search and RAG over user knowledge.
+Pure SQLite Vector & Full-Text Search Store for FinSocNet.
+Replaces Chroma with self-contained, embedded SQLite vector storage (float32 BLOBs)
+and SQLite FTS5 for full-text search. No external daemon or Chroma required.
 """
 
 from __future__ import annotations
 
+import json
 import os
+import sqlite3
+import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-import chromadb
-from chromadb.utils import embedding_functions
+import numpy as np
 from dotenv import load_dotenv
 
 load_dotenv()
 
-CHROMA_PERSIST_DIR = os.getenv("CHROMA_PERSIST_DIR", "data/chroma_db")
+DEFAULT_DB_PATH = Path(os.getenv("KNOWLEDGE_DB_PATH", "data/knowledge.db"))
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
-HYPOTHESES_COLLECTION_NAME = "hypotheses"
-CONTENT_CHUNKS_COLLECTION_NAME = "content_chunks"
 
-_embedding_function = None
-_chroma_client = None
+_model = None
 
 
-def get_embedding_func():
-    global _embedding_function
-    if _embedding_function is None:
-        _embedding_function = embedding_functions.SentenceTransformerEmbeddingFunction(
-            model_name=EMBEDDING_MODEL
-        )
-    return _embedding_function
+def get_embedding_model():
+    global _model
+    if _model is None:
+        from sentence_transformers import SentenceTransformer
+        _model = SentenceTransformer(EMBEDDING_MODEL)
+    return _model
 
 
-def get_chroma_client(persist_dir: str = CHROMA_PERSIST_DIR) -> chromadb.PersistentClient:
-    global _chroma_client
-    if _chroma_client is None:
-        Path(persist_dir).mkdir(parents=True, exist_ok=True)
-        _chroma_client = chromadb.PersistentClient(path=persist_dir)
-    return _chroma_client
+def encode_text(text: str) -> np.ndarray:
+    """Encode text to 384-dim unit-normalized float32 vector."""
+    model = get_embedding_model()
+    vec = model.encode(text, normalize_embeddings=True)
+    return vec.astype(np.float32)
 
 
-def get_hypotheses_collection(client: Optional[chromadb.PersistentClient] = None):
-    if client is None:
-        client = get_chroma_client()
-    return client.get_or_create_collection(
-        name=HYPOTHESES_COLLECTION_NAME,
-        embedding_function=get_embedding_func(),
-        metadata={"hnsw:space": "cosine"},
+def upsert_vector_embedding(
+    conn: sqlite3.Connection,
+    collection: str,
+    entity_id: str,
+    document: str,
+    metadata: dict[str, Any],
+    person_id: Optional[str] = None,
+) -> str:
+    """Embed and store a document in the vector_embeddings SQLite table."""
+    vec = encode_text(document)
+    vec_blob = vec.tobytes()
+    doc_id = f"{collection}_{entity_id}"
+    meta_json = json.dumps(metadata, ensure_ascii=False)
+
+    conn.execute(
+        """
+        INSERT INTO vector_embeddings (id, collection, entity_id, person_id, document, metadata_json, embedding)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET
+            document = excluded.document,
+            metadata_json = excluded.metadata_json,
+            embedding = excluded.embedding,
+            person_id = excluded.person_id;
+        """,
+        (doc_id, collection, str(entity_id), person_id, document, meta_json, vec_blob),
     )
+    conn.commit()
+    return doc_id
 
 
-def get_content_chunks_collection(client: Optional[chromadb.PersistentClient] = None):
-    if client is None:
-        client = get_chroma_client()
-    return client.get_or_create_collection(
-        name=CONTENT_CHUNKS_COLLECTION_NAME,
-        embedding_function=get_embedding_func(),
-        metadata={"hnsw:space": "cosine"},
-    )
-
-
-def format_hypothesis_document(h: dict[str, Any]) -> str:
-    parts = [
-        f"Title: {h.get('title', '')}",
-        f"Direction: {h.get('direction', 'NEUTRAL')}",
-        f"Category: {h.get('category', 'general')}",
-        f"Platform: {h.get('platform', 'unknown')}",
-        f"Statement: {h.get('hypothesis_statement', '')}",
-    ]
-    if h.get("setup_conditions"):
-        parts.append(f"Setup Conditions: {h['setup_conditions']}")
-    if h.get("holding_period"):
-        parts.append(f"Holding Period: {h['holding_period']}")
-    if h.get("statistical_claim"):
-        parts.append(f"Statistical Evidence: {h['statistical_claim']}")
-    if h.get("verbatim_quote"):
-        parts.append(f"Quote: {h['verbatim_quote']}")
-    return "\n".join(parts)
-
-
-def index_hypothesis_in_vector_store(h: dict[str, Any]) -> None:
-    col = get_hypotheses_collection()
-    doc_id = f"hyp_{h['id']}"
-    doc_text = format_hypothesis_document(h)
-    meta = {
-        "hypothesis_id": int(h["id"]),
-        "content_id": str(h.get("content_id", "")),
-        "user_id": str(h.get("user_id", "")),
-        "platform": str(h.get("platform", "youtube")),
-        "category": str(h.get("category", "")),
-        "direction": str(h.get("direction", "")),
-        "title": str(h.get("title", "")),
-        "timestamp_formatted": str(h.get("timestamp_formatted", "")),
-        "holding_period": str(h.get("holding_period", "")),
-    }
-    col.upsert(ids=[doc_id], documents=[doc_text], metadatas=[meta])
-
-
-def index_content_chunks(
-    content_id: str,
-    user_id: str,
-    platform: str,
-    content_title: str,
-    snippets: list[dict[str, Any]],
-) -> int:
-    col = get_content_chunks_collection()
-    ids: list[str] = []
-    docs: list[str] = []
-    metas: list[dict[str, Any]] = []
-
-    current_block: list[str] = []
-    block_start = 0.0
-
-    for i, s in enumerate(snippets):
-        if not current_block:
-            block_start = s.get("start", 0.0)
-        current_block.append(s.get("text", ""))
-
-        is_last = (i == len(snippets) - 1)
-        next_start = snippets[i + 1].get("start", 0.0) if not is_last else s.get("start", 0.0)
-        time_span = s.get("start", 0.0) + s.get("duration", 0.0) - block_start
-
-        if is_last or time_span >= 30.0 or (next_start - (s.get("start", 0.0) + s.get("duration", 0.0))) > 2.5:
-            text = " ".join(current_block).strip()
-            mins = int(block_start // 60)
-            secs = int(block_start % 60)
-            ts_str = f"{mins:02d}:{secs:02d}"
-
-            chunk_id = f"chunk_{content_id}_{int(block_start)}"
-            doc = f"Content: {content_title} ({platform})\nTime: [{ts_str}]\nText: {text}"
-            meta = {
-                "content_id": content_id,
-                "user_id": user_id,
-                "platform": platform,
-                "title": content_title,
-                "timestamp_start": float(block_start),
-                "timestamp_formatted": ts_str,
-            }
-
-            ids.append(chunk_id)
-            docs.append(doc)
-            metas.append(meta)
-            current_block = []
-
-    if ids:
-        col.upsert(ids=ids, documents=docs, metadatas=metas)
-    return len(ids)
-
-
-def search_hypotheses_vectors(
-    query: str,
-    n_results: int = 5,
-    category: Optional[str] = None,
-    direction: Optional[str] = None,
-    platform: Optional[str] = None,
+def search_vector_sqlite(
+    conn: sqlite3.Connection,
+    collection: str,
+    query_text: str,
+    limit: int = 5,
+    person_id: Optional[str] = None,
+    filter_metadata: Optional[dict[str, Any]] = None,
 ) -> list[dict[str, Any]]:
-    col = get_hypotheses_collection()
-    filters = []
-    if category:
-        filters.append({"category": category})
-    if direction:
-        filters.append({"direction": direction.upper()})
-    if platform:
-        filters.append({"platform": platform.lower()})
+    """
+    Search embeddings in SQLite using exact dot product cosine similarity.
+    Blazing fast matrix-vector dot product in numpy directly from SQLite BLOBs.
+    """
+    query_vec = encode_text(query_text)
 
-    where_filter = None
-    if len(filters) == 1:
-        where_filter = filters[0]
-    elif len(filters) > 1:
-        where_filter = {"$and": filters}
+    sql = "SELECT id, entity_id, person_id, document, metadata_json, embedding FROM vector_embeddings WHERE collection = ?"
+    params: list[Any] = [collection]
+    if person_id:
+        sql += " AND person_id = ?"
+        params.append(person_id)
 
-    res = col.query(
-        query_texts=[query],
-        n_results=n_results,
-        where=where_filter,
-    )
+    rows = conn.execute(sql, params).fetchall()
+    if not rows:
+        return []
 
-    out = []
-    if res and res["ids"] and res["ids"][0]:
-        for i in range(len(res["ids"][0])):
-            distance = res["distances"][0][i] if res.get("distances") else 0.0
-            similarity = round(1.0 - distance, 4)
-            out.append({
-                "id": res["ids"][0][i],
-                "score": similarity,
-                "document": res["documents"][0][i],
-                "metadata": res["metadatas"][0][i],
-            })
-    return out
+    ids = []
+    entity_ids = []
+    person_ids = []
+    docs = []
+    metas = []
+    vectors = []
+
+    for r in rows:
+        meta = json.loads(r["metadata_json"])
+        if filter_metadata:
+            match = True
+            for k, v in filter_metadata.items():
+                if meta.get(k) != v:
+                    match = False
+                    break
+            if not match:
+                continue
+
+        ids.append(r["id"])
+        entity_ids.append(r["entity_id"])
+        person_ids.append(r["person_id"])
+        docs.append(r["document"])
+        metas.append(meta)
+        vec = np.frombuffer(r["embedding"], dtype=np.float32)
+        vectors.append(vec)
+
+    if not vectors:
+        return []
+
+    matrix = np.vstack(vectors)  # shape (N, 384)
+    scores = np.dot(matrix, query_vec)  # Cosine similarity for unit vectors
+
+    top_indices = np.argsort(scores)[::-1][:limit]
+
+    results = []
+    for idx in top_indices:
+        results.append({
+            "id": ids[idx],
+            "entity_id": entity_ids[idx],
+            "person_id": person_ids[idx],
+            "score": round(float(scores[idx]), 4),
+            "document": docs[idx],
+            "metadata": metas[idx],
+        })
+
+    return results
 
 
-def search_content_chunks_vectors(
-    query: str,
-    n_results: int = 5,
-    content_id: Optional[str] = None,
-    platform: Optional[str] = None,
+def search_fts_sqlite(
+    conn: sqlite3.Connection,
+    table_name: str,
+    query_text: str,
+    limit: int = 5,
 ) -> list[dict[str, Any]]:
-    col = get_content_chunks_collection()
-    filters = []
-    if content_id:
-        filters.append({"content_id": content_id})
-    if platform:
-        filters.append({"platform": platform.lower()})
+    """Full-text search using SQLite FTS5."""
+    # Sanitize FTS5 query terms
+    clean_terms = [re.sub(r"[^\w*]", "", w) for w in query_text.split() if w]
+    if not clean_terms:
+        return []
+    fts_query = " OR ".join(clean_terms)
 
-    where_filter = None
-    if len(filters) == 1:
-        where_filter = filters[0]
-    elif len(filters) > 1:
-        where_filter = {"$and": filters}
+    try:
+        sql = f"""
+        SELECT rowid, rank, * FROM {table_name}
+        WHERE {table_name} MATCH ?
+        ORDER BY rank
+        LIMIT ?
+        """
+        rows = conn.execute(sql, (fts_query, limit)).fetchall()
+        return [dict(r) for r in rows]
+    except Exception as e:
+        # Fallback to empty if FTS syntax error
+        return []
 
-    res = col.query(
-        query_texts=[query],
-        n_results=n_results,
-        where=where_filter,
-    )
 
-    out = []
-    if res and res["ids"] and res["ids"][0]:
-        for i in range(len(res["ids"][0])):
-            distance = res["distances"][0][i] if res.get("distances") else 0.0
-            similarity = round(1.0 - distance, 4)
-            out.append({
-                "id": res["ids"][0][i],
-                "score": similarity,
-                "document": res["documents"][0][i],
-                "metadata": res["metadatas"][0][i],
-            })
-    return out
+def hybrid_search_ideas(
+    conn: sqlite3.Connection,
+    query_text: str,
+    limit: int = 5,
+    person_id: Optional[str] = None,
+) -> list[dict[str, Any]]:
+    """
+    Hybrid Search combining Vector similarity and FTS5 BM25 text match.
+    Uses Reciprocal Rank Fusion (RRF) to score and rank results.
+    """
+    vec_results = search_vector_sqlite(conn, collection="market_ideas", query_text=query_text, limit=limit * 2, person_id=person_id)
+    fts_results = search_fts_sqlite(conn, table_name="market_ideas_fts", query_text=query_text, limit=limit * 2)
+
+    rrf_scores: dict[int, float] = {}
+    doc_lookup: dict[int, dict[str, Any]] = {}
+
+    k = 60.0
+    for rank, r in enumerate(vec_results):
+        try:
+            e_id = int(r["entity_id"])
+            rrf_scores[e_id] = rrf_scores.get(e_id, 0.0) + (1.0 / (k + rank + 1))
+            doc_lookup[e_id] = r
+        except Exception:
+            continue
+
+    for rank, r in enumerate(fts_results):
+        e_id = r["rowid"]
+        rrf_scores[e_id] = rrf_scores.get(e_id, 0.0) + (1.0 / (k + rank + 1))
+        if e_id not in doc_lookup:
+            # Fetch from market_ideas
+            row = conn.execute("SELECT * FROM market_ideas WHERE id = ?", (e_id,)).fetchone()
+            if row:
+                doc_lookup[e_id] = {
+                    "id": f"market_ideas_{e_id}",
+                    "entity_id": str(e_id),
+                    "person_id": row["person_id"],
+                    "document": f"{row['title']}\n{row['idea_statement']}",
+                    "metadata": dict(row),
+                }
+
+    sorted_ids = sorted(rrf_scores.keys(), key=lambda x: rrf_scores[x], reverse=True)[:limit]
+    final_results = []
+    for e_id in sorted_ids:
+        item = doc_lookup[e_id]
+        item["rrf_score"] = round(rrf_scores[e_id], 4)
+        final_results.append(item)
+
+    return final_results
