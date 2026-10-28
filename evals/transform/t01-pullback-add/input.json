@@ -1,0 +1,13 @@
+{
+ "content_id": "youtube:evalvid0001",
+ "platform": "youtube",
+ "chunk_view": "CONTENT youtube:evalvid0001 | video | \"Adding on the first pullback\" | 2026-09-02\nSEGMENTS 0-2 of 0-2\n[#0 | 00:00-00:20 | speaker ?] welcome back everyone, hope the week treated you well,\n[#1 | 00:20-00:40 | speaker ?] so after a breakout I always wait for the first pullback to the 20 EMA. If it holds the 20 on lighter volume I add to the position,\n[#2 | 00:40-01:00 | speaker ?] and my stop sits right under the low of that pullback, if it breaks that low I am out, no questions.",
+ "cast": [
+  {
+   "person_id": "example-owner",
+   "role": "owner",
+   "name": "Example Owner"
+  }
+ ],
+ "note": ""
+}

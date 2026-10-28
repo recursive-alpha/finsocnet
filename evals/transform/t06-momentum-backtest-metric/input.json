@@ -1,0 +1,13 @@
+{
+ "content_id": "stackexchange:quant:eval01",
+ "platform": "stackexchange",
+ "chunk_view": "CONTENT stackexchange:quant:eval01 | video | \"Does momentum still work?\" | 2026-09-02\nSEGMENTS 0-0 of 0-0\n[#0 | comment t3_p0 | member_0] In a 2005 to 2020 backtest on S&P 500 constituents, a 12-1 month momentum strategy delivered a Sharpe ratio of 0.6 before transaction costs, and about 0.3 after costs.",
+ "cast": [
+  {
+   "person_id": null,
+   "handle": "member_0",
+   "role": "member"
+  }
+ ],
+ "note": ""
+}

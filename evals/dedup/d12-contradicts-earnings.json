@@ -1,0 +1,64 @@
+{
+ "new_card": {
+  "kind": "rule",
+  "domain": "trading_strategy",
+  "category": "trade_management",
+  "subject": "close before earnings",
+  "claim": "IF position is profitable before earnings THEN EXIT before the report",
+  "conditions": [
+   "position profitable before earnings"
+  ],
+  "action": "EXIT",
+  "horizon": "swing_weeks",
+  "instruments": [
+   "equities"
+  ],
+  "terms": [
+   "earnings",
+   "gap_risk"
+  ],
+  "aliases": [],
+  "numbers": {},
+  "evidence_level": "claimed",
+  "card_version": 1,
+  "citation": {
+   "content_id": "youtube:evaldedup01",
+   "segment_seq": 0,
+   "quote": "placeholder quote text",
+   "speaker": {
+    "person_id": "p2",
+    "role": "owner",
+    "confidence": 0.9
+   }
+  }
+ },
+ "candidates": [
+  {
+   "id": 5,
+   "kind": "rule",
+   "domain": "trading_strategy",
+   "category": "trade_management",
+   "subject": "hold through earnings",
+   "claim": "IF position is profitable before earnings THEN HOLD through the report",
+   "conditions": [
+    "position profitable before earnings"
+   ],
+   "action": "HOLD",
+   "horizon": "swing_weeks",
+   "instruments": [
+    "equities"
+   ],
+   "terms": [
+    "earnings",
+    "holding_period"
+   ],
+   "aliases": [],
+   "numbers": {},
+   "evidence_level": "claimed",
+   "status": "active"
+  }
+ ],
+ "expected_decision": "contradicts",
+ "expected_target": null,
+ "note": ""
+}

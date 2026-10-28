@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P0"
-  status: planned
+  status: ready
   phase: "1"
   spec: docs/spec/03-pipelines.md
 ---
 
 # Market Idea Miner
-
-> **Status: planned — built in Phase 1.** Replaces the v1 `hypothesis-miner` (now in `legacy/meta-skills/`).
 
 Orchestrates other skills for one content item. It has no script of its own; every step is a `kb` command or another skill's procedure.
 

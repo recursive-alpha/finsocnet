@@ -210,6 +210,11 @@ def main():
         kb_main(sys.argv[2:])
         return
 
+    if len(sys.argv) > 1 and sys.argv[1] == "eval":
+        from finsocnet.core.eval_cli import main as eval_main
+        eval_main(sys.argv[2:])
+        return
+
     parser = argparse.ArgumentParser(
         prog="finsocnet",
         description="FinSocNet: Multi-Platform Financial Social Intelligence & Trading Strategy Synthesizer",
@@ -217,6 +222,7 @@ def main():
     sub = parser.add_subparsers(dest="cmd")
 
     # kb (handled before argparse: `finsocnet kb <group> <command> …`, see docs/spec/01-database.md §6)
+    sub.add_parser("eval", help="Evaluation sets: prepare inputs and score agent outputs (finsocnet eval --help)")
     sub.add_parser("kb", help="Database CLI: runs, contents, cards, vocabulary, persons (finsocnet kb --help)")
 
     # tui (default when no args)

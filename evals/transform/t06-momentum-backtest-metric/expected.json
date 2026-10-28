@@ -1,0 +1,20 @@
+{
+ "cards": [
+  {
+   "kind": "metric",
+   "category": [
+    "research_method",
+    "market_dynamics"
+   ],
+   "action": [
+    "NONE",
+    null
+   ],
+   "terms": [
+    "sharpe_ratio",
+    "momentum"
+   ],
+   "segment_seq": 0
+  }
+ ]
+}

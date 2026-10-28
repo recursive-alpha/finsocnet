@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P0"
-  status: planned
+  status: ready
   phase: "1"
   spec: docs/spec/03-pipelines.md
 ---
 
 # Knowledge Dedup
-
-> **Status: planned — built in Phase 1.**
 
 `kb card candidates` finds up to 10 similar existing cards with SQLite FTS5 over the canonical card fields (no embeddings, ADR-001). **You** decide what each candidate is to the new card. `kb card commit` applies your decision in one transaction and stores your rationale.
 

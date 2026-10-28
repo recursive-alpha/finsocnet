@@ -1,0 +1,13 @@
+{
+ "content_id": "reddit:evalpost01",
+ "platform": "reddit",
+ "chunk_view": "CONTENT reddit:evalpost01 | video | \"What finally fixed your trading?\" | 2026-09-02\nSEGMENTS 0-0 of 0-0\n[#0 | comment t1_k0 | u/example_0 | score 12] Keeping a journal with a screenshot of every trade finally made me see that I was cutting my winners way too early. Two months later my average winner doubled.",
+ "cast": [
+  {
+   "person_id": null,
+   "handle": "u/example_0",
+   "role": "commenter"
+  }
+ ],
+ "note": ""
+}

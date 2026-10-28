@@ -1,0 +1,19 @@
+{
+ "cards": [
+  {
+   "kind": "rule",
+   "category": [
+    "risk_and_sizing"
+   ],
+   "action": [
+    "EXIT",
+    "AVOID",
+    "SIZE"
+   ],
+   "terms": [
+    "daily_loss_limit"
+   ],
+   "segment_seq": 1
+  }
+ ]
+}

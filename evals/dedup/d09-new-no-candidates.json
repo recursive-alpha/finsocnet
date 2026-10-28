@@ -1,0 +1,39 @@
+{
+ "new_card": {
+  "kind": "observation",
+  "domain": "trading_strategy",
+  "category": "market_dynamics",
+  "subject": "vix spikes mark short term bottoms",
+  "claim": "market indices TENDS TO bounce WHEN vix spikes above 40 for the first time",
+  "conditions": [
+   "vix spikes above 40"
+  ],
+  "action": "NONE",
+  "horizon": "swing_days",
+  "instruments": [
+   "equities"
+  ],
+  "terms": [
+   "vix",
+   "market_regime"
+  ],
+  "aliases": [],
+  "numbers": {},
+  "evidence_level": "claimed",
+  "card_version": 1,
+  "citation": {
+   "content_id": "youtube:evaldedup01",
+   "segment_seq": 0,
+   "quote": "placeholder quote text",
+   "speaker": {
+    "person_id": "p2",
+    "role": "owner",
+    "confidence": 0.9
+   }
+  }
+ },
+ "candidates": [],
+ "expected_decision": "new",
+ "expected_target": null,
+ "note": "no candidates"
+}

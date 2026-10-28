@@ -1,0 +1,65 @@
+{
+ "new_card": {
+  "kind": "rule",
+  "domain": "trading_strategy",
+  "category": "trade_management",
+  "subject": "never hold overnight",
+  "claim": "IF position is profitable at the close THEN EXIT before the close to avoid gap_risk",
+  "conditions": [
+   "position profitable at close"
+  ],
+  "action": "EXIT",
+  "horizon": "overnight",
+  "instruments": [
+   "equities"
+  ],
+  "terms": [
+   "overnight_hold",
+   "gap_risk",
+   "intraday_exit"
+  ],
+  "aliases": [],
+  "numbers": {},
+  "evidence_level": "claimed",
+  "card_version": 1,
+  "citation": {
+   "content_id": "youtube:evaldedup01",
+   "segment_seq": 0,
+   "quote": "placeholder quote text",
+   "speaker": {
+    "person_id": "p2",
+    "role": "owner",
+    "confidence": 0.9
+   }
+  }
+ },
+ "candidates": [
+  {
+   "id": 2,
+   "kind": "rule",
+   "domain": "trading_strategy",
+   "category": "trade_management",
+   "subject": "hold winners overnight",
+   "claim": "IF position is profitable at the close THEN HOLD overnight",
+   "conditions": [
+    "position profitable at close"
+   ],
+   "action": "HOLD",
+   "horizon": "overnight",
+   "instruments": [
+    "equities"
+   ],
+   "terms": [
+    "overnight_hold",
+    "holding_period"
+   ],
+   "aliases": [],
+   "numbers": {},
+   "evidence_level": "claimed",
+   "status": "active"
+  }
+ ],
+ "expected_decision": "contradicts",
+ "expected_target": null,
+ "note": "same conditions, opposite action"
+}

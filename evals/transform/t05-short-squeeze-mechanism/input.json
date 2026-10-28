@@ -1,0 +1,13 @@
+{
+ "content_id": "book:eval00000000000000000000000000001",
+ "platform": "book",
+ "chunk_view": "CONTENT book:eval00000000000000000000000000001 | video | \"Market Mechanics\" | 2026-09-02\nSEGMENTS 0-0 of 0-0\n[#0 | page 200] When short interest is high and the price starts to rise, shorts are forced to buy shares to close their positions, which pushes the price up further and forces more shorts to cover.",
+ "cast": [
+  {
+   "person_id": "example-author",
+   "role": "author",
+   "name": "Example Author"
+  }
+ ],
+ "note": ""
+}

@@ -1,0 +1,31 @@
+{
+ "cards": [
+  {
+   "kind": "rule",
+   "category": [
+    "entry_and_execution",
+    "trade_management"
+   ],
+   "action": "ADD",
+   "terms": [
+    "ema_20",
+    "pullback",
+    "breakout"
+   ],
+   "segment_seq": 1
+  },
+  {
+   "kind": "rule",
+   "category": [
+    "trade_management",
+    "risk_and_sizing"
+   ],
+   "action": "EXIT",
+   "terms": [
+    "pullback",
+    "stop_loss"
+   ],
+   "segment_seq": 2
+  }
+ ]
+}

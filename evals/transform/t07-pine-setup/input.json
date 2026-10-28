@@ -1,0 +1,13 @@
+{
+ "content_id": "tradingview:script:evalpine1",
+ "platform": "tradingview",
+ "chunk_view": "CONTENT tradingview:script:evalpine1 | video | \"EMA volume breakout\" | 2026-09-02\nSEGMENTS 0-0 of 0-0\n[#0 | code strategy.pine:1-9] longCondition = ta.crossover(close, ta.ema(close, 20)) and volume > ta.sma(volume, 20) * 1.5\nif longCondition\n    strategy.entry(\"Long\", strategy.long)",
+ "cast": [
+  {
+   "person_id": "example-pine",
+   "role": "author",
+   "name": "Example Pine Author"
+  }
+ ],
+ "note": ""
+}

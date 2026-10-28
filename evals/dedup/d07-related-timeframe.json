@@ -1,0 +1,66 @@
+{
+ "new_card": {
+  "kind": "rule",
+  "domain": "trading_strategy",
+  "category": "entry_and_execution",
+  "subject": "buy the daily range breakout",
+  "claim": "IF price breaks the high of the prior range on tf_daily THEN LONG",
+  "conditions": [
+   "price breaks the prior daily high"
+  ],
+  "action": "LONG",
+  "horizon": "swing_days",
+  "instruments": [
+   "equities"
+  ],
+  "terms": [
+   "breakout",
+   "tf_daily",
+   "prior_day_high"
+  ],
+  "aliases": [],
+  "numbers": {},
+  "evidence_level": "claimed",
+  "card_version": 1,
+  "citation": {
+   "content_id": "youtube:evaldedup01",
+   "segment_seq": 0,
+   "quote": "placeholder quote text",
+   "speaker": {
+    "person_id": "p2",
+    "role": "owner",
+    "confidence": 0.9
+   }
+  }
+ },
+ "candidates": [
+  {
+   "id": 4,
+   "kind": "rule",
+   "domain": "trading_strategy",
+   "category": "entry_and_execution",
+   "subject": "buy the opening range breakout",
+   "claim": "IF price breaks opening_range high on tf_5m THEN LONG",
+   "conditions": [
+    "price breaks the opening range high on the 5 minute chart"
+   ],
+   "action": "LONG",
+   "horizon": "intraday",
+   "instruments": [
+    "equities"
+   ],
+   "terms": [
+    "opening_range",
+    "tf_5m",
+    "breakout"
+   ],
+   "aliases": [],
+   "numbers": {},
+   "evidence_level": "claimed",
+   "status": "active"
+  }
+ ],
+ "expected_decision": "related",
+ "expected_target": null,
+ "note": "same idea on another timeframe"
+}

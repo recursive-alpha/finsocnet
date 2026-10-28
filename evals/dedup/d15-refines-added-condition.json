@@ -1,0 +1,70 @@
+{
+ "new_card": {
+  "kind": "setup",
+  "domain": "trading_strategy",
+  "category": "setup_and_screening",
+  "subject": "bull flag breakout needs relative strength",
+  "claim": "IF bull_flag forms after a strong move AND volume contracts AND relative_strength is top decile THEN LONG on break of the flag high",
+  "conditions": [
+   "bull flag after a strong move",
+   "volume contracts",
+   "relative strength top decile"
+  ],
+  "action": "LONG",
+  "horizon": "swing_days",
+  "instruments": [
+   "equities"
+  ],
+  "terms": [
+   "bull_flag",
+   "breakout",
+   "volume_dry_up",
+   "relative_strength"
+  ],
+  "aliases": [],
+  "numbers": {},
+  "evidence_level": "claimed",
+  "card_version": 1,
+  "citation": {
+   "content_id": "youtube:evaldedup01",
+   "segment_seq": 0,
+   "quote": "placeholder quote text",
+   "speaker": {
+    "person_id": "p2",
+    "role": "owner",
+    "confidence": 0.9
+   }
+  }
+ },
+ "candidates": [
+  {
+   "id": 7,
+   "kind": "setup",
+   "domain": "trading_strategy",
+   "category": "setup_and_screening",
+   "subject": "bull flag breakout",
+   "claim": "IF bull_flag forms after a strong move AND volume contracts THEN LONG on break of the flag high",
+   "conditions": [
+    "bull flag after a strong move",
+    "volume contracts"
+   ],
+   "action": "LONG",
+   "horizon": "swing_days",
+   "instruments": [
+    "equities"
+   ],
+   "terms": [
+    "bull_flag",
+    "breakout",
+    "volume_dry_up"
+   ],
+   "aliases": [],
+   "numbers": {},
+   "evidence_level": "claimed",
+   "status": "active"
+  }
+ ],
+ "expected_decision": "refines",
+ "expected_target": 7,
+ "note": "adds a filter condition"
+}

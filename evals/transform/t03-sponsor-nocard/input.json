@@ -1,0 +1,13 @@
+{
+ "content_id": "youtube:evalvid0003",
+ "platform": "youtube",
+ "chunk_view": "CONTENT youtube:evalvid0003 | video | \"Weekly watchlist\" | 2026-09-02\nSEGMENTS 0-1 of 0-1\n[#0 | 00:00-00:20 | speaker ?] this video is sponsored by Example Broker, use my link below for a free month of charts,\n[#1 | 00:20-00:40 | speaker ?] don't forget to like and subscribe and hit the bell, it really helps the channel grow,",
+ "cast": [
+  {
+   "person_id": "example-owner",
+   "role": "owner",
+   "name": "Example Owner"
+  }
+ ],
+ "note": ""
+}

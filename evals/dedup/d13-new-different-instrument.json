@@ -1,0 +1,65 @@
+{
+ "new_card": {
+  "kind": "rule",
+  "domain": "trading_strategy",
+  "category": "risk_and_sizing",
+  "subject": "size equity day trades by the stop distance",
+  "claim": "IF day trading equities THEN SIZE position so the stop equals 0.5% account risk",
+  "conditions": [
+   "day trading equities"
+  ],
+  "action": "SIZE",
+  "horizon": "intraday",
+  "instruments": [
+   "equities"
+  ],
+  "terms": [
+   "position_sizing",
+   "risk_per_trade",
+   "stop_loss"
+  ],
+  "aliases": [],
+  "numbers": {},
+  "evidence_level": "claimed",
+  "card_version": 1,
+  "citation": {
+   "content_id": "youtube:evaldedup01",
+   "segment_seq": 0,
+   "quote": "placeholder quote text",
+   "speaker": {
+    "person_id": "p2",
+    "role": "owner",
+    "confidence": 0.9
+   }
+  }
+ },
+ "candidates": [
+  {
+   "id": 6,
+   "kind": "rule",
+   "domain": "trading_strategy",
+   "category": "risk_and_sizing",
+   "subject": "size crypto positions small",
+   "claim": "IF trading crypto THEN SIZE at most 1% risk per trade",
+   "conditions": [
+    "trading crypto"
+   ],
+   "action": "SIZE",
+   "horizon": "n/a",
+   "instruments": [
+    "crypto"
+   ],
+   "terms": [
+    "position_sizing",
+    "risk_per_trade"
+   ],
+   "aliases": [],
+   "numbers": {},
+   "evidence_level": "claimed",
+   "status": "active"
+  }
+ ],
+ "expected_decision": "new",
+ "expected_target": null,
+ "note": "different instrument and numbers"
+}

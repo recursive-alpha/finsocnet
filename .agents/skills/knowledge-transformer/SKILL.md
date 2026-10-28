@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "kt-1.0"
   priority: "P0"
-  status: planned
+  status: ready
   phase: "1"
   spec: docs/spec/02-knowledge-cards.md
 ---
 
 # Knowledge Transformer
-
-> **Status: planned — instructions are final; the `kb card validate` and `kb vocab` commands it relies on are built in Phases 0–1.**
 
 You turn text into **Knowledge Cards**: one atomic piece of financial knowledge per card, rewritten into a fixed form with the **same meaning** as the source. You also turn questions into **Query Cards** with the same vocabulary, which is what makes search work without embeddings.
 

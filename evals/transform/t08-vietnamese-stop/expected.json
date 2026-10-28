@@ -1,0 +1,16 @@
+{
+ "cards": [
+  {
+   "kind": "rule",
+   "category": [
+    "trade_management",
+    "risk_and_sizing"
+   ],
+   "action": "EXIT",
+   "terms": [
+    "ma_20"
+   ],
+   "segment_seq": 0
+  }
+ ]
+}

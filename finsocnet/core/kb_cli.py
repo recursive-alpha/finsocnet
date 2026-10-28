@@ -10,7 +10,7 @@ import time
 from pathlib import Path
 from typing import Any, Callable
 
-from finsocnet.core import config, content as content_mod, migrations, runs
+from finsocnet.core import cards as cards_mod, config, content as content_mod, migrations, runs, vocab as vocab_mod
 from finsocnet.core import output
 from finsocnet.core.db import backup as db_backup
 from finsocnet.core.db import connect, default_backup_path, transaction
@@ -81,10 +81,26 @@ def parse_json_arg(text: str | None, what: str) -> Any:
 
 # --- admin ----------------------------------------------------------------------------------------------
 
+SEED_PATH = ".agents/skills/knowledge-transformer/references/vocabulary_seed.json"
+
+
+def load_seed(conn: sqlite3.Connection) -> int:
+    """Load the vocabulary seed into an empty vocabulary table; returns the number of terms added."""
+    seed = config.repo_root() / SEED_PATH
+    if conn.execute("SELECT COUNT(*) FROM vocabulary").fetchone()[0] or not seed.exists():
+        return 0
+    run_id = runs.start_run(conn, "init", "load vocabulary seed", "manual")
+    added = len(vocab_mod.add(conn, json.loads(seed.read_text(encoding="utf-8")), run_id)["added"])
+    runs.end_run(conn, run_id, "success", {"terms": added})
+    return added
+
+
 def cmd_init(ctx: Ctx) -> Result:
     conn = ctx.conn(create=True, require_v2=False)
     res = migrations.migrate(conn)
-    return Result({"db": str(ctx.db_path), "applied": res["applied"], "backups": res["backups"], "summaries": res["summaries"]}, res["warnings"])
+    seeded = load_seed(conn)
+    return Result({"db": str(ctx.db_path), "applied": res["applied"], "backups": res["backups"], "summaries": res["summaries"],
+                   "vocabulary_seeded": seeded}, res["warnings"])
 
 
 def cmd_migrate(ctx: Ctx) -> Result:
@@ -356,6 +372,110 @@ def cmd_content_search(ctx: Ctx) -> Result:
     return Result({"hits": hits})
 
 
+
+# --- vocabulary -----------------------------------------------------------------------------------------
+
+def cmd_vocab_lookup(ctx: Ctx) -> Result:
+    return Result({"matches": vocab_mod.lookup(ctx.conn(), ctx.args.phrase, ctx.args.limit)})
+
+
+def cmd_vocab_add(ctx: Ctx) -> Result:
+    payload = read_json(ctx.args.file)
+    return Result(vocab_mod.add(ctx.conn(), payload if isinstance(payload, list) else [payload], ctx.run_id()))
+
+
+def cmd_vocab_update(ctx: Ctx) -> Result:
+    return Result(vocab_mod.update(ctx.conn(), ctx.args.term, read_json(ctx.args.file), ctx.run_id()))
+
+
+def cmd_vocab_merge(ctx: Ctx) -> Result:
+    return Result(vocab_mod.merge(ctx.conn(), ctx.args.src, ctx.args.dst, ctx.run_id()))
+
+
+def cmd_vocab_list(ctx: Ctx) -> Result:
+    return Result({"terms": vocab_mod.list_terms(ctx.conn(), ctx.args.facet)})
+
+
+def cmd_vocab_export(ctx: Ctx) -> Result:
+    return Result(vocab_mod.export(ctx.conn(), config.resolve_path(ctx.args.out)))
+
+
+# --- cards ----------------------------------------------------------------------------------------------
+
+def _cards_file(path: str | None) -> list[dict[str, Any]]:
+    payload = read_json(path)
+    return payload if isinstance(payload, list) else [payload]
+
+
+def cmd_card_validate(ctx: Ctx) -> Result:
+    res = cards_mod.validate_cards(ctx.conn(), _cards_file(ctx.args.file), ctx.args.legacy)
+    return Result({"valid": res["valid"], "errors": res["errors"]}, res["warnings"])
+
+
+def cmd_card_candidates(ctx: Ctx) -> Result:
+    a = ctx.args
+    res, warns = cards_mod.candidates(ctx.conn(), _cards_file(a.file), a.index, a.limit, getattr(a, "run", None) or config.env_run_id())
+    return Result({"results": res}, warns)
+
+
+def cmd_card_commit(ctx: Ctx) -> Result:
+    run_id = ctx.run_id()
+    results = cards_mod.commit_decisions(ctx.conn(), _cards_file(ctx.args.file), run_id, ctx.args.legacy)
+    failed = [r for r in results if r["status"] == "error"]
+    warnings = [f"decision {r['index']} failed: {r['error']['code']} {r['error']['message']}" for r in failed]
+    return Result({"results": results, "committed": sum(r["status"] == "committed" for r in results), "errors": len(failed)}, warnings)
+
+
+def cmd_card_search(ctx: Ctx) -> Result:
+    a = ctx.args
+    qc = read_json(a.query_card) if a.query_card else None
+    res = cards_mod.search_cards(ctx.conn(), qc, a.text, a.limit)
+    return Result({"results": res["results"], "terms_used": res["terms_used"]}, res["warnings"])
+
+
+def cmd_card_get(ctx: Ctx) -> Result:
+    a = ctx.args
+    return Result(cards_mod.get_card(ctx.conn(), a.id, a.citations, a.links, a.history))
+
+
+def cmd_card_list(ctx: Ctx) -> Result:
+    a = ctx.args
+    return Result({"cards": cards_mod.list_cards(ctx.conn(), a.person, a.category, None if a.status == "any" else a.status, a.since, a.limit)})
+
+
+def cmd_card_update(ctx: Ctx) -> Result:
+    return Result(cards_mod.update_card(ctx.conn(), ctx.args.id, read_json(ctx.args.file), ctx.args.reason, ctx.run_id()))
+
+
+def cmd_card_merge(ctx: Ctx) -> Result:
+    a = ctx.args
+    return Result(cards_mod.merge_cards(ctx.conn(), a.src, a.dst, a.reason, ctx.run_id()))
+
+
+def cmd_card_retire(ctx: Ctx) -> Result:
+    return Result(cards_mod.retire_card(ctx.conn(), ctx.args.id, ctx.args.reason, ctx.run_id()))
+
+
+def cmd_card_undo(ctx: Ctx) -> Result:
+    return Result(cards_mod.undo(ctx.conn(), ctx.args.history_id, ctx.run_id()))
+
+
+def cmd_citation_attribute(ctx: Ctx) -> Result:
+    a = ctx.args
+    return Result(cards_mod.attribute_citation(ctx.conn(), a.id, a.person, a.role, a.confidence, ctx.run_id()))
+
+
+def cmd_decision_list(ctx: Ctx) -> Result:
+    a = ctx.args
+    return Result({"decisions": cards_mod.list_decisions(ctx.conn(), a.since, a.reviewed, a.limit)})
+
+
+def cmd_decision_review(ctx: Ctx) -> Result:
+    ctx.run_id()
+    a = ctx.args
+    return Result(cards_mod.review_decision(ctx.conn(), a.id, a.verdict, a.note))
+
+
 # --- parser ---------------------------------------------------------------------------------------------
 
 def _common() -> argparse.ArgumentParser:
@@ -496,6 +616,80 @@ def build_parser() -> _Parser:
     p.add_argument("--person")
     p.add_argument("--content")
     p.add_argument("--limit", type=int, default=20)
+
+    g = group("vocab", "controlled vocabulary")
+    p = leaf(g, ("vocab", "lookup"), "lookup", cmd_vocab_lookup)
+    p.add_argument("phrase")
+    p.add_argument("--limit", type=int, default=5)
+    p = leaf(g, ("vocab", "add"), "add", cmd_vocab_add)
+    p.add_argument("--file", required=True)
+    p = leaf(g, ("vocab", "update"), "update", cmd_vocab_update)
+    p.add_argument("term")
+    p.add_argument("--file", required=True)
+    p = leaf(g, ("vocab", "merge"), "merge", cmd_vocab_merge)
+    p.add_argument("--from", dest="src", required=True)
+    p.add_argument("--into", dest="dst", required=True)
+    p = leaf(g, ("vocab", "list"), "list", cmd_vocab_list)
+    p.add_argument("--facet")
+    p = leaf(g, ("vocab", "export"), "export", cmd_vocab_export)
+    p.add_argument("--out", required=True)
+
+    g = group("card", "knowledge cards")
+    p = leaf(g, ("card", "validate"), "validate", cmd_card_validate)
+    p.add_argument("--file", required=True)
+    p.add_argument("--legacy", action="store_true")
+    p = leaf(g, ("card", "candidates"), "candidates", cmd_card_candidates)
+    p.add_argument("--file", required=True)
+    p.add_argument("--index", type=int)
+    p.add_argument("--limit", type=int, default=10)
+    p = leaf(g, ("card", "commit"), "commit", cmd_card_commit)
+    p.add_argument("--file", required=True, help="array of decision JSON (03 §3.3)")
+    p.add_argument("--legacy", action="store_true", help="Phase 2 only: allow segment_seq null for contents without text")
+    p = leaf(g, ("card", "search"), "search", cmd_card_search)
+    p.add_argument("--query-card")
+    p.add_argument("--text")
+    p.add_argument("--limit", type=int, default=30)
+    p = leaf(g, ("card", "get"), "get", cmd_card_get)
+    p.add_argument("id", type=int)
+    p.add_argument("--citations", action="store_true")
+    p.add_argument("--links", action="store_true")
+    p.add_argument("--history", action="store_true")
+    p = leaf(g, ("card", "list"), "list", cmd_card_list)
+    p.add_argument("--person")
+    p.add_argument("--category")
+    p.add_argument("--status", default="active", choices=["active", "merged", "retired", "any"])
+    p.add_argument("--since")
+    p.add_argument("--limit", type=int, default=50)
+    p = leaf(g, ("card", "update"), "update", cmd_card_update)
+    p.add_argument("id", type=int)
+    p.add_argument("--file", required=True)
+    p.add_argument("--reason", required=True)
+    p = leaf(g, ("card", "merge"), "merge", cmd_card_merge)
+    p.add_argument("--from", dest="src", type=int, required=True)
+    p.add_argument("--into", dest="dst", type=int, required=True)
+    p.add_argument("--reason", required=True)
+    p = leaf(g, ("card", "retire"), "retire", cmd_card_retire)
+    p.add_argument("id", type=int)
+    p.add_argument("--reason", required=True)
+    p = leaf(g, ("card", "undo"), "undo", cmd_card_undo)
+    p.add_argument("--history-id", type=int, required=True)
+
+    g = group("citation", "citations")
+    p = leaf(g, ("citation", "attribute"), "attribute", cmd_citation_attribute)
+    p.add_argument("id", type=int)
+    p.add_argument("--person", required=True)
+    p.add_argument("--role", required=True)
+    p.add_argument("--confidence", type=float, required=True)
+
+    g = group("decision", "dedup decisions")
+    p = leaf(g, ("decision", "list"), "list", cmd_decision_list)
+    p.add_argument("--since")
+    p.add_argument("--reviewed", choices=["none", "agreed", "overturned"])
+    p.add_argument("--limit", type=int, default=50)
+    p = leaf(g, ("decision", "review"), "review", cmd_decision_review)
+    p.add_argument("id", type=int)
+    p.add_argument("--verdict", required=True, choices=["agreed", "overturned"])
+    p.add_argument("--note")
 
     root.set_defaults(_handlers=handlers)
     return root

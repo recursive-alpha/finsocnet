@@ -9,7 +9,7 @@
 | Phase | Spec | SKILL.md + references | Code | Tests / acceptance |
 |---|---|---|---|---|
 | 0 Foundation and cleanup | [x] | [x] knowledge-db | [x] | [~] 30 tests green; migration 003 run on a copy, real DB awaiting your approval |
-| 1 Knowledge core | [x] | [x] transformer, dedup, search, miner | [ ] | [ ] |
+| 1 Knowledge core | [x] | [x] transformer, dedup, search, miner | [x] | [~] 69 tests green; agent acceptance runs happen with the legacy conversion (Phase 2) |
 | 2 Persons and legacy conversion | [x] | [x] matcher, synthesizer, explorer | [~] v1 `match_person.py` only | [ ] |
 | 3 Agent browser and session bridge | [x] | [x] agent-browser, session-bridge | [ ] | [ ] |
 | 4 P1 platform skills (15) | [x] | [x] all 15 | [~] v1 scripts in 9 skills | [ ] |
@@ -77,12 +77,14 @@ Migration 003 on the copy of the real DB (2026-10-28): 9 persons, 19 sources (2 
 Deviations to review: (a) the runner ignores FK violations in `legacy_*` tables because of those orphans; (b) a brand-new database gets no pre-migration backups; (c) `kb content claim` stores its claim in `contents.extra_json._claim` (no column exists) and has a `--reprocess` flag; (d) `kb content done` keeps `processing` while more segments remain, instead of resetting to `new`, so the claim survives between chunks.
 
 ### 2.2 Phase 1 — Knowledge core
-- [x] Skill docs and references (see 1.2).
-- [ ] `finsocnet/core/vocab.py`, `cards.py`, `fts.py`; `kb vocab|card|citation|decision …`; seed loaded into the DB.
-- [ ] `--legacy` flag on `kb card commit`.
-- [ ] `evals/` (does not exist yet): transform ≥ 10, dedup ≥ 15 cases; `finsocnet eval prepare|score`.
-- [ ] Tests: grammar, vocabulary, quote check, candidate determinism, commit per decision type, idempotency, CONFLICT, FTS triggers, undo.
-- [ ] Acceptance: miner on 3 legacy transcripts; re-run creates no duplicates; 5 cited answers + 1 gap; eval targets.
+- [x] Skill docs and references (see 1.2); statuses set to `ready`.
+- [x] `finsocnet/core/vocab.py`, `cards.py`, `fts.py`; `kb vocab|card|citation|decision …`; the 344-term seed loads on `kb init`.
+- [x] `--legacy` flag on `kb card commit` and `kb card validate` (relaxes only the quote check, only for contents without text).
+- [x] `evals/transform` (10 cases), `evals/dedup` (15 cases), `evals/README.md`; `finsocnet eval prepare|score|run` for transform, dedup, attribution and search (search needs `evals/search/fixture_db.sql`, Phase 5).
+- [x] Tests: grammar per kind, vocabulary (add/merge/lookup), quote check, candidate determinism, siblings, commit for every decision type, idempotent re-commit, CONFLICT and batch isolation, FTS triggers (insert, update, citation add/move, delete), merge/undo, legacy commit, eval scoring, CLI flow.
+- [~] Acceptance: all 14 of 15 spec example cards validate (the 15th, E12, adds its own vocabulary term first). Initial eval run by the same agent that wrote the cases: transform validity 1.0 / recall 1.0 / precision 1.0, dedup accuracy 1.0 / wrong-merge 0.0 (not independent evidence; the user should review the golden cases). The `market-idea-miner` run on 3 legacy transcripts, the re-run without duplicates, and the 5 cited answers + 1 gap are done with the Phase 2 conversion on the migrated DB.
+
+Deviations to review: (a) the tag-stuffing check also looks at `subject` (spec example E8 only passes that way); (b) `card.schema.json` allows an optional `citation.locator` (needed for legacy citations); (c) `kb card commit` exits 0 with per-item `status: error` entries and a warning per failed decision, instead of a non-zero exit; (d) `kb card candidates` also returns `siblings`.
 
 ### 2.3 Phase 2 — Persons and legacy conversion
 - [x] Skill docs (see 1.2).

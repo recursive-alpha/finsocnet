@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P0"
-  status: planned
+  status: ready
   phase: "1"
   spec: docs/spec/03-pipelines.md
 ---
 
 # Knowledge Search
-
-> **Status: planned — built in Phase 1.**
 
 Search is lexical over canonical cards (ADR-001): you turn the question into the same vocabulary the cards use, the script retrieves, and you judge relevance and write the answer.
 

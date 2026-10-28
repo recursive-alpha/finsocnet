@@ -1,0 +1,13 @@
+{
+ "content_id": "youtube:evalvid0009",
+ "platform": "youtube",
+ "chunk_view": "CONTENT youtube:evalvid0009 | video | \"My NVDA call\" | 2026-09-02\nSEGMENTS 0-0 of 0-0\n[#0 | 00:00-00:20 | speaker ?] I think NVDA is going to 200 by next Friday, I just feel it, load the boat,",
+ "cast": [
+  {
+   "person_id": "example-owner",
+   "role": "owner",
+   "name": "Example Owner"
+  }
+ ],
+ "note": ""
+}

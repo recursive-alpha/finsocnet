@@ -1,0 +1,20 @@
+{
+ "cards": [
+  {
+   "kind": "observation",
+   "category": [
+    "market_dynamics",
+    "setup_and_screening"
+   ],
+   "action": [
+    "NONE",
+    null
+   ],
+   "terms": [
+    "gap_up",
+    "earnings"
+   ],
+   "segment_seq": 0
+  }
+ ]
+}

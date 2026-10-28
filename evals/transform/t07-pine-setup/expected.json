@@ -1,0 +1,16 @@
+{
+ "cards": [
+  {
+   "kind": "setup",
+   "category": [
+    "setup_and_screening",
+    "entry_and_execution"
+   ],
+   "action": "LONG",
+   "terms": [
+    "ema_20"
+   ],
+   "segment_seq": 0
+  }
+ ]
+}

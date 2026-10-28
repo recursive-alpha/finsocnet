@@ -1,0 +1,19 @@
+{
+ "cards": [
+  {
+   "kind": "mechanism",
+   "category": [
+    "market_dynamics"
+   ],
+   "action": [
+    "NONE",
+    null
+   ],
+   "terms": [
+    "short_squeeze",
+    "short_interest"
+   ],
+   "segment_seq": 0
+  }
+ ]
+}

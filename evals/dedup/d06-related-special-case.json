@@ -1,0 +1,66 @@
+{
+ "new_card": {
+  "kind": "rule",
+  "domain": "trading_strategy",
+  "category": "entry_and_execution",
+  "subject": "adding to a losing breakout is allowed on a reclaim",
+  "claim": "IF breakout position is losing AND price reclaims the breakout level THEN ADD small size",
+  "conditions": [
+   "breakout position is losing",
+   "price reclaims the breakout level"
+  ],
+  "action": "ADD",
+  "horizon": "swing_weeks",
+  "instruments": [
+   "equities"
+  ],
+  "terms": [
+   "breakout",
+   "reclaim",
+   "scaling_in"
+  ],
+  "aliases": [],
+  "numbers": {},
+  "evidence_level": "claimed",
+  "card_version": 1,
+  "citation": {
+   "content_id": "youtube:evaldedup01",
+   "segment_seq": 0,
+   "quote": "placeholder quote text",
+   "speaker": {
+    "person_id": "p2",
+    "role": "owner",
+    "confidence": 0.9
+   }
+  }
+ },
+ "candidates": [
+  {
+   "id": 3,
+   "kind": "rule",
+   "domain": "trading_strategy",
+   "category": "risk_and_sizing",
+   "subject": "never average down",
+   "claim": "IF position is losing THEN AVOID adding to the position",
+   "conditions": [
+    "position is losing"
+   ],
+   "action": "AVOID",
+   "horizon": "n/a",
+   "instruments": [
+    "equities"
+   ],
+   "terms": [
+    "scaling_in",
+    "stop_loss"
+   ],
+   "aliases": [],
+   "numbers": {},
+   "evidence_level": "claimed",
+   "status": "active"
+  }
+ ],
+ "expected_decision": "related",
+ "expected_target": null,
+ "note": "special case with a different action: related, not merge"
+}

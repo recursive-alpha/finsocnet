@@ -1,0 +1,18 @@
+{
+ "content_id": "podcast:aaaaaaaaaaaa:evalep01",
+ "platform": "podcast",
+ "chunk_view": "CONTENT podcast:aaaaaaaaaaaa:evalep01 | video | \"Defense first with Example Guest\" | 2026-09-02\nSEGMENTS 0-1 of 0-1\n[#0 | 00:00-00:20 | speaker ?] So what is your hard stop for a bad day, how much are we talking?\n[#1 | 00:20-00:40 | speaker ?] My daily loss limit is two percent of the account. Once I hit it I close everything and I am done until the next morning, no revenge trading.",
+ "cast": [
+  {
+   "person_id": "example-host",
+   "role": "host",
+   "name": "Example Host"
+  },
+  {
+   "person_id": "example-guest",
+   "role": "guest",
+   "name": "Example Guest"
+  }
+ ],
+ "note": ""
+}

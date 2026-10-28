@@ -1,0 +1,68 @@
+{
+ "new_card": {
+  "kind": "rule",
+  "domain": "trading_strategy",
+  "category": "trade_management",
+  "subject": "exit the remainder at a profit target instead of trailing",
+  "claim": "IF position held after partial profit THEN EXIT remainder AT 3R profit target",
+  "conditions": [
+   "partial profit taken"
+  ],
+  "action": "EXIT",
+  "horizon": "swing_weeks",
+  "instruments": [
+   "equities"
+  ],
+  "terms": [
+   "partial_profit",
+   "r_multiple"
+  ],
+  "aliases": [],
+  "numbers": {
+   "target_r": 3
+  },
+  "evidence_level": "claimed",
+  "card_version": 1,
+  "citation": {
+   "content_id": "youtube:evaldedup01",
+   "segment_seq": 0,
+   "quote": "placeholder quote text",
+   "speaker": {
+    "person_id": "p2",
+    "role": "owner",
+    "confidence": 0.9
+   }
+  }
+ },
+ "candidates": [
+  {
+   "id": 1,
+   "kind": "rule",
+   "domain": "trading_strategy",
+   "category": "trade_management",
+   "subject": "trail the remainder with the 10-day moving average",
+   "claim": "IF position held after partial profit THEN HOLD remainder UNTIL first tf_daily close below ma_10",
+   "conditions": [
+    "partial profit already taken"
+   ],
+   "action": "HOLD",
+   "horizon": "swing_weeks",
+   "instruments": [
+    "equities"
+   ],
+   "terms": [
+    "trailing_stop",
+    "ma_10",
+    "tf_daily",
+    "partial_profit"
+   ],
+   "aliases": [],
+   "numbers": {},
+   "evidence_level": "claimed",
+   "status": "active"
+  }
+ ],
+ "expected_decision": "related",
+ "expected_target": null,
+ "note": "same setup family, different exit"
+}
