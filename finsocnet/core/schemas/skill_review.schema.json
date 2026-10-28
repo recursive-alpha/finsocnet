@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "skill_review.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "staging_id",
+    "skill_name",
+    "files_read",
+    "findings",
+    "purpose_match",
+    "summary",
+    "verdict"
+  ],
+  "properties": {
+    "staging_id": {
+      "type": "string",
+      "pattern": "^st-\\d{14}-[0-9a-f]{4}$"
+    },
+    "skill_name": {
+      "type": "string"
+    },
+    "files_read": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "rule",
+          "assessment",
+          "note"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^F\\d+$"
+          },
+          "rule": {
+            "type": "string"
+          },
+          "assessment": {
+            "enum": [
+              "false_positive",
+              "accepted",
+              "blocking"
+            ]
+          },
+          "note": {
+            "type": "string",
+            "minLength": 3
+          }
+        }
+      }
+    },
+    "own_findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "file",
+          "severity",
+          "note"
+        ],
+        "properties": {
+          "file": {
+            "type": "string"
+          },
+          "line": {
+            "type": "integer"
+          },
+          "severity": {
+            "enum": [
+              "info",
+              "medium",
+              "high",
+              "blocking"
+            ]
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "purpose_match": {
+      "type": "boolean"
+    },
+    "network": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "writes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "duplicates": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 10
+    },
+    "verdict": {
+      "enum": [
+        "approve",
+        "reject"
+      ]
+    }
+  }
+}

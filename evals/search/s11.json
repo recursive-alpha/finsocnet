@@ -1,0 +1,12 @@
+{
+ "question": "how do support and resistance levels work best",
+ "expected_card_refs": [
+  "clean_level",
+  "in_play",
+  "mtf_alignment",
+  "consolidation_tension"
+ ],
+ "must_not": [
+  "options_theta"
+ ]
+}

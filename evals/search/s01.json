@@ -1,0 +1,11 @@
+{
+ "question": "how should I trail a stop on a winner after taking profits",
+ "expected_card_refs": [
+  "trail_ma10",
+  "trail_ma20_slow",
+  "partial_3_5_days"
+ ],
+ "must_not": [
+  "vwap_reclaim"
+ ]
+}

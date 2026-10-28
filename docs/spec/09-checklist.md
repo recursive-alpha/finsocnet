@@ -12,10 +12,10 @@
 | 1 Knowledge core | [x] | [x] transformer, dedup, search, miner | [x] | [~] 69 tests green; agent acceptance runs happen with the legacy conversion (Phase 2) |
 | 2 Persons and legacy conversion | [x] | [x] matcher, synthesizer, explorer | [x] | [~] conversion done; deleting the legacy folders waits for your approval of `docs/improvements/legacy-conversion.md` |
 | 3 Agent browser and session bridge | [x] | [x] agent-browser, session-bridge | [x] | [~] 15 tests incl. a real headless Chromium; live check with your accounts pending |
-| 4 P1 platform skills (15) | [x] | [x] all 15 | [~] v1 scripts in 9 skills | [ ] |
-| 5 Explore, self-improve, eval, skill installer | [x] | [x] source-explorer, self-improver, skill-installer | [ ] | [ ] |
-| 6 P2 platform skills (11) | [x] | [x] all 11 | [ ] | [ ] |
-| 7 P3 platform skills (7) | [x] | [x] all 7 | [ ] | [ ] |
+| 4 P1 platform skills (15) | [x] | [x] all 15 | [x] | [~] fixture tests for every adapter; live checks with your accounts pending (see platform notes) |
+| 5 Explore, self-improve, eval, skill installer | [x] | [x] source-explorer, self-improver, skill-installer | [x] | [~] eval sets below the spec minimum (see 2.6); unattended explore run not demonstrated |
+| 6 P2 platform skills (11) | [x] | [x] all 11 | [x] | [~] 5 verified against live APIs/pages, 6 hand-written fixtures only |
+| 7 P3 platform skills (7) | [x] | [x] all 7 | [x] | [~] hackernews verified live, the rest hand-written fixtures |
 | 8 Harness integration and docs | [x] | [x] finsocnet | [~] v1 installer and commands | [ ] |
 
 Bottom line: the **spec and every skill's instructions are written** (45 skills); **Phase 0 code exists** (`finsocnet/core`, `kb` admin/run/lesson/feedback/source/content, migration 003). Phases 1–8 are not implemented. The real `data/knowledge.db` is still on the v1 schema (migration waits for your approval); v1 platform scripts still run except their `--ingest-db` paths, which called the removed `knowledge-db/scripts/db.py` and return in Phase 4.
@@ -108,24 +108,25 @@ Deviation to review: the spec asks for a card for every legacy rule, "with a leg
 Notes: `session_bridge.py keygen` was run once while testing and created `~/.config/finsocnet/age_identity.txt` on this machine (chmod 600); reuse or delete it. Chrome hangs on the first cookie operation when no desktop keyring exists, so the agent browser passes `--password-store=basic --use-mock-keychain` on Linux.
 
 ### 2.5 Phase 4 — P1 platform skills
-- [ ] `finsocnet/core/platform.py`, `http.py`.
-- [ ] v2 adapters (fixtures + one live smoke test each): `youtube.py`, `transcribe.py`, `document.py`, `web.py`, `web_search.py`, `google.py`, `reddit.py`, `x.py`, `medium.py`, `substack.py`, `podcast.py`, `annas.py`, `papers.py`.
-- [ ] Old script names as wrappers (05 §1.4).
-- [ ] `grep -rn "chromium.launch\|new_context(" .agents/skills` → 0 (today: 38).
+- [x] `finsocnet/core/platform.py` (adapter contract, standard CLI: `--ingest`, `--enqueue`, `--save-cursor`, `known`, session guard), `http.py` (budgeted client), `segments.py`, `legacy.py`.
+- [x] Adapters in `finsocnet/adapters/` (the skill scripts are thin wrappers; deviation from the spec's "adapter inside the script"): `youtube, web_search, web, google, document, annas, papers, reddit, x, medium, substack, podcast` and `core/transcribe.py`.
+- [x] Old script names kept as wrappers (`core/legacy.py`); the password-login scripts `login_x/reddit/medium.py` and `session_manager.py` are deleted (ADR-005). `grep -rn "chromium.launch\|new_context(\|launch_persistent_context" .agents finsocnet` -> 0 matches outside `core/browser*`.
+- [x] Fixture tests for every supported subcommand; ContentRecords validate. Real recordings for hackernews, stackexchange, bluesky, github, openalex, itunes + podcast feed, rss, telegram preview, substack, sec; hand-written fixtures (documented shape, not recorded) for reddit, x, google, medium, annas, and every session-gated platform.
+- [~] **Not done:** the "live smoke test with your sessions" and `fetch --ingest -> market-idea-miner` end-to-end per skill. Plain HTTP to reddit.com, stocktwits.com and medium.com feeds was refused from this network, so those adapters rely on the agent browser and were not run against the real sites.
 
 ### 2.6 Phase 5 — Explore, self-improve, eval, skill installer
-- [x] Skill docs (see 1.2).
-- [ ] `finsocnet/core/queue.py`; `kb queue|gap|history|feedback …`.
-- [ ] Full eval sets (06 §3.1) incl. `evals/search/fixture_db.sql`.
-- [ ] `finsocnet explore add`, `persons review`, `feedback`.
-- [ ] `finsocnet/core/skill_install.py`, `skill_installer.py`, `config/skills.lock.json`, `skills.py` core/installed split, fixtures (07 §5.6).
-- [ ] Acceptance: 10 unattended explore steps; gap filled; one self-improver run with a data fix + branch proposal; skill-installer fixtures.
+- [x] `core/queue.py` and `kb queue|gap|history`, `kb feedback`; `finsocnet explore add|show`, `finsocnet persons review`, `finsocnet feedback`; URL dispatch rules (`core/dispatch.py`, 06 §1.3).
+- [x] `evals/search/fixture_db.sql` (68 fictional cards) and `eval prepare|score` for transform, dedup, search and attribution; `kb ... --since 7d` accepted.
+- [x] Skill installer: `core/skill_install.py` (B1-B6, H1-H8, M1-M4 scanner, safe archive extraction, review verification, lock file, update/remove/outdated), `skill_installer.py`, `skill_review.schema.json`, `config/skills.lock.json`, `finsocnet/skills.py` core/installed split, 18 offline tests (no staged file is ever passed to a subprocess; test-enforced).
+- [~] Eval sets are **below the minimum** of 06 §3.1: transform 10 (30), dedup 15 (40), search 15 (30), attribution 15 (15 ok). Results from the author of the cases: transform validity 1.0, recall 1.0; dedup accuracy 1.0, wrong-merge 0.0; search recall@10 1.0; attribution 1.0. They are not independent evidence. Plan: have the user review and extend the golden cases before trusting the numbers.
+- [ ] **Not demonstrated:** 10 unattended explore steps, a gap filled by exploration, and a self-improver run with a branch proposal. These need real content from the platforms and the user's review.
 
-### 2.7 Phase 6 — P2 platform skills (code)
-- [ ] `stackexchange.py` · [ ] `rss.py` · [ ] `forum.py` + `config/forums.yaml` · [ ] `telegram.py` · [ ] `discord.py` · [ ] `tradingview.py` · [ ] `facebook.py` · [ ] `sec.py` · [ ] `research.py` · [ ] `github.py` · [ ] `bluesky.py`
+### 2.7 Phase 6 — P2 platform skills
+- [x] `stackexchange, rss, forum (discourse/xenforo/generic), telegram (public), discord (user/bot), tradingview, facebook, sec, research, github, bluesky`.
+- Discord and Facebook ship with the ToS warnings; enabling them for real use waits for your answer to SPEC §9 Q2.
 
-### 2.8 Phase 7 — P3 platform skills (code)
-- [ ] `hackernews.py` · [ ] `stocktwits.py` · [ ] `tiktok.py` · [ ] `instagram.py` · [ ] `threads.py` · [ ] `seekingalpha.py` · [ ] `linkedin.py`
+### 2.8 Phase 7 — P3 platform skills
+- [x] `hackernews, stocktwits, tiktok, instagram, threads, seekingalpha, linkedin`.
 
 ### 2.9 Phase 8 — Harness integration and docs
 - [~] `finsocnet install <harness>` exists (v1); needs v2 slash commands (07 §3) and symlinks for all core + installed skills.

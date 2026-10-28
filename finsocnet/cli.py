@@ -231,6 +231,11 @@ def main():
         kb_main(sys.argv[2:])
         return
 
+    if len(sys.argv) > 1 and sys.argv[1] in ("explore", "persons", "feedback") and not (sys.argv[1] == "explore" and len(sys.argv) > 2 and sys.argv[2] in ("youtube", "x", "reddit", "medium", "arxiv", "annas_archive")):
+        from finsocnet.core import user_cli
+        {"explore": user_cli.explore_main, "persons": user_cli.persons_main, "feedback": user_cli.feedback_main}[sys.argv[1]](sys.argv[2:])
+        return
+
     if len(sys.argv) > 1 and sys.argv[1] == "session":
         from finsocnet.core.session_cli import local_main
         local_main(sys.argv[2:])

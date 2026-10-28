@@ -1,0 +1,9 @@
+{
+ "question": "what is a volatility contraction pattern",
+ "expected_card_refs": [
+  "vcp_def"
+ ],
+ "must_not": [
+  "short_squeeze"
+ ]
+}

@@ -229,3 +229,30 @@ def merge(conn: sqlite3.Connection, src: str, dst: str, run_id: int) -> dict[str
         conn.execute("UPDATE persons SET status = 'merged', merged_into = ?, updated_at = ? WHERE id = ?", (dst, utc_now(), src))
         conn.execute("UPDATE persons SET updated_at = ? WHERE id = ?", (utc_now(), dst))  # fires the persons_fts refresh trigger (aliases moved)
     return {"merged": src, "into": dst, "moved": moved, "note": "rebuild the rulebook of the target person (`person-skill-synthesizer`)"}
+
+
+def review_appearance(conn: sqlite3.Connection, appearance_id: int, action: str, to_person: str | None = None) -> dict[str, Any]:
+    """Resolve a `needs_review` appearance: confirm, reject, or reassign it to another person."""
+    if action not in ("confirm", "reject", "reassign"):
+        raise CliError("USAGE", "action must be confirm, reject or reassign")
+    with transaction(conn):
+        a = conn.execute("SELECT * FROM person_appearances WHERE id = ?", (appearance_id,)).fetchone()
+        if a is None:
+            raise CliError("NOT_FOUND", f"appearance {appearance_id} not found")
+        if action == "confirm":
+            conn.execute("UPDATE person_appearances SET match_status = 'confirmed', match_confidence = MAX(match_confidence, 0.9) WHERE id = ?", (appearance_id,))
+        elif action == "reject":
+            conn.execute("UPDATE person_appearances SET match_status = 'rejected' WHERE id = ?", (appearance_id,))
+            if a["content_id"]:
+                conn.execute("UPDATE card_citations SET person_id = NULL WHERE content_id = ? AND person_id = ?", (a["content_id"], a["person_id"]))
+        else:
+            if not to_person or conn.execute("SELECT 1 FROM persons WHERE id = ?", (to_person,)).fetchone() is None:
+                raise CliError("NOT_FOUND", f"person {to_person} not found")
+            conn.execute("UPDATE person_appearances SET match_status = 'rejected' WHERE id = ?", (appearance_id,))
+            if a["content_id"]:
+                conn.execute("UPDATE card_citations SET person_id = ? WHERE content_id = ? AND person_id = ?", (to_person, a["content_id"], a["person_id"]))
+            dup = conn.execute("SELECT id FROM person_appearances WHERE person_id = ? AND content_id IS ? AND source_id IS ? AND role = ?", (to_person, a["content_id"], a["source_id"], a["role"])).fetchone()
+            if dup is None:
+                conn.execute("INSERT INTO person_appearances (person_id, content_id, source_id, role, match_confidence, match_status, evidence) VALUES (?, ?, ?, ?, 1.0, 'confirmed', 'reassigned by user')",
+                             (to_person, a["content_id"], a["source_id"], a["role"]))
+    return {"appearance_id": appearance_id, "action": action, "to": to_person}

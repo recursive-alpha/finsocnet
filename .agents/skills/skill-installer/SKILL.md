@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P2"
-  status: planned
+  status: ready
   phase: "5"
   spec: docs/spec/07-harness-integration.md
 ---
 
 # Skill Installer
-
-> **Status: planned — built in Phase 5** (depends only on Phase 0, so it can be built earlier).
 
 Installs third-party skills into `.agents/skills/<name>/` (the system skills every harness sees) and records them in `config/skills.lock.json`. Core FinSocNet skills are never touched by this skill.
 

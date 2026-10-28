@@ -1,0 +1,9 @@
+{
+ "question": "why do growth stocks fall when interest rates rise",
+ "expected_card_refs": [
+  "real_yields"
+ ],
+ "must_not": [
+  "orb_5m"
+ ]
+}

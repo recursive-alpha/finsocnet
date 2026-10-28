@@ -1,0 +1,12 @@
+{
+ "question": "is it ok to hold positions overnight",
+ "expected_card_refs": [
+  "gap_risk_overnight",
+  "longs_overnight",
+  "overnight_cap",
+  "close_shorts_same_day"
+ ],
+ "must_not": [
+  "journal_practice"
+ ]
+}

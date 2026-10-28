@@ -1,0 +1,12 @@
+{
+ "question": "where should I place my stop loss",
+ "expected_card_refs": [
+  "stop_before_entry",
+  "flag_stop",
+  "round_number_stops",
+  "stop_hunt"
+ ],
+ "must_not": [
+  "sharpe_momentum"
+ ]
+}

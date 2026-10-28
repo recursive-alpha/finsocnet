@@ -1,0 +1,11 @@
+{
+ "question": "which market conditions are good for breakout trading",
+ "expected_card_refs": [
+  "regime_ma",
+  "regime_cash",
+  "exposure_ramp"
+ ],
+ "must_not": [
+  "options_theta"
+ ]
+}

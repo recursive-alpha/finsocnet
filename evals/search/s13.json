@@ -1,0 +1,10 @@
+{
+ "question": "how to handle shorting in an uptrend",
+ "expected_card_refs": [
+  "trend_never_short",
+  "close_shorts_same_day"
+ ],
+ "must_not": [
+  "journal_practice"
+ ]
+}

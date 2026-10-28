@@ -1,0 +1,11 @@
+{
+ "question": "when should I stop trading for the day",
+ "expected_card_refs": [
+  "daily_loss_2r",
+  "halve_after_streak",
+  "walk_away"
+ ],
+ "must_not": [
+  "vcp_def"
+ ]
+}

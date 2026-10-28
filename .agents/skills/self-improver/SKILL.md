@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P2"
-  status: planned
+  status: ready
   phase: "5"
   spec: docs/spec/06-explore-improve-eval.md
 ---
 
 # Self-Improver
-
-> **Status: planned — built in Phase 5.**
 
 ## Hard limits
 

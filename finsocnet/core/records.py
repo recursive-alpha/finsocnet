@@ -14,7 +14,7 @@ from referencing.jsonschema import DRAFT202012
 from finsocnet.core import config
 from finsocnet.core.output import CliError
 
-SCHEMA_NAMES = ["content_record", "card", "query_card", "decision", "person", "person_skill", "eval_case"]
+SCHEMA_NAMES = ["content_record", "card", "query_card", "decision", "person", "person_skill", "eval_case", "skill_review"]
 
 
 @lru_cache(maxsize=None)

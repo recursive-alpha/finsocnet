@@ -1,0 +1,12 @@
+{
+ "question": "how do I stop overtrading and revenge trading",
+ "expected_card_refs": [
+  "walk_away",
+  "revenge_trading",
+  "open_chop",
+  "daily_plan"
+ ],
+ "must_not": [
+  "real_yields"
+ ]
+}

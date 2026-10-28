@@ -1,0 +1,12 @@
+{
+ "question": "what mistakes make backtests unreliable",
+ "expected_card_refs": [
+  "overfitting",
+  "survivorship",
+  "lookahead",
+  "costs_matter"
+ ],
+ "must_not": [
+  "orb_5m"
+ ]
+}

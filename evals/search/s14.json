@@ -1,0 +1,12 @@
+{
+ "question": "how should I review my trades to improve",
+ "expected_card_refs": [
+  "journal_practice",
+  "weekly_review",
+  "demon_finder",
+  "negative_visualization"
+ ],
+ "must_not": [
+  "htf_setup"
+ ]
+}

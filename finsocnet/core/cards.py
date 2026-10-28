@@ -13,7 +13,7 @@ from typing import Any
 
 from finsocnet.core import config, fts, vocab
 from finsocnet.core.db import dumps, loads, savepoint, transaction
-from finsocnet.core.ids import utc_now
+from finsocnet.core.ids import parse_since, utc_now
 from finsocnet.core.normalize import quote_in, quote_key
 from finsocnet.core.output import CliError
 from finsocnet.core.records import schema_errors
@@ -594,7 +594,7 @@ def list_cards(conn: sqlite3.Connection, person: str | None = None, category: st
         args.append(category)
     if since:
         sql += " AND k.created_at >= ?"
-        args.append(since)
+        args.append(parse_since(since))
     if person:
         sql += " AND EXISTS (SELECT 1 FROM card_citations c WHERE c.card_id = k.id AND c.person_id = ?)"
         args.append(person)
@@ -727,7 +727,7 @@ def list_decisions(conn: sqlite3.Connection, since: str | None = None, reviewed:
     sql, args = "SELECT id, decision, target_card, result_card, rationale, produced_by, run_id, reviewed, review_note, created_at FROM dedup_decisions WHERE 1=1", []
     if since:
         sql += " AND created_at >= ?"
-        args.append(since)
+        args.append(parse_since(since))
     if reviewed == "none":
         sql += " AND reviewed IS NULL"
     elif reviewed:

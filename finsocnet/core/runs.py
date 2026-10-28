@@ -7,7 +7,7 @@ from typing import Any
 
 from finsocnet.core import config
 from finsocnet.core.db import dumps, loads, transaction
-from finsocnet.core.ids import utc_now
+from finsocnet.core.ids import parse_since, utc_now
 from finsocnet.core.output import CliError
 
 OUTCOMES = ("success", "partial", "failed", "aborted")
@@ -67,7 +67,7 @@ def list_runs(conn: sqlite3.Connection, skill: str | None = None, since: str | N
         args.append(skill)
     if since:
         sql += " AND started_at >= ?"
-        args.append(since)
+        args.append(parse_since(since))
     sql += " ORDER BY id DESC LIMIT ?"
     args.append(limit)
     out = []

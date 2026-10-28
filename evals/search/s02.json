@@ -1,0 +1,10 @@
+{
+ "question": "what percent of my account should I risk on one trade",
+ "expected_card_refs": [
+  "risk_1pct",
+  "risk_025"
+ ],
+ "must_not": [
+  "fomc_volatility"
+ ]
+}

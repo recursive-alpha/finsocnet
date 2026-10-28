@@ -1,0 +1,9 @@
+{
+ "question": "should I average down on a losing trade",
+ "expected_card_refs": [
+  "never_avg_down"
+ ],
+ "must_not": [
+  "gap_and_go"
+ ]
+}

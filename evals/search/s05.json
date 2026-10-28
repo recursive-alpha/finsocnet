@@ -1,0 +1,12 @@
+{
+ "question": "how do I know a breakout is real",
+ "expected_card_refs": [
+  "rvol_confirm",
+  "tape_signature",
+  "thin_volume_trap",
+  "consolidation_tension"
+ ],
+ "must_not": [
+  "kelly_caution"
+ ]
+}

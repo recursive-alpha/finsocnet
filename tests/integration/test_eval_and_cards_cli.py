@@ -108,3 +108,14 @@ def test_attribution_golden_set_and_scoring(evals, tmp_path):
     assert eval_cli.score_attribution(tmp_path)["metrics"]["accuracy"] == 1.0
     (tmp_path / "a02-interview-qa.attribution.json").write_text(json.dumps({"0": "example-guest", "1": "example-guest", "2": "example-guest", "3": "example-guest"}))
     assert eval_cli.score_attribution(tmp_path)["metrics"]["accuracy"] < 1.0
+
+
+def test_search_golden_set_scores_a_query_card_against_the_fixture_db(evals, tmp_path):
+    assert len(eval_cli.case_files("search")) >= 15
+    qc = {"intent": "find_rules", "subject": "risk per trade as a percent of the account", "terms": ["risk_per_trade", "position_sizing"], "aliases": ["risk at most 1% of equity", "small risk per trade"]}
+    (tmp_path / "s02.query_card.json").write_text(json.dumps(qc))
+    (tmp_path / "s07.query_card.json").write_text(json.dumps({"intent": "find_rules", "subject": "vix spikes", "terms": ["vix"]}))
+    rep = eval_cli.score_search(tmp_path)
+    miss = {f["case"] for f in rep["failures"] if "missing" in f["reason"]}
+    assert "s02" not in miss and "s07" in miss and rep["n"] == len(eval_cli.case_files("search"))
+    assert 0 < rep["metrics"]["recall@10"] < 1

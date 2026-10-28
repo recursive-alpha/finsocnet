@@ -101,3 +101,15 @@ def bundle_id(now: datetime | None = None) -> str:
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def parse_since(value: str | None) -> str | None:
+    """`7d`, `12h`, `2w` (relative to now) or an ISO date/time -> UTC ISO string comparable with stored timestamps."""
+    if not value:
+        return None
+    m = re.fullmatch(r"(\d+)([hdw])", value.strip().lower())
+    if not m:
+        return value
+    from datetime import timedelta
+    delta = timedelta(**{{"h": "hours", "d": "days", "w": "weeks"}[m.group(2)]: int(m.group(1))})
+    return (datetime.now(timezone.utc) - delta).strftime("%Y-%m-%dT%H:%M:%SZ")
