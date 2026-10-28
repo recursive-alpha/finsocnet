@@ -7,7 +7,7 @@ A Next.js app in [`web/`](../web/) for people who prefer a browser. It contains 
 ```bash
 make web-install && make web-build && make web-start      # http://localhost:3000
 # development: make web-dev
-# Docker: make docker-build && make docker-up              # http://localhost:3001, ./data mounted
+# Docker: make docker-build && make docker-up              # web on http://localhost:3001; CLI: docker compose exec worker uv run finsocnet ...
 ```
 
 It runs from the repository root (it finds `pyproject.toml`) and uses `data/knowledge.db`. `uv` must be on `PATH` for the server process.

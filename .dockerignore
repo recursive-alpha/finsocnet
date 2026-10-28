@@ -4,18 +4,14 @@ __pycache__
 *.py[cod]
 .pytest_cache
 *.log
+.env
 
 # Web artifacts
 web/node_modules
 web/.next
 web/out
 
-# Runtime data caches
-data/audio/*
-data/screenshots/*
-data/backups/*
-data/work/*
-data/browser-profile/*
-!data/knowledge.db
-!data/persons/*
-!data/.gitkeep
+# Runtime data is a volume, never part of the image
+data
+legacy
+tests

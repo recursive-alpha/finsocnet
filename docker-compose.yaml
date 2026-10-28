@@ -1,23 +1,42 @@
+# FinSocNet stack: the web UI and a worker container with the CLI and skills, sharing ./data.
+#
+#   docker compose up -d --build
+#   docker compose exec worker uv run finsocnet kb stats
+#   docker compose exec worker uv run .agents/skills/youtube-extractor/scripts/youtube.py list @Qullamaggie --tab all
+#
+# data/ is a bind mount, never part of the image (and is git-ignored).
+x-finsocnet: &finsocnet
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: finsocnet:latest
+  environment:
+    KNOWLEDGE_DB_PATH: /app/data/knowledge.db
+    FINSOCNET_HOME: /app
+    FINSOCNET_EMBED_PROVIDER: ${FINSOCNET_EMBED_PROVIDER:-fastembed}
+  volumes:
+    - ./data:/app/data
+  restart: unless-stopped
+
 services:
-  finsocnet:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: finsocnet:latest
+  web:
+    <<: *finsocnet
     ports:
       - "${PORT:-3001}:3000"
     environment:
-      - NODE_ENV=production
-      - PORT=3000
-      - HOST=0.0.0.0
-      - KNOWLEDGE_DB_PATH=/app/data/knowledge.db
-      - FINSOCNET_HOME=/app
-    volumes:
-      - ./data:/app/data
-    restart: unless-stopped
+      KNOWLEDGE_DB_PATH: /app/data/knowledge.db
+      FINSOCNET_HOME: /app
+      FINSOCNET_EMBED_PROVIDER: ${FINSOCNET_EMBED_PROVIDER:-fastembed}
+      PORT: "3000"
+      HOST: 0.0.0.0
+
+  # Idle container to run the CLI and platform skills in: docker compose exec worker <command>
+  worker:
+    <<: *finsocnet
+    command: ["sleep", "infinity"]
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/stats || exit 1"]
-      interval: 15s
-      timeout: 5s
+      test: ["CMD-SHELL", "uv run finsocnet kb doctor >/dev/null"]
+      interval: 60s
+      timeout: 30s
       retries: 3
-      start_period: 15s
+      start_period: 30s

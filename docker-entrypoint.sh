@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
-# Initialize SQLite database if absent
-if [ ! -f "${KNOWLEDGE_DB_PATH:-/app/data/knowledge.db}" ]; then
-    echo "==> Knowledge base not found at ${KNOWLEDGE_DB_PATH:-/app/data/knowledge.db}. Initializing database..."
-    uv run finsocnet kb init || true
-fi
+# Create or migrate the knowledge base (idempotent; migrations back it up first).
+mkdir -p /app/data/backups
+uv run finsocnet kb init >/dev/null 2>&1 || uv run finsocnet kb migrate >/dev/null
 
 exec "$@"
