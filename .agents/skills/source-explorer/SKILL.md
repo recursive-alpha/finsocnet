@@ -26,6 +26,7 @@ metadata:
       - **list** → unknown items were enqueued; mark obviously irrelevant ones `skipped` with a reason (never silently drop them).
       - **profile** → `person-matcher` on the profile; if the source is relevant, enqueue `crawl_source` for it.
       - **search** → enqueue the promising results with a priority and one-line reason.
+   c2. **Visited items.** Platform scripts record every item they show you in `seen_items` (when a run id is given): `search`/`list` print `visited` (`null|seen|queued|fetched|skipped|failed`) and `seen_count` per item and `known` is true for stored, fetched or skipped items. Add `--new-only` to hide those. When you judge an item irrelevant, say so once so it never comes back: `kb seen mark --key <item id> --status skipped --note "<why>" --run R`. `kb seen check <key>…`, `kb seen list --status skipped`, `kb seen stats` answer "did we look at this already?".
    d. `kb queue update <id> --status done|failed|deferred [--retry-after S] [--error "…"] --run R`.
 4. Errors: exit 3 → `session-bridge` procedure; exit 4 → `deferred` with `retry_after_sec`; exit 5 → `failed`; exit 7 → `agent-browser start`, retry once.
 5. Gaps touched in this step: re-run the gap's Query Card (`kb card search`). Good answer → `kb gap update <id> --status filled --filled-by <card ids>`.

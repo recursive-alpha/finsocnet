@@ -93,3 +93,32 @@ def test_session_platforms_require_a_logged_in_session(conn, capsys):
     code, env = call(NeedsLogin(), capsys, "search", "q")
     assert code == 0
 
+
+
+def test_visited_items_are_tracked_per_run_and_new_only_hides_them(conn, run_id, capsys):
+    # no run: nothing is recorded
+    call(Fake(), capsys, "search", "sizing")
+    assert conn.execute("SELECT COUNT(*) FROM seen_items").fetchone()[0] == 0
+    # with a run: both items recorded, a second sighting counts
+    code, env = call(Fake(), capsys, "search", "sizing", "--run", str(run_id))
+    assert [i["visited"] for i in env["data"]["items"]] == [None, None]
+    code, env = call(Fake(), capsys, "search", "sizing", "--run", str(run_id))
+    assert [i["visited"] for i in env["data"]["items"]] == ["seen", "seen"] and env["data"]["items"][0]["seen_count"] == 1
+    assert conn.execute("SELECT times_seen FROM seen_items WHERE key = 'reddit:aaa111'").fetchone()[0] == 2
+    # a rejected item stays rejected and disappears from --new-only without ever being ingested
+    code, env = call(Fake(), capsys, "search", "sizing", "--new-only", "--run", str(run_id))
+    assert env["data"]["count"] == 2 and env["data"]["hidden_known"] == 0
+    from finsocnet.core import seen
+    seen.set_status(conn, "reddit:bbb222", "skipped", run_id, note="off topic")
+    seen.mark_seen(conn, "reddit", [{"id": "reddit:bbb222", "ref": "https://r/2"}], run_id)  # a new sighting does not undo the decision
+    assert conn.execute("SELECT status FROM seen_items WHERE key = 'reddit:bbb222'").fetchone()[0] == "skipped"
+    code, env = call(Fake(), capsys, "search", "sizing", "--new-only", "--run", str(run_id))
+    assert [i["id"] for i in env["data"]["items"]] == ["reddit:aaa111"] and env["data"]["hidden_known"] == 1
+    # fetch --ingest marks fetched; list --enqueue marks the rest queued and does not queue twice
+    call(Fake(), capsys, "fetch", "aaa111", "--ingest", "--run", str(run_id))
+    assert conn.execute("SELECT status FROM seen_items WHERE key = 'reddit:aaa111'").fetchone()[0] == "fetched"
+    code, env = call(Fake(), capsys, "list", "r/test", "--enqueue", "--run", str(run_id))
+    assert env["data"]["enqueued"] == []  # aaa111 fetched, bbb222 skipped
+    before = conn.execute("SELECT times_seen FROM seen_items WHERE key = 'reddit:aaa111'").fetchone()[0]
+    call(Fake(), capsys, "search", "sizing", "--no-track", "--run", str(run_id))
+    assert conn.execute("SELECT times_seen FROM seen_items WHERE key = 'reddit:aaa111'").fetchone()[0] == before

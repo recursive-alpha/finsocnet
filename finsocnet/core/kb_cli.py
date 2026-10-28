@@ -10,7 +10,7 @@ import time
 from pathlib import Path
 from typing import Any, Callable
 
-from finsocnet.core import cards as cards_mod, config, content as content_mod, embed as embed_mod, migrations, translate as translate_mod, persons as persons_mod, runs, vocab as vocab_mod
+from finsocnet.core import cards as cards_mod, config, content as content_mod, embed as embed_mod, seen as seen_mod, migrations, translate as translate_mod, persons as persons_mod, runs, vocab as vocab_mod
 from finsocnet.core import person_skills as skills_mod
 from finsocnet.core import queue as queue_mod
 from finsocnet.core import output
@@ -618,6 +618,26 @@ def _common() -> argparse.ArgumentParser:
     return p
 
 
+def cmd_seen_check(ctx: Ctx) -> Result:
+    got = seen_mod.lookup(ctx.conn(), ctx.args.keys)
+    known = {r[0] for r in ctx.conn().execute(f"SELECT id FROM contents WHERE id IN ({','.join('?' * len(ctx.args.keys))})", ctx.args.keys)}
+    return Result({"items": [{"key": k, "in_contents": k in known, **(got.get(k) or {"status": None})} for k in ctx.args.keys]})
+
+
+def cmd_seen_mark(ctx: Ctx) -> Result:
+    a, run = ctx.args, ctx.run_id()
+    return Result(seen_mod.set_status(ctx.conn(), a.key, a.status, run, platform=a.platform, note=a.note, url=a.url, title=a.title))
+
+
+def cmd_seen_list(ctx: Ctx) -> Result:
+    a = ctx.args
+    return Result({"items": seen_mod.list_items(ctx.conn(), platform=a.platform, status=a.status, source=a.source, limit=a.limit)})
+
+
+def cmd_seen_stats(ctx: Ctx) -> Result:
+    return Result(seen_mod.stats(ctx.conn()))
+
+
 def cmd_embed_status(ctx: Ctx) -> Result:
     return Result(embed_mod.status(ctx.conn()))
 
@@ -938,6 +958,23 @@ def build_parser() -> _Parser:
     p = leaf(g, ("queue", "list"), "list", cmd_queue_list)
     p.add_argument("--status", choices=queue_mod.STATUSES)
     p.add_argument("--limit", type=int, default=100)
+
+    g = group("seen", "items the explorers have looked at (specs/11-explore-visited-open-topics.md)")
+    p = leaf(g, ("seen", "check"), "check", cmd_seen_check, "status of item keys (visited? stored?)")
+    p.add_argument("keys", nargs="+")
+    p = leaf(g, ("seen", "mark"), "mark", cmd_seen_mark, "record a decision about an item (skipped / failed / fetched ...)")
+    p.add_argument("--key", required=True)
+    p.add_argument("--status", required=True, choices=list(seen_mod.STATUSES))
+    p.add_argument("--platform")
+    p.add_argument("--note")
+    p.add_argument("--url")
+    p.add_argument("--title")
+    p = leaf(g, ("seen", "list"), "list", cmd_seen_list)
+    p.add_argument("--platform")
+    p.add_argument("--status", choices=list(seen_mod.STATUSES))
+    p.add_argument("--source")
+    p.add_argument("--limit", type=int, default=100)
+    leaf(g, ("seen", "stats"), "stats", cmd_seen_stats)
 
     g = group("embed", "semantic search index (specs/10-semantic-search.md)")
     leaf(g, ("embed", "status"), "status", cmd_embed_status)

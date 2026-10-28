@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
-from finsocnet.core import config, content, output, persons, queue, runs
+from finsocnet.core import config, content, output, persons, queue, runs, seen
 from finsocnet.core.db import connect
 from finsocnet.core.ids import utc_now
 from finsocnet.core.output import CliError, Result
@@ -109,8 +109,10 @@ def build_parser(adapter: PlatformAdapter, extra: dict[str, tuple[Callable[[argp
     common.add_argument("--format", choices=["json", "text"], default="json")
     common.add_argument("--run", type=int)
     common.add_argument("--db")
+    common.add_argument("--no-track", action="store_true", help="do not record the items in seen_items (specs/11 §1)")
     s = sub.add_parser("search", parents=[common])
     s.add_argument("query")
+    s.add_argument("--new-only", action="store_true", help="drop items that were already fetched or skipped")
     s.add_argument("--limit", type=int, default=20)
     s.add_argument("--since")
     _add_opts(s, adapter.opts.get("search"))
@@ -125,6 +127,7 @@ def build_parser(adapter: PlatformAdapter, extra: dict[str, tuple[Callable[[argp
     l.add_argument("--since")
     l.add_argument("--save-cursor", action="store_true")
     l.add_argument("--enqueue", action="store_true")
+    l.add_argument("--new-only", action="store_true", help="drop items that were already fetched or skipped")
     _add_opts(l, adapter.opts.get("list"))
     f = sub.add_parser("fetch", parents=[common])
     f.add_argument("item")
@@ -141,7 +144,7 @@ def _opts(args: argparse.Namespace, skip: set[str]) -> dict[str, Any]:
     return {k: v for k, v in vars(args).items() if k not in skip}
 
 
-STD_SKIP = {"cmd", "format", "run", "db", "ingest", "full", "save_cursor", "enqueue", "query", "target", "source", "item", "limit", "since", "cursor"}
+STD_SKIP = {"cmd", "format", "run", "db", "ingest", "full", "save_cursor", "enqueue", "new_only", "no_track", "query", "target", "source", "item", "limit", "since", "cursor"}
 
 
 def _mark_known(conn: Any, items: list[dict[str, Any]]) -> None:
@@ -154,6 +157,26 @@ def _mark_known(conn: Any, items: list[dict[str, Any]]) -> None:
         known |= {r[0] for r in conn.execute(f"SELECT id FROM contents WHERE id IN ({','.join('?' * len(chunk))})", chunk)}
     for it in items:
         it["known"] = it["id"] in known
+
+
+def _track(conn: Any, args: argparse.Namespace, platform: str, items: list[dict[str, Any]], source_id: str | None = None) -> None:
+    """Record sightings when the call belongs to a run (`--run` or FINSOCNET_RUN_ID); an ad-hoc look-around leaves no trace."""
+    if conn is None or getattr(args, "no_track", False) or not items:
+        return
+    try:
+        run_id = runs.resolve_run(conn, args.run)
+        seen.mark_seen(conn, platform, items, run_id, source_id)
+    except (CliError, Exception):  # noqa: BLE001 - tracking must never break a fetch
+        return
+
+
+def _visit(conn: Any, args: argparse.Namespace, key: str, status: str, **kw: Any) -> None:
+    if conn is None or getattr(args, "no_track", False):
+        return
+    try:
+        seen.set_status(conn, key, status, runs.resolve_run(conn, args.run), **kw)
+    except (CliError, Exception):  # noqa: BLE001
+        return
 
 
 def _check_session(adapter: PlatformAdapter, conn: Any) -> None:
@@ -213,7 +236,12 @@ def run_platform_cli(adapter: PlatformAdapter, extra: dict[str, tuple[Callable[[
             if args.cmd == "search":
                 items = adapter.search(args.query, limit=args.limit, since=args.since, **_opts(args, skip))
                 _mark_known(conn, items)
-                return Result({"items": items, "count": len(items)})
+                seen.annotate(conn, items)
+                _track(conn, args, adapter.platform, items)
+                total = len(items)
+                if args.new_only:
+                    items = [i for i in items if not i["known"]]
+                return Result({"items": items, "count": len(items), "hidden_known": total - len(items)})
             if args.cmd == "profile":
                 prof = adapter.profile(args.target, **_opts(args, skip))
                 data: dict[str, Any] = {"profile": prof}
@@ -231,7 +259,12 @@ def run_platform_cli(adapter: PlatformAdapter, extra: dict[str, tuple[Callable[[
             if args.cmd == "list":
                 res = adapter.list(args.source, limit=args.limit, cursor=args.cursor, since=args.since, **_opts(args, skip))
                 _mark_known(conn, res["items"])
+                seen.annotate(conn, res["items"])
+                _track(conn, args, adapter.platform, res["items"], (res.get("source") or {}).get("id"))
                 data = dict(res)
+                if args.new_only:
+                    data["items"] = [i for i in res["items"] if not i["known"]]
+                    data["hidden_known"] = len(res["items"]) - len(data["items"])
                 if args.enqueue or args.save_cursor:
                     if conn is None:
                         raise CliError("NOT_FOUND", "database does not exist", "run `finsocnet kb init`")
@@ -240,7 +273,10 @@ def run_platform_cli(adapter: PlatformAdapter, extra: dict[str, tuple[Callable[[
                         data["enqueued"] = [queue.add(conn, {"target": it["ref"], "target_kind": "url", "platform": adapter.platform, "action": "fetch",
                                                               "origin": "source_refresh", "origin_ref": (res.get("source") or {}).get("id") or args.source,
                                                               "reason": it.get("title") or "new item from source refresh", "priority": 0.4}, run_id)
-                                            for it in res["items"] if not it["known"]]
+                                            for it in res["items"] if not it["known"] and it.get("visited") != "queued"]
+                        for it in res["items"]:
+                            if not it["known"] and it.get("visited") != "queued":
+                                _visit(conn, args, it["id"], "queued", platform=adapter.platform, url=it.get("ref"), title=it.get("title"))
                     if args.save_cursor and (res.get("source") or {}).get("id"):
                         from finsocnet.core.db import transaction
                         with transaction(conn):
@@ -249,6 +285,7 @@ def run_platform_cli(adapter: PlatformAdapter, extra: dict[str, tuple[Callable[[
                 return Result(data)
             rec = adapter.fetch(args.item, **_opts(args, skip))
             path = write_record(rec)
+            _visit(conn, args, rec["id"], "fetched" if args.ingest else "seen", platform=adapter.platform, url=rec.get("url"), title=rec.get("title"))
             out = rec if args.full else summarize(rec, path)
             data = {"content": out}
             if args.ingest:
