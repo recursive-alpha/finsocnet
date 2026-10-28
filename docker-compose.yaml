@@ -1,0 +1,23 @@
+services:
+  finsocnet:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: finsocnet:latest
+    ports:
+      - "${PORT:-3001}:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=0.0.0.0
+      - KNOWLEDGE_DB_PATH=/app/data/knowledge.db
+      - FINSOCNET_HOME=/app
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/stats || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s

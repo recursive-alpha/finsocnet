@@ -1,0 +1,21 @@
+.git
+.venv
+__pycache__
+*.py[cod]
+.pytest_cache
+*.log
+
+# Web artifacts
+web/node_modules
+web/.next
+web/out
+
+# Runtime data caches
+data/audio/*
+data/screenshots/*
+data/backups/*
+data/work/*
+data/browser-profile/*
+!data/knowledge.db
+!data/persons/*
+!data/.gitkeep
