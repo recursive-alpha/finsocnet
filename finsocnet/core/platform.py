@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from finsocnet.core import config, content, output, persons, queue, runs, seen
-from finsocnet.core.db import connect
+from finsocnet.core.db import connect, transaction
 from finsocnet.core.ids import utc_now
 from finsocnet.core.output import CliError, Result
 from finsocnet.core.records import schema_errors
@@ -306,5 +306,15 @@ def run_platform_cli(adapter: PlatformAdapter, extra: dict[str, tuple[Callable[[
 def _ingest_source(conn: Any, prof: dict[str, Any], run_id: int) -> dict[str, Any]:
     from finsocnet.core.db import transaction
     with transaction(conn):
-        return content.upsert_source(conn, {"id": prof["source_id"], "title": prof.get("display_name") or prof.get("handle"), "url": prof.get("profile_url"),
-                                            "requires_session": False})
+        res = content.upsert_source(conn, {"id": prof["source_id"], "title": prof.get("display_name") or prof.get("handle"), "url": prof.get("profile_url"),
+                                           "requires_session": False, "avatar_url": prof.get("avatar_url")})
+    if prof.get("avatar_url"):  # a picture is nice to have: a failed download is a warning, never a failed profile
+        from finsocnet.core import media
+        try:
+            img = media.download_image(prof["avatar_url"], "sources", prof["source_id"].split(":", 1)[0])
+            with transaction(conn):
+                content.upsert_source(conn, {"id": prof["source_id"], "avatar_path": img["path"], "avatar_sha256": img["sha256"]})
+            res["avatar"] = {"path": img["path"], "width": img["width"], "height": img["height"]}
+        except CliError as e:
+            res["avatar_error"] = {"code": e.code, "message": e.message}
+    return res

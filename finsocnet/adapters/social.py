@@ -88,7 +88,7 @@ class Facebook(PlatformAdapter):
         g = (gid.group(1) or gid.group(2)) if gid else target
         _f, html = _browser.load_html("facebook", f"https://www.facebook.com/groups/{g}/about", wait="networkidle")
         md, meta = web.extract_markdown(html)
-        return profile_record("facebook", f"facebook:group:{g}", g, display_name=meta.get("title"), bio=md[:500] or None, profile_url=f"https://www.facebook.com/groups/{g}/")
+        return profile_record("facebook", f"facebook:group:{g}", g, display_name=meta.get("title"), avatar_url=meta.get("image"), bio=md[:500] or None, profile_url=f"https://www.facebook.com/groups/{g}/")
 
     def list(self, source, *, limit=20, cursor=None, since=None, **_):
         g = re.search(r"/groups/([\w.-]+)", source).group(1) if "/groups/" in source else source  # type: ignore[union-attr]
@@ -151,7 +151,7 @@ class Threads(PlatformAdapter):
         h = target.rstrip("/").split("/")[-1].lstrip("@")
         _f, html = _browser.load_html("threads", f"https://www.threads.net/@{h}", wait="networkidle")
         md, meta = web.extract_markdown(html)
-        return profile_record("threads", f"threads:user:{h.lower()}", f"@{h}", display_name=meta.get("title"), bio=meta.get("description"), profile_url=f"https://www.threads.net/@{h}")
+        return profile_record("threads", f"threads:user:{h.lower()}", f"@{h}", display_name=meta.get("title"), avatar_url=meta.get("image"), bio=meta.get("description"), profile_url=f"https://www.threads.net/@{h}")
 
     def list(self, source, *, limit=20, cursor=None, since=None, **_):
         h = source.rstrip("/").split("/")[-1].lstrip("@")
@@ -181,7 +181,7 @@ class Instagram(PlatformAdapter):
         h = target.rstrip("/").split("/")[-1].lstrip("@")
         _f, html = _browser.load_html("instagram", f"https://www.instagram.com/{h}/", wait="networkidle")
         md, meta = web.extract_markdown(html)
-        return profile_record("instagram", f"instagram:user:{h.lower()}", f"@{h}", display_name=meta.get("title"), bio=meta.get("description"), profile_url=f"https://www.instagram.com/{h}/")
+        return profile_record("instagram", f"instagram:user:{h.lower()}", f"@{h}", display_name=meta.get("title"), avatar_url=meta.get("image"), bio=meta.get("description"), profile_url=f"https://www.instagram.com/{h}/")
 
     def list(self, source, *, limit=12, cursor=None, since=None, **_):
         h = source.rstrip("/").split("/")[-1].lstrip("@")
@@ -241,7 +241,7 @@ class LinkedIn(PlatformAdapter):
         h = target.rstrip("/").split("/")[-1]
         _f, html = _browser.load_html("linkedin", f"https://www.linkedin.com/in/{h}/", wait="networkidle")
         md, meta = web.extract_markdown(html)
-        return profile_record("linkedin", f"linkedin:user:{h.lower()}", h, display_name=meta.get("title"), bio=meta.get("description") or md[:300], profile_url=f"https://www.linkedin.com/in/{h}/")
+        return profile_record("linkedin", f"linkedin:user:{h.lower()}", h, display_name=meta.get("title"), avatar_url=meta.get("image"), bio=meta.get("description") or md[:300], profile_url=f"https://www.linkedin.com/in/{h}/")
 
     def list(self, source, *, limit=10, cursor=None, since=None, **_):
         h = source.rstrip("/").split("/")[-1]
@@ -297,7 +297,7 @@ class SeekingAlpha(PlatformAdapter):
         s = target.rstrip("/").split("/")[-1]
         _f, html = _browser.load_html("seekingalpha", f"https://seekingalpha.com/author/{s}", wait="networkidle")
         md, meta = web.extract_markdown(html)
-        return profile_record("seekingalpha", f"seekingalpha:author:{s.lower()}", s, display_name=meta.get("title"), bio=meta.get("description"), profile_url=f"https://seekingalpha.com/author/{s}")
+        return profile_record("seekingalpha", f"seekingalpha:author:{s.lower()}", s, display_name=meta.get("title"), avatar_url=meta.get("image"), bio=meta.get("description"), profile_url=f"https://seekingalpha.com/author/{s}")
 
     def list(self, source, *, limit=20, cursor=None, since=None, **_):
         s = source.rstrip("/").split("/")[-1]

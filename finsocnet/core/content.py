@@ -46,14 +46,14 @@ def upsert_source(conn: sqlite3.Connection, src: dict[str, Any]) -> dict[str, An
     existing = conn.execute("SELECT * FROM sources WHERE id = ?", (sid,)).fetchone()
     if existing is None:
         conn.execute(
-            """INSERT INTO sources (id, platform, kind, url, title, person_id, requires_session, status, notes)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            """INSERT INTO sources (id, platform, kind, url, title, person_id, requires_session, status, notes, avatar_url, avatar_path, avatar_sha256)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (sid, platform, kind, src.get("url"), src.get("title"), src.get("person_id"),
-             1 if src.get("requires_session") else 0, status or "active", src.get("notes")),
+             1 if src.get("requires_session") else 0, status or "active", src.get("notes"), src.get("avatar_url"), src.get("avatar_path"), src.get("avatar_sha256")),
         )
         return {"id": sid, "status": "created"}
     changes = {}
-    for col in ("url", "title", "notes"):
+    for col in ("url", "title", "notes", "avatar_url", "avatar_path", "avatar_sha256"):
         if src.get(col) and src[col] != existing[col]:
             changes[col] = src[col]
     if src.get("person_id") and src["person_id"] != existing["person_id"]:

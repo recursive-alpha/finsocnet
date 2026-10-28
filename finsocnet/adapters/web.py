@@ -23,7 +23,7 @@ def extract_markdown(html: str, url: str | None = None) -> tuple[str, dict[str, 
     import trafilatura
     md = trafilatura.extract(html, output_format="markdown", include_comments=True, include_tables=True, url=url, favor_recall=True) or ""
     meta_obj = trafilatura.extract_metadata(html)
-    meta = {k: getattr(meta_obj, k, None) for k in ("title", "author", "date", "sitename", "description")} if meta_obj else {}
+    meta = {k: getattr(meta_obj, k, None) for k in ("title", "author", "date", "sitename", "description", "image")} if meta_obj else {}
     if len(md) < MIN_EXTRACT_CHARS:
         root = lhtml.fromstring(html)
         for bad in root.xpath("//script|//style|//nav|//header|//footer|//noscript|//aside|//form"):

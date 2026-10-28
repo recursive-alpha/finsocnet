@@ -282,3 +282,15 @@ def test_stackexchange_tag_url_lists_and_dispatches(monkeypatch):
     monkeypatch.setattr(se.StackExchange, "_get", fake_get)
     res = se.StackExchange().list("https://quant.stackexchange.com/questions/tagged/risk-management")
     assert seen["site"] == "quant" and seen["params"]["tagged"] == "risk-management" and res["source"]["id"] == "stackexchange:tag:quant:risk-management"
+
+
+def test_profile_avatar_extractors():
+    from finsocnet.adapters import reddit, telegram, youtube
+    thumbs = [{"id": "0", "url": "https://yt/banner.jpg", "width": 1060, "height": 175}, {"id": "avatar_uncropped", "url": "https://yt/avatar.jpg"}]
+    assert youtube.channel_avatar(thumbs) == "https://yt/avatar.jpg"
+    assert youtube.channel_avatar([{"url": "https://yt/a.jpg", "width": 88, "height": 88}, {"url": "https://yt/b.jpg", "width": 176, "height": 176}]) == "https://yt/b.jpg"
+    assert youtube.channel_avatar([{"url": "https://yt/wide.jpg", "width": 1060, "height": 175}]) is None
+    assert reddit._icon({"icon_img": "https://styles.redditmedia.com/t5_2/a.png?width=256&amp;s=abc", "community_icon": ""}) == "https://styles.redditmedia.com/t5_2/a.png"
+    assert reddit._icon({"snoovatar_img": "https://i.redd.it/snoovatar/avatars/x.png"}) == "https://i.redd.it/snoovatar/avatars/x.png" and reddit._icon({}) is None
+    page = '<div class="tgme_channel_info_header"><i class="tgme_page_photo_image"><img src="https://cdn4.telesco.pe/file/x.jpg"></i><div class="tgme_channel_info_header_title">T</div></div>'
+    assert telegram.parse_channel(page)["info"]["photo"] == "https://cdn4.telesco.pe/file/x.jpg"

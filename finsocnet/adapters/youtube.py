@@ -80,6 +80,15 @@ def flat_ref(e: dict[str, Any]) -> dict[str, Any]:
                     e.get("description"), {"views": e.get("view_count"), "duration": e.get("duration")})
 
 
+def channel_avatar(thumbs: list[dict[str, Any]]) -> str | None:
+    """yt-dlp lists channel thumbnails: banners (wide) and `avatar_uncropped` (square). Prefer the square one."""
+    sq = [t for t in thumbs if "avatar" in str(t.get("id", "")) and t.get("url")]
+    if sq:
+        return sq[0]["url"]
+    sq = [t for t in thumbs if t.get("url") and t.get("width") and t.get("height") and t["width"] == t["height"]]
+    return max(sq, key=lambda t: t["width"])["url"] if sq else None
+
+
 class YouTube(PlatformAdapter):
     platform = "youtube"
     capabilities = frozenset({"search", "profile", "list", "fetch"})
@@ -102,7 +111,8 @@ class YouTube(PlatformAdapter):
         cid = r.get("channel_id") or r.get("id")
         desc = r.get("description") or ""
         return profile_record("youtube", f"youtube:channel:{cid}", r.get("uploader_id") or target, display_name=r.get("channel") or r.get("title"), bio=desc or None,
-                              followers=r.get("channel_follower_count"), profile_url=r.get("channel_url") or url, links=refs(desc)["links"], verified=None)
+                              followers=r.get("channel_follower_count"), profile_url=r.get("channel_url") or url, links=refs(desc)["links"], verified=None,
+                              avatar_url=channel_avatar(r.get("thumbnails") or []))
 
     def list(self, source, *, limit=50, cursor=None, since=None, tab="videos", **_):
         base = source if source.startswith("http") else f"https://www.youtube.com/{'channel/' if re.match(r'UC[\\w-]{22}$', source) else '@'}{source.lstrip('@')}"

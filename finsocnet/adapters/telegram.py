@@ -37,6 +37,7 @@ def parse_channel(page: str) -> dict[str, Any]:
         "description": " ".join("".join(root.xpath("//div[contains(@class,'tgme_channel_info_description')]//text()")).split()) or None,
         "counters": {" ".join(c.xpath(".//*[contains(@class,'counter_type')]/text()")).strip(): " ".join(c.xpath(".//*[contains(@class,'counter_value')]/text()")).strip()
                      for c in root.xpath("//div[contains(@class,'tgme_channel_info_counter')]")},
+        "photo": (root.xpath("//div[contains(@class,'tgme_channel_info_header')]//img/@src") or root.xpath("//i[contains(@class,'tgme_page_photo_image')]/img/@src") or [None])[0],
         "more": (root.xpath("//a[contains(@class,'tme_messages_more')]/@href") or [None])[0],
     }
     msgs = []
@@ -90,7 +91,7 @@ class Telegram(PlatformAdapter):
         p = self._page(ch)
         i = p["info"]
         subs = i["counters"].get("subscribers")
-        return profile_record("telegram", f"telegram:channel:{ch.lower()}", ch, display_name=i["title"], bio=i["description"], followers=subs, profile_url=f"https://t.me/{ch}",
+        return profile_record("telegram", f"telegram:channel:{ch.lower()}", ch, display_name=i["title"], bio=i["description"], followers=subs, profile_url=f"https://t.me/{ch}", avatar_url=i.get("photo"),
                               links=refs(i["description"] or "")["links"])
 
     def list(self, source, *, limit=50, cursor=None, since=None, **_):

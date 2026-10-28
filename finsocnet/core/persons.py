@@ -161,6 +161,7 @@ def get(conn: sqlite3.Connection, person_id: str) -> dict[str, Any]:
     d["aliases"] = [dict(x) for x in conn.execute("SELECT alias, platform FROM person_aliases WHERE person_id = ? ORDER BY platform, alias", (person_id,))]
     s = conn.execute("SELECT cards, appearances, sources FROM person_stats WHERE person_id = ?", (person_id,)).fetchone()
     d["stats"] = dict(s) if s else {}
+    d["images"] = [dict(x) for x in conn.execute("SELECT id, kind, platform, source_url, path, sha256, mime, width, height FROM person_images WHERE person_id = ? ORDER BY kind, id", (person_id,))]
     d["sources"] = [dict(x) for x in conn.execute("SELECT id, title, status FROM sources WHERE person_id = ?", (person_id,))]
     d["appearances"] = [dict(x) for x in conn.execute(
         "SELECT a.id, a.content_id, a.source_id, a.role, a.match_confidence, a.match_status, c.title FROM person_appearances a LEFT JOIN contents c ON c.id = a.content_id "
@@ -226,6 +227,10 @@ def merge(conn: sqlite3.Connection, src: str, dst: str, run_id: int) -> dict[str
             else:
                 conn.execute("UPDATE person_skills SET person_id = ? WHERE id = ?", (dst, sk["id"]))
         moved["person_skills_skipped"] = skipped
+        moved["images"] = conn.execute("UPDATE OR IGNORE person_images SET person_id = ? WHERE person_id = ?", (dst, src)).rowcount
+        if not conn.execute("SELECT avatar_path FROM persons WHERE id = ?", (dst,)).fetchone()[0]:
+            conn.execute("UPDATE persons SET avatar_path = (SELECT avatar_path FROM persons WHERE id = ?), avatar_sha256 = (SELECT avatar_sha256 FROM persons WHERE id = ?), "
+                         "avatar_mime = (SELECT avatar_mime FROM persons WHERE id = ?) WHERE id = ?", (src, src, src, dst))
         conn.execute("UPDATE persons SET status = 'merged', merged_into = ?, updated_at = ? WHERE id = ?", (dst, utc_now(), src))
         conn.execute("UPDATE persons SET updated_at = ? WHERE id = ?", (utc_now(), dst))  # fires the persons_fts refresh trigger (aliases moved)
     return {"merged": src, "into": dst, "moved": moved, "note": "rebuild the rulebook of the target person (`person-skill-synthesizer`)"}
@@ -256,3 +261,61 @@ def review_appearance(conn: sqlite3.Connection, appearance_id: int, action: str,
                 conn.execute("INSERT INTO person_appearances (person_id, content_id, source_id, role, match_confidence, match_status, evidence) VALUES (?, ?, ?, ?, 1.0, 'confirmed', 'reassigned by user')",
                              (to_person, a["content_id"], a["source_id"], a["role"]))
     return {"appearance_id": appearance_id, "action": action, "to": to_person}
+
+
+# --- images ---------------------------------------------------------------------------------------------------------
+
+def _record_image(conn: sqlite3.Connection, person_id: str, img: dict[str, Any], kind: str, platform: str | None, primary: bool | None, run_id: int) -> dict[str, Any]:
+    with transaction(conn):
+        cur = conn.execute(
+            """INSERT OR IGNORE INTO person_images (person_id, kind, platform, source_url, path, sha256, mime, width, height, bytes, run_id)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (person_id, kind, platform, img["source_url"], img["path"], img["sha256"], img["mime"], img["width"], img["height"], img["bytes"], run_id))
+        new = bool(cur.rowcount)
+        has = conn.execute("SELECT avatar_path FROM persons WHERE id = ?", (person_id,)).fetchone()[0]
+        made_primary = False
+        if kind == "avatar" and (primary or (primary is None and not has)):
+            conn.execute("UPDATE persons SET avatar_path = ?, avatar_sha256 = ?, avatar_mime = ?, avatar_fetched_at = ?, updated_at = ? WHERE id = ?",
+                         (img["path"], img["sha256"], img["mime"], utc_now(), utc_now(), person_id))
+            made_primary = True
+    return {"person_id": person_id, "kind": kind, "path": img["path"], "sha256": img["sha256"], "width": img["width"], "height": img["height"],
+            "new": new, "primary": made_primary}
+
+
+def image_add(conn: sqlite3.Connection, person_id: str, run_id: int, *, url: str | None = None, file: str | None = None, kind: str = "avatar",
+              platform: str | None = None, primary: bool | None = None) -> dict[str, Any]:
+    """Store a picture for a person from a URL or a local file. The first avatar becomes the primary one unless `primary` says otherwise."""
+    from finsocnet.core import media
+    pid = resolve_id(conn, person_id)
+    if (url is None) == (file is None):
+        raise CliError("USAGE", "give exactly one of --url or --file")
+    img = media.download_image(url, f"persons/{pid}", platform or "default") if url else media.read_file_image(file, f"persons/{pid}")
+    return _record_image(conn, pid, img, kind, platform, primary, run_id)
+
+
+def image_fetch(conn: sqlite3.Connection, person_id: str, run_id: int) -> dict[str, Any]:
+    """Download every known avatar URL of a person: `persons.avatar_url` and the `avatar_url` of the sources linked to them. Errors are reported, not raised."""
+    pid = resolve_id(conn, person_id)
+    urls: list[tuple[str, str | None]] = []
+    p = conn.execute("SELECT avatar_url FROM persons WHERE id = ?", (pid,)).fetchone()
+    if p and p["avatar_url"]:
+        urls.append((p["avatar_url"], None))
+    for r in conn.execute("SELECT platform, avatar_url FROM sources WHERE person_id = ? AND avatar_url IS NOT NULL ORDER BY platform, id", (pid,)):
+        urls.append((r["avatar_url"], r["platform"]))
+    have = {r[0] for r in conn.execute("SELECT source_url FROM person_images WHERE person_id = ?", (pid,))}
+    stored, errors, skipped = [], [], 0
+    for url, platform in dict.fromkeys(urls):
+        if url in have:
+            skipped += 1
+            continue
+        try:
+            stored.append(image_add(conn, pid, run_id, url=url, platform=platform))
+        except CliError as e:
+            errors.append({"url": url, "code": e.code, "message": e.message})
+    return {"person_id": pid, "candidates": len(dict.fromkeys(urls)), "stored": stored, "already_stored": skipped, "errors": errors,
+            "hint": None if urls else "no avatar_url known: run `profile` for the person's handles with --ingest, link the source with `kb source upsert` (person_id), or give --url/--file"}
+
+
+def image_list(conn: sqlite3.Connection, person_id: str) -> list[dict[str, Any]]:
+    pid = resolve_id(conn, person_id)
+    return [dict(r) for r in conn.execute("SELECT * FROM person_images WHERE person_id = ? ORDER BY kind, id", (pid,))]

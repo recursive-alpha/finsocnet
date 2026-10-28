@@ -531,6 +531,20 @@ def cmd_person_cards(ctx: Ctx) -> Result:
     return Result(persons_mod.person_cards(ctx.conn(), ctx.args.id, ctx.args.category))
 
 
+def cmd_person_avatar_add(ctx: Ctx) -> Result:
+    a, run = ctx.args, ctx.run_id()
+    return Result(persons_mod.image_add(ctx.conn(), a.person, run, url=a.url, file=a.file, kind=a.kind, platform=a.platform, primary=True if a.primary else None))
+
+
+def cmd_person_avatar_fetch(ctx: Ctx) -> Result:
+    run = ctx.run_id()
+    return Result(persons_mod.image_fetch(ctx.conn(), ctx.args.person, run))
+
+
+def cmd_person_avatar_list(ctx: Ctx) -> Result:
+    return Result({"images": persons_mod.image_list(ctx.conn(), ctx.args.person)})
+
+
 def cmd_person_merge(ctx: Ctx) -> Result:
     return Result(persons_mod.merge(ctx.conn(), ctx.args.src, ctx.args.dst, ctx.run_id()))
 
@@ -921,6 +935,17 @@ def build_parser() -> _Parser:
     p = leaf(g, ("person", "cards"), "cards", cmd_person_cards)
     p.add_argument("id")
     p.add_argument("--category")
+    ag = g.add_parser("avatar", help="pictures of a person (specs/12-person-images.md)").add_subparsers(dest="sub", required=True, parser_class=_Parser)
+    for name, handler in (("add", cmd_person_avatar_add), ("fetch", cmd_person_avatar_fetch), ("list", cmd_person_avatar_list)):
+        handlers[("person", "avatar", name)] = handler
+        p = ag.add_parser(name, parents=[common])
+        p.add_argument("--person", required=True)
+        if name == "add":
+            p.add_argument("--url")
+            p.add_argument("--file")
+            p.add_argument("--kind", default="avatar", choices=["avatar", "banner", "photo", "logo"])
+            p.add_argument("--platform")
+            p.add_argument("--primary", action="store_true", help="make it the person's main picture even if one exists")
     p = leaf(g, ("person", "merge"), "merge", cmd_person_merge)
     p.add_argument("--from", dest="src", required=True)
     p.add_argument("--into", dest="dst", required=True)

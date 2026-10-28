@@ -102,7 +102,7 @@ class Medium(PlatformAdapter):
         h = h if h.startswith("@") else "@" + h.lstrip("@")
         _f, html = _browser.load_html("medium", f"https://medium.com/{h}/about", wait="networkidle")
         md, meta = web.extract_markdown(html)
-        return profile_record("medium", f"medium:user:{h.lstrip('@').lower()}", h, display_name=meta.get("title"), bio=(meta.get("description") or md[:300]) or None, profile_url=f"https://medium.com/{h}",
+        return profile_record("medium", f"medium:user:{h.lstrip('@').lower()}", h, display_name=meta.get("title"), avatar_url=meta.get("image"), bio=(meta.get("description") or md[:300]) or None, profile_url=f"https://medium.com/{h}",
                               links=refs(md)["links"][:20])
 
     def list(self, source, *, limit=20, cursor=None, since=None, full=False, **_):

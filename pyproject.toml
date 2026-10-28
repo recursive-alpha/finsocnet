@@ -28,6 +28,7 @@ dependencies = [
     "textual>=8.2.8",
     "prompt-toolkit>=3.0.53",
     "fastembed>=0.9.1",
+    "pillow>=13.0.0",
 ]
 
 [project.scripts]

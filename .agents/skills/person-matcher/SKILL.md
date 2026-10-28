@@ -36,6 +36,18 @@ Knowledge belongs to people, not channels. One person can own a YouTube channel,
 6. Appearance → `kb person appearance add --file appearance.json --run R` with `role` (`owner`, `guest`, `host`, `co_host`, `author`, `co_author`, `commenter`, `member`, `archive`, `mentioned`), `match_confidence`, and `evidence` (one sentence: why).
 7. `match_confidence < 0.7` → `match_status: "needs_review"`. Mining continues; the user reviews later with `finsocnet persons review`.
 
+## Pictures (avatar and other images)
+
+Every confirmed or newly created person gets a picture when one can be found (`persons.avatar_path`, table `person_images`, files in `data/media/persons/<id>/`):
+
+1. For each platform handle of the person, run that platform's `profile <handle> --ingest --run R`. The profile's `avatar_url` is stored on the source (and the icon downloaded to `data/media/sources/`).
+2. Link the source to the person: `kb source upsert --file source.json --run R` with `{"id": "<source id>", "person_id": "<person id>"}`.
+3. `kb person avatar fetch --person <id> --run R` downloads every known avatar URL (the person's own `avatar_url` and those of linked sources); failures are listed per URL, not fatal. The first avatar becomes the primary one.
+4. Nothing found: look at the person's own website or the official page of a channel (`web-reader`, `og:image`) and use `kb person avatar add --person <id> --url <image url> --platform web --run R` (or `--file` for a file the user gave you). Add `--primary` to replace the main picture, `--kind banner|photo|logo` for other images.
+5. Use only pictures the person publishes themselves (profile pictures, official site images). Do not scrape search-engine image results or private photos. A wrong face is worse than none: when the match between handle and person is uncertain, do not attach an image.
+
+`kb person avatar list --person <id>` shows what is stored; only real images are accepted (checked by bytes), at most 8 MB.
+
 ## Other tasks
 
 | Task | Command |

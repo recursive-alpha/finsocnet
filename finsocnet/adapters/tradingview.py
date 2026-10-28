@@ -101,7 +101,7 @@ class TradingView(PlatformAdapter):
         u = target.rstrip("/").split("/")[-1].lstrip("@")
         _f, html = _browser.load_html("tradingview", f"{BASE}/u/{u}/", wait="networkidle")
         md, meta = web.extract_markdown(html)
-        return profile_record("tradingview", f"tradingview:user:{u.lower()}", u, display_name=meta.get("title") or u, bio=(meta.get("description") or md[:300]) or None, profile_url=f"{BASE}/u/{u}/")
+        return profile_record("tradingview", f"tradingview:user:{u.lower()}", u, display_name=meta.get("title") or u, avatar_url=meta.get("image"), bio=(meta.get("description") or md[:300]) or None, profile_url=f"{BASE}/u/{u}/")
 
     def list(self, source, *, limit=20, cursor=None, since=None, **_):
         if source.startswith("http") or "/" in source:

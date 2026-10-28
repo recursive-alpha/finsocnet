@@ -162,6 +162,15 @@ def _json_or(url: str, rss_url: str) -> tuple[str, Any]:
         return "rss", _rss(rss_url)
 
 
+def _icon(about: dict[str, Any]) -> str | None:
+    """Reddit's picture fields hold HTML-escaped URLs with resize query strings."""
+    for k in ("snoovatar_img", "icon_img", "community_icon"):
+        v = about.get(k)
+        if v:
+            return html.unescape(v).split("?")[0] if k != "snoovatar_img" else html.unescape(v)
+    return None
+
+
 class Reddit(PlatformAdapter):
     platform = "reddit"
     requires_session = False
@@ -190,11 +199,11 @@ class Reddit(PlatformAdapter):
             name = t.split("r/")[-1].split("/")[0]
             a = _browser.load_json("reddit", f"{BASE}/r/{name}/about.json")["data"]
             return profile_record("reddit", f"reddit:subreddit:{name.lower()}", f"r/{name}", display_name=a.get("title"), bio=a.get("public_description"), followers=a.get("subscribers"),
-                                  profile_url=f"{BASE}/r/{name}/", joined_at=(iso(a.get("created_utc")) or "")[:10])
+                                  avatar_url=_icon(a), profile_url=f"{BASE}/r/{name}/", joined_at=(iso(a.get("created_utc")) or "")[:10])
         name = t.split("user/")[-1].split("/")[0].removeprefix("u/")
         a = _browser.load_json("reddit", f"{BASE}/user/{name}/about.json")["data"]
         return profile_record("reddit", f"reddit:user:{name.lower()}", f"u/{name}", display_name=a.get("name"), bio=(a.get("subreddit") or {}).get("public_description"), followers=a.get("link_karma"),
-                              profile_url=f"{BASE}/user/{name}", joined_at=(iso(a.get("created_utc")) or "")[:10])
+                              avatar_url=_icon(a), profile_url=f"{BASE}/user/{name}", joined_at=(iso(a.get("created_utc")) or "")[:10])
 
     def list(self, source, *, limit=25, cursor=None, since=None, sort="hot", t="week", kind="posts", **_):
         s = source.strip().rstrip("/")

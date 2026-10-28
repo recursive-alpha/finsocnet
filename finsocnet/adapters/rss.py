@@ -75,7 +75,8 @@ class RSS(PlatformAdapter):
         xml = http.get_text(target, platform="rss")
         src, _items = feed_items(xml, target)
         f = feedparser.parse(xml).feed
-        return profile_record("rss", src["id"], target, display_name=f.get("title"), bio=f.get("subtitle") or f.get("description"), profile_url=f.get("link") or target)
+        return profile_record("rss", src["id"], target, display_name=f.get("title"), bio=f.get("subtitle") or f.get("description"), profile_url=f.get("link") or target,
+                              avatar_url=(f.get("image") or {}).get("href") or (f.get("image") or {}).get("url"))
 
     def list(self, source, *, limit=50, cursor=None, since=None, **_):
         xml = http.get_text(source, platform="rss")
