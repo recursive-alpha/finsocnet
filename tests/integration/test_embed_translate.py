@@ -76,7 +76,7 @@ def test_unknown_language_blocks_embedding_until_the_agent_decides(seeded, run_i
     cid = _segment(seeded, VI)
     seeded.execute("UPDATE contents SET language = NULL WHERE id = ?", (cid,))
     det = translate.detect_pending(seeded)
-    assert det and det[0]["content_id"] == cid and det[0]["sample"]
+    assert det and any(d["content_id"] == cid and d["sample"] for d in det)
     embed.sync(seeded, ["segment"])
     assert seeded.execute("SELECT COUNT(*) FROM embeddings WHERE kind='segment'").fetchone()[0] == 0
     translate.set_language(seeded, [{"content_id": cid, "language": "en"}], run_id)
@@ -108,3 +108,22 @@ def test_english_segment_inside_a_mixed_content_is_marked_without_text(seeded, r
     assert 7 in [p["seq"] for p in translate.pending(seeded, content_id=cid)]
     translate.put(seeded, [{"content_id": cid, "seq": 7, "source_lang": "en"}], run_id)
     assert translate.get(seeded, cid, 7)[0]["text_en"] == "I sell a third after three days."
+
+
+def test_a_source_verdict_covers_all_its_unset_contents_and_never_overwrites(seeded, run_id, hashing):
+    cid = _segment(seeded, VI)
+    seeded.execute("INSERT OR IGNORE INTO sources (id, platform, kind, title) VALUES ('forum:board:example', 'forum', 'board', 'Example board')")
+    seeded.execute("UPDATE contents SET source_id = 'forum:board:example', language = NULL WHERE id = ?", (cid,))
+    seeded.execute("INSERT INTO contents (id, source_id, platform, content_type, title, language) VALUES ('forum:other1', 'forum:board:example', 'forum', 'thread', 'x', 'en')")
+    seeded.execute("INSERT INTO contents (id, source_id, platform, content_type, title) VALUES ('forum:other2', 'forum:board:example', 'forum', 'thread', 'y')")
+    seeded.execute("INSERT INTO content_segments (content_id, seq, kind, locator_json, text) VALUES ('forum:other2', 0, 'post', '{}', ?)", (VI,))
+    by_src = translate.detect_pending(seeded, by_source=True)
+    entry = next(e for e in by_src if e["source_id"] == "forum:board:example")
+    assert entry["contents"] == 2 and entry["title"] == "Example board" and entry["sample"]
+    assert translate.set_language(seeded, [{"source_id": "forum:board:example", "language": "vi"}], run_id) == {"updated": 2}
+    langs = dict(seeded.execute("SELECT id, language FROM contents WHERE id IN (?, 'forum:other1', 'forum:other2')", (cid,)).fetchall())
+    assert langs[cid] == "vi" and langs["forum:other2"] == "vi" and langs["forum:other1"] == "en"  # the explicit en stayed
+    with pytest.raises(CliError):
+        translate.set_language(seeded, [{"language": "vi"}], run_id)
+    with pytest.raises(CliError):
+        translate.set_language(seeded, [{"source_id": "nope:x", "language": "vi"}], run_id)

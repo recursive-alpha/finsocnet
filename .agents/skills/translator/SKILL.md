@@ -19,13 +19,15 @@ Semantic search embeds **English** text only (config/embedding.yaml). Cards are 
 ## 1. Detect the language of contents
 
 1. `kb run start --skill translator --goal "detect languages" …` → `R`.
-2. `kb translate detect-pending --limit 20` → contents with `language` unset and a sample (first 3 segments, 700 chars each) of their text.
-3. For each content, read the sample and decide:
+2. `kb translate detect-pending --by-source --limit 40` → one entry per **source** (channel, subreddit, blog, forum) with a sample from several of its contents and how many contents it covers; contents that have no source come one by one (`content_id`). Without `--by-source` every content is listed with its own sample (first 3 segments, 700 chars each).
+3. For each entry, read the sample and decide:
    - one BCP-47 tag for the main language: `en`, `vi`, `es`, `pt-BR`, `zh-Hans`, `ja`, `ar`…;
    - `mixed` when segments clearly differ (a bilingual podcast, a thread where replies switch language). Mixed contents are resolved per segment in step 2.
    - Code, tickers and numbers only (a Pine script, a table) → the language of its comments or title; if none, `en`.
    - Do not guess from a single word or a name. If the sample is too short to tell, look at more of it: `kb content view <id> --from-seq 0 --to-seq 10`.
-4. Write `data/work/R/languages.json` → `[{"content_id": "…", "language": "vi"}]`, then `kb translate set-language --file … --run R`. Until a content has a language it is **not embedded**.
+   - A source verdict is a claim about *all* its contents: if a source is plainly multilingual, give per-content verdicts instead.
+4. Write `data/work/R/languages.json` → `[{"source_id": "youtube:channel:UC…", "language": "vi"}, {"content_id": "book:aa-…", "language": "en"}]`, then `kb translate set-language --file … --run R`. A `source_id` verdict sets every content of that source **that has no language yet** (it never overwrites one that is set); a `content_id` verdict sets or corrects that one content. Until a content has a language it is **not embedded**.
+5. New contents arrive without a language: run this step after fetching (the `market-idea-miner` procedure does, step 3b).
 
 ## 2. Translate what is not English
 

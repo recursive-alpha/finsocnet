@@ -10,7 +10,7 @@ import time
 from pathlib import Path
 from typing import Any, Callable
 
-from finsocnet.core import cards as cards_mod, config, content as content_mod, embed as embed_mod, seen as seen_mod, migrations, translate as translate_mod, persons as persons_mod, runs, vocab as vocab_mod
+from finsocnet.core import cards as cards_mod, config, content as content_mod, embed as embed_mod, search as search_mod, seen as seen_mod, migrations, translate as translate_mod, persons as persons_mod, runs, vocab as vocab_mod
 from finsocnet.core import person_skills as skills_mod
 from finsocnet.core import queue as queue_mod
 from finsocnet.core import output
@@ -632,6 +632,19 @@ def _common() -> argparse.ArgumentParser:
     return p
 
 
+def cmd_search(ctx: Ctx) -> Result:
+    a = ctx.args
+    filters = {"kind": a.kind, "category": a.category, "domain": a.domain, "horizon": a.horizon, "evidence_level_min": a.evidence_min, "person_id": a.person or None,
+               "instruments": a.instrument or None, "min_persons": a.min_persons, "platform": a.platform or None, "content_type": a.content_type or None,
+               "since": a.since, "language": a.language, "status": a.status}
+    if a.kind:
+        filters["kind"] = a.kind.split(",")
+    if a.category:
+        filters["category"] = a.category.split(",")
+    res = search_mod.search(ctx.conn(), a.query, types=[t.strip() for t in a.types.split(",") if t.strip()], mode=a.mode, filters=filters, limit=a.limit)
+    return Result({k: v for k, v in res.items() if k != "warnings"}, res["warnings"])
+
+
 def cmd_seen_check(ctx: Ctx) -> Result:
     got = seen_mod.lookup(ctx.conn(), ctx.args.keys)
     known = {r[0] for r in ctx.conn().execute(f"SELECT id FROM contents WHERE id IN ({','.join('?' * len(ctx.args.keys))})", ctx.args.keys)}
@@ -674,7 +687,7 @@ def cmd_translate_pending(ctx: Ctx) -> Result:
 
 
 def cmd_translate_detect_pending(ctx: Ctx) -> Result:
-    items = translate_mod.detect_pending(ctx.conn(), ctx.args.limit)
+    items = translate_mod.detect_pending(ctx.conn(), ctx.args.limit, ctx.args.by_source)
     return Result({"count": len(items), "items": items})
 
 
@@ -984,6 +997,25 @@ def build_parser() -> _Parser:
     p.add_argument("--status", choices=queue_mod.STATUSES)
     p.add_argument("--limit", type=int, default=100)
 
+    p = top("search", cmd_search, "search cards, content text, persons and rulebooks together (semantic + lexical), filter, rank")
+    p.add_argument("query", help="English text (use the translator skill for other languages)")
+    p.add_argument("--types", default="cards,contents,persons,skills", help="data types to search: cards,contents,persons,skills")
+    p.add_argument("--mode", default="auto", choices=["auto", "lexical", "semantic", "hybrid"])
+    p.add_argument("--limit", type=int, default=30)
+    p.add_argument("--kind", help="cards: rule,setup,observation,... (comma separated)")
+    p.add_argument("--category", help="cards / skills: comma separated")
+    p.add_argument("--domain")
+    p.add_argument("--horizon")
+    p.add_argument("--evidence-min", choices=["anecdotal", "claimed", "backtested", "audited"])
+    p.add_argument("--person", action="append", help="person id (repeatable): cards, contents, skills")
+    p.add_argument("--instrument", action="append")
+    p.add_argument("--min-persons", type=int)
+    p.add_argument("--platform", action="append", help="contents (repeatable)")
+    p.add_argument("--content-type", action="append")
+    p.add_argument("--since", help="contents: published on or after YYYY-MM-DD")
+    p.add_argument("--language")
+    p.add_argument("--status", help="contents: processed, new, ...")
+
     g = group("seen", "items the explorers have looked at (specs/11-explore-visited-open-topics.md)")
     p = leaf(g, ("seen", "check"), "check", cmd_seen_check, "status of item keys (visited? stored?)")
     p.add_argument("keys", nargs="+")
@@ -1015,8 +1047,9 @@ def build_parser() -> _Parser:
     p = leaf(g, ("translate", "pending"), "pending", cmd_translate_pending)
     p.add_argument("--content")
     p.add_argument("--limit", type=int, default=50)
-    p = leaf(g, ("translate", "detect-pending"), "detect-pending", cmd_translate_detect_pending, "contents whose language the agent has not set")
+    p = leaf(g, ("translate", "detect-pending"), "detect-pending", cmd_translate_detect_pending, "contents (or, with --by-source, sources) whose language the agent has not set")
     p.add_argument("--limit", type=int, default=20)
+    p.add_argument("--by-source", action="store_true", help="one entry per source with a sample from several of its contents")
     p = leaf(g, ("translate", "set-language"), "set-language", cmd_translate_set_language, "store the agent's language verdicts")
     p.add_argument("--file", required=True)
     p = leaf(g, ("translate", "put"), "put", cmd_translate_put)

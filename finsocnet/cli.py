@@ -84,17 +84,21 @@ def print_strategy(name: str) -> int:
 
 
 def main() -> None:
+    from finsocnet.core import output
+    sys.argv[:] = [sys.argv[0], *output.take_ui(sys.argv[1:])]  # `--ui` is global: any command can print for humans instead of JSON
+    if len(sys.argv) > 1 and sys.argv[1] == "search":  # shortcut for `kb search`
+        sys.argv[1:2] = ["kb", "search"]
     if len(sys.argv) > 1 and sys.argv[1] in PASSTHROUGH:
         import importlib
         mod, fn = PASSTHROUGH[sys.argv[1]]
         getattr(importlib.import_module(mod), fn)(sys.argv[2:])
         return
 
-    parser = argparse.ArgumentParser(prog="finsocnet", description="FinSocNet: agent-operated financial knowledge network (SQLite + FTS5 Knowledge Cards)")
+    parser = argparse.ArgumentParser(prog="finsocnet", description="FinSocNet: agent-operated knowledge network (SQLite + FTS5 + embeddings, Knowledge Cards). Every command prints one JSON envelope; add --ui for a human terminal view.")
     sub = parser.add_subparsers(dest="cmd")
     for name, help_ in [("kb", "Database CLI: runs, contents, cards, vocabulary, persons, queue (finsocnet kb --help)"), ("eval", "Evaluation sets: prepare inputs, score agent outputs"),
                         ("session", "Local session bridge: init-local | export | push"), ("explore", "Add a seed to the exploration queue: explore add <target>"),
-                        ("persons", "Review uncertain person matches: persons review"), ("feedback", "Record feedback: feedback <type> <id> <+1|-1> [comment]")]:
+                        ("persons", "Review uncertain person matches: persons review"), ("feedback", "Record feedback: feedback <type> <id> <+1|-1> [comment]"), ("search", "Search everything (alias of kb search); add --ui for a terminal view")]:
         sub.add_parser(name, help=help_)
     sub.add_parser("tui", help="Terminal UI over the v2 data")
     sub.add_parser("stats", help="Knowledge base summary (text)")

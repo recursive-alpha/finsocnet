@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import logging
 import sys
 import time
@@ -44,9 +45,27 @@ def setup_logging(level: str = "INFO") -> None:
     )
 
 
+_UI = os.getenv("FINSOCNET_UI") == "1"
+
+
+def take_ui(argv: list[str]) -> list[str]:
+    """Remove the global `--ui` flag from `argv` (and from sys.argv when it is that list) and switch terminal rendering on."""
+    global _UI
+    if "--ui" in argv:
+        _UI = True
+        argv = [a for a in argv if a != "--ui"]
+    return argv
+
+
+def ui_enabled() -> bool:
+    return _UI
+
+
 def begin() -> None:
     global _started
     _started = time.monotonic()
+    if "--ui" in sys.argv[1:]:  # scripts run directly (platform skills): the flag is global, parsers never see it
+        sys.argv[:] = [sys.argv[0], *take_ui(sys.argv[1:])]
 
 
 def elapsed_ms() -> int:
@@ -112,7 +131,11 @@ def failure_envelope(
 
 
 def emit(command: str, data: Any, warnings: list[str] | None = None, meta: dict[str, Any] | None = None, fmt: str = "json") -> None:
-    """Print the success envelope (exactly one JSON object on stdout)."""
+    """Print the success envelope (exactly one JSON object on stdout), or the `--ui` rendering of it."""
+    if _UI:
+        from finsocnet.core import ui
+        ui.render_success(command, data, warnings, meta or {"elapsed_ms": elapsed_ms()})
+        return
     sys.stdout.write(_dump(success_envelope(command, data, warnings, meta), fmt) + "\n")
     sys.stdout.flush()
 
@@ -127,6 +150,10 @@ def fail(
     fmt: str = "json",
 ) -> "None":
     """Print the failure envelope and exit with the mapped code."""
+    if _UI:
+        from finsocnet.core import ui
+        ui.render_failure(command, code, message, hint, retry_after_sec, details)
+        sys.exit(EXIT_CODES.get(code, 1))
     sys.stdout.write(_dump(failure_envelope(command, code, message, hint, retry_after_sec, details), fmt) + "\n")
     sys.stdout.flush()
     sys.exit(EXIT_CODES.get(code, 1))
