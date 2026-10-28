@@ -9,7 +9,7 @@ metadata:
   priority: "P1"
   status: ready
   phase: "4"
-  spec: docs/spec/05-platform-skills.md
+  spec: specs/05-platform-skills.md
 ---
 
 # Medium Explorer
@@ -42,7 +42,7 @@ uv run $S fetch <article url> [--ingest]
 | `list <@author|publication|tag/<t>>` | RSS by default; `--full` scrolls the page for full history |
 | `fetch <article url>` | article paragraphs and code blocks |
 
-Common flags (docs/spec/00-conventions.md §3): `--ingest --run R` stores the record (writes require a run id); `--enqueue --run R` adds unseen items to the explore queue; `--save-cursor` stores the paging position in `sources.cursor_json` so the next `list` continues where it stopped; `--cursor C` overrides it. Output is always the JSON envelope `{ok, command, data, warnings, meta}`.
+Common flags (specs/00-conventions.md §3): `--ingest --run R` stores the record (writes require a run id); `--enqueue --run R` adds unseen items to the explore queue; `--save-cursor` stores the paging position in `sources.cursor_json` so the next `list` continues where it stopped; `--cursor C` overrides it. Output is always the JSON envelope `{ok, command, data, warnings, meta}`.
 
 ## Procedure
 

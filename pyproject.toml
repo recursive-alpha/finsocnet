@@ -33,7 +33,7 @@ dependencies = [
 finsocnet = "finsocnet.cli:main"
 
 [project.optional-dependencies]
-# Session export on the user's own machine (docs/spec/04-sessions-browser.md).
+# Session export on the user's own machine (specs/04-sessions-browser.md).
 # ccl_chromium_reader is not published on PyPI; Phase 3 decides how to vendor or install it (see 04 §9).
 local = [
     "rookiepy>=0.5.0",

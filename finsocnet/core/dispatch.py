@@ -1,4 +1,4 @@
-"""Map a pasted URL/handle/query to (target_kind, platform, skill) with the rules of docs/spec/06 §1.3."""
+"""Map a pasted URL/handle/query to (target_kind, platform, skill) with the rules of specs/06 §1.3."""
 
 from __future__ import annotations
 

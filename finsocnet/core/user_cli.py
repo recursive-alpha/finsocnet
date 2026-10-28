@@ -1,4 +1,4 @@
-"""User-facing commands on the remote host: `finsocnet explore add`, `finsocnet persons review`, `finsocnet feedback` (docs/spec/07 §1)."""
+"""User-facing commands on the remote host: `finsocnet explore add`, `finsocnet persons review`, `finsocnet feedback` (specs/07 §1)."""
 
 from __future__ import annotations
 

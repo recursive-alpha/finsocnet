@@ -1,4 +1,4 @@
-"""JSON envelope, exit codes and the command runner (docs/spec/00-conventions.md §3)."""
+"""JSON envelope, exit codes and the command runner (specs/00-conventions.md §3)."""
 
 from __future__ import annotations
 

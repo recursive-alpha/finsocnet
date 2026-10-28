@@ -1,4 +1,4 @@
-"""The standard adapter CLI (docs/spec/05 §1.2): known flags, --ingest, --enqueue, --save-cursor, UNSUPPORTED, session guard, v1 wrappers."""
+"""The standard adapter CLI (specs/05 §1.2): known flags, --ingest, --enqueue, --save-cursor, UNSUPPORTED, session guard, v1 wrappers."""
 
 from __future__ import annotations
 

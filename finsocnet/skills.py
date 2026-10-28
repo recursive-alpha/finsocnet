@@ -1,4 +1,4 @@
-"""Core vs installed skills (docs/spec/07 §5.1): core = every folder in `.agents/skills/` that is not in `config/skills.lock.json`."""
+"""Core vs installed skills (specs/07 §5.1): core = every folder in `.agents/skills/` that is not in `config/skills.lock.json`."""
 
 from __future__ import annotations
 

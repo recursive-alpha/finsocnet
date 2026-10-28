@@ -1,4 +1,4 @@
-"""FTS5 query building and sanitizing (docs/spec/03-pipelines.md §2)."""
+"""FTS5 query building and sanitizing (specs/03-pipelines.md §2)."""
 
 from __future__ import annotations
 

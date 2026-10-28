@@ -9,7 +9,7 @@ metadata:
   priority: "P1"
   status: ready
   phase: "4"
-  spec: docs/spec/05-platform-skills.md
+  spec: specs/05-platform-skills.md
 ---
 
 # Podcast Explorer
@@ -41,7 +41,7 @@ uv run $S fetch <episode guid|enclosure url|episode page> [--ingest]
 | `list <feed url|apple url>` | episodes newest first; cursor = last guid |
 | `fetch <episode guid|enclosure url|episode page>` | episode with transcript segments |
 
-Common flags (docs/spec/00-conventions.md §3): `--ingest --run R` stores the record (writes require a run id); `--enqueue --run R` adds unseen items to the explore queue; `--save-cursor` stores the paging position in `sources.cursor_json` so the next `list` continues where it stopped; `--cursor C` overrides it. Output is always the JSON envelope `{ok, command, data, warnings, meta}`.
+Common flags (specs/00-conventions.md §3): `--ingest --run R` stores the record (writes require a run id); `--enqueue --run R` adds unseen items to the explore queue; `--save-cursor` stores the paging position in `sources.cursor_json` so the next `list` continues where it stopped; `--cursor C` overrides it. Output is always the JSON envelope `{ok, command, data, warnings, meta}`.
 
 ## Procedure
 

@@ -9,7 +9,7 @@ metadata:
   priority: "P1"
   status: ready
   phase: "4"
-  spec: docs/spec/05-platform-skills.md
+  spec: specs/05-platform-skills.md
 ---
 
 # Google Searcher
@@ -36,7 +36,7 @@ uv run $S search "<query with operators>" [--news] [--since YYYY-MM-DD] [--limit
 |---|---|
 | `search "<query with operators>"` | organic results (ads ignored) as ItemRef[] |
 
-Common flags (docs/spec/00-conventions.md §3): `--ingest --run R` stores the record (writes require a run id); `--enqueue --run R` adds unseen items to the explore queue; `--save-cursor` stores the paging position in `sources.cursor_json` so the next `list` continues where it stopped; `--cursor C` overrides it. Output is always the JSON envelope `{ok, command, data, warnings, meta}`.
+Common flags (specs/00-conventions.md §3): `--ingest --run R` stores the record (writes require a run id); `--enqueue --run R` adds unseen items to the explore queue; `--save-cursor` stores the paging position in `sources.cursor_json` so the next `list` continues where it stopped; `--cursor C` overrides it. Output is always the JSON envelope `{ok, command, data, warnings, meta}`.
 
 Implements only `search` of the adapter contract; other subcommands exit 2 `UNSUPPORTED`.
 

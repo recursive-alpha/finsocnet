@@ -1,4 +1,4 @@
-"""Any web page rendered in the agent browser (docs/spec/05 §2.10), plus feed/sitemap/media discovery."""
+"""Any web page rendered in the agent browser (specs/05 §2.10), plus feed/sitemap/media discovery."""
 
 from __future__ import annotations
 

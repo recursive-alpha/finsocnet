@@ -1,4 +1,4 @@
-"""arXiv + Hugging Face Papers (docs/spec/05 §2.13)."""
+"""arXiv + Hugging Face Papers (specs/05 §2.13)."""
 
 from __future__ import annotations
 

@@ -9,7 +9,7 @@ metadata:
   priority: "P1"
   status: ready
   phase: "2"
-  spec: docs/spec/03-pipelines.md
+  spec: specs/03-pipelines.md
 ---
 
 # Person Skills Explorer

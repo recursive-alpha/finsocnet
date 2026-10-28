@@ -1,4 +1,4 @@
-"""SEC EDGAR (docs/spec/05 §3.8). Every request carries SEC_USER_AGENT; the budget keeps us under 10 requests/s."""
+"""SEC EDGAR (specs/05 §3.8). Every request carries SEC_USER_AGENT; the budget keeps us under 10 requests/s."""
 
 from __future__ import annotations
 

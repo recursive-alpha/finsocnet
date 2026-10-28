@@ -1,4 +1,4 @@
-"""Trading forums: Discourse JSON, XenForo HTML, generic pages (docs/spec/05 §3.4). Everything loads through the agent browser."""
+"""Trading forums: Discourse JSON, XenForo HTML, generic pages (specs/05 §3.4). Everything loads through the agent browser."""
 
 from __future__ import annotations
 

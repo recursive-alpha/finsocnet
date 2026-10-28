@@ -1,4 +1,4 @@
-# Per-platform rate budgets (docs/spec/04-sessions-browser.md §7). A "unit" is one page navigation or one API request.
+# Per-platform rate budgets (specs/04-sessions-browser.md §7). A "unit" is one page navigation or one API request.
 default:       {per_minute: 20,  per_hour: 300,   per_day: 3000,  min_delay_ms: 800,  max_delay_ms: 2500}
 google:        {per_minute: 3,   per_hour: 30,    per_day: 200,   min_delay_ms: 4000, max_delay_ms: 12000}
 x:             {per_minute: 6,   per_hour: 150,   per_day: 1200,  min_delay_ms: 2000, max_delay_ms: 6000}

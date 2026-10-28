@@ -1,4 +1,4 @@
-"""Readers and writers for every cookie/session input format (docs/spec/04 §3.1). Normalized cookie:
+"""Readers and writers for every cookie/session input format (specs/04 §3.1). Normalized cookie:
 `{name, value, domain, path, expires (epoch seconds, -1 = session), httpOnly, secure, sameSite (Strict|Lax|None|null), partitionKey?}`."""
 
 from __future__ import annotations

@@ -1,4 +1,4 @@
--- Migration 003: FinSocNet v2 schema (docs/spec/01-database.md §2). SQLite only, FTS5, no vectors (ADR-001).
+-- Migration 003: FinSocNet v2 schema (specs/01-database.md §2). SQLite only, FTS5, no vectors (ADR-001).
 -- Generated from the spec DDL; executed by 003_v2_schema.py after the v1 tables were renamed to legacy_*.
 
 -- 2.1 Runs

@@ -1,4 +1,4 @@
-"""Harness registration (docs/spec/07 §2–§3): renders the slash commands in `commands/` for every harness and links the system
+"""Harness registration (specs/07 §2–§3): renders the slash commands in `commands/` for every harness and links the system
 skills from `.agents/skills/` (symlinks, never copies). Everything created is recorded in `~/.config/finsocnet/installed.json`
 so `finsocnet install --uninstall <harness>` removes exactly that. Nothing person-specific is exported (private_source persons stay out)."""
 

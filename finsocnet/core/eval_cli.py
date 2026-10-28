@@ -1,4 +1,4 @@
-"""`finsocnet eval prepare|score|run` (docs/spec/06-explore-improve-eval.md §3). Scripts never call an LLM (ADR-002):
+"""`finsocnet eval prepare|score|run` (specs/06-explore-improve-eval.md §3). Scripts never call an LLM (ADR-002):
 the harness agent produces the outputs, these functions only prepare inputs and score outputs deterministically."""
 
 from __future__ import annotations

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Medium adapter CLI (docs/spec/05-platform-skills.md)."""
+"""Medium adapter CLI (specs/05-platform-skills.md)."""
 
 from finsocnet.adapters.medium import Medium
 from finsocnet.core.platform import run_platform_cli

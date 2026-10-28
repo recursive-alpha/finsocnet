@@ -1,6 +1,6 @@
 # Knowledge Card format (card_version 1)
 
-Normative schema: `finsocnet/core/schemas/card.schema.json` (`docs/spec/02-knowledge-cards.md` §2). This page explains each field for the agent.
+Normative schema: `finsocnet/core/schemas/card.schema.json` (`specs/02-knowledge-cards.md` §2). This page explains each field for the agent.
 
 | Field | Required | What to write | Example |
 |---|---|---|---|

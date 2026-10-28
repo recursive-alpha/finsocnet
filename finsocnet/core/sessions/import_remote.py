@@ -1,4 +1,4 @@
-"""Remote side of the session bridge: import, reapply, status, verify, purge (docs/spec/04 §4).
+"""Remote side of the session bridge: import, reapply, status, verify, purge (specs/04 §4).
 
 Cookie and storage values are handled only here and in `formats`/`bundle`; results contain counts, domain names and
 dates, never values (secret-leak test: tests/integration/test_sessions.py)."""

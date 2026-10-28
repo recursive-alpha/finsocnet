@@ -1,4 +1,4 @@
-"""Telegram public channels via the `t.me/s/<channel>` preview (docs/spec/05 §3.2). Browser mode for private chats needs
+"""Telegram public channels via the `t.me/s/<channel>` preview (specs/05 §3.2). Browser mode for private chats needs
 the Telegram Web session and is a documented extension point (the preview is a static page, no login)."""
 
 from __future__ import annotations

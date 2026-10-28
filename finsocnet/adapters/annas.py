@@ -1,4 +1,4 @@
-"""Anna's Archive through the agent browser (docs/spec/05 §2.12). DDoS-Guard clearance lives in the agent browser profile.
+"""Anna's Archive through the agent browser (specs/05 §2.12). DDoS-Guard clearance lives in the agent browser profile.
 `download` runs only when called explicitly: downloading copyrighted books may be illegal in your jurisdiction."""
 
 from __future__ import annotations

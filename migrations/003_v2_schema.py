@@ -1,4 +1,4 @@
-"""Migration 003: FinSocNet v2 schema and mapping of the v1 data (docs/spec/01-database.md §5.3).
+"""Migration 003: FinSocNet v2 schema and mapping of the v1 data (specs/01-database.md §5.3).
 
 Renames the v1 tables to legacy_*, creates the v2 schema from 003_v2_schema.sql, and maps users, contents,
 transcripts, persons and appearances. Hypotheses and legacy skills are kept for Phase 2.

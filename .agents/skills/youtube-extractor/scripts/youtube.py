@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""YouTube adapter CLI (docs/spec/05-platform-skills.md)."""
+"""YouTube adapter CLI (specs/05-platform-skills.md)."""
 
 from finsocnet.adapters.youtube import YouTube
 from finsocnet.core.platform import run_platform_cli

@@ -9,7 +9,7 @@ metadata:
   priority: "P2"
   status: ready
   phase: "5"
-  spec: docs/spec/06-explore-improve-eval.md
+  spec: specs/06-explore-improve-eval.md
 ---
 
 # Self-Improver
@@ -40,7 +40,7 @@ metadata:
    <edit SKILL.md / references/*.md / script>
    finsocnet eval run --all   → data/work/R/eval_after.json
    ```
-   Keep the change only if the target set improves and no other set drops by more than 2 points. Write `docs/improvements/<YYYYMMDD>-<topic>.md` (lessons, change, before/after table), commit, `kb lesson update <ids> --status proposed --ref <branch> --run R`, switch back to the original branch.
+   Keep the change only if the target set improves and no other set drops by more than 2 points. Write `specs/improvements/<YYYYMMDD>-<topic>.md` (lessons, change, before/after table), commit, `kb lesson update <ids> --status proposed --ref <branch> --run R`, switch back to the original branch.
 6. `kb run end --run R --outcome success --stats '{"data_fixes": N, "proposals": N, "dedup_agreement": 0.0}'`.
 7. Report to the user: data fixes applied (with undo hint `kb card undo --history-id …`), branches proposed with their before/after tables, open questions.
 
@@ -48,6 +48,6 @@ metadata:
 
 After every 20 mining runs or daily, whichever comes first; on demand via `/finsocnet:improve`.
 
-## Eval targets (from `docs/spec/06-explore-improve-eval.md` §3.4)
+## Eval targets (from `specs/06-explore-improve-eval.md` §3.4)
 
 transform validity 100% · transform recall ≥ 0.80 · precision ≥ 0.75 · dedup accuracy ≥ 0.85 · wrong-merge rate ≤ 0.03 · search recall@10 ≥ 0.80 · attribution accuracy ≥ 0.85.

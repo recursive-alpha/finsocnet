@@ -1,4 +1,4 @@
-"""CLI for the agent browser: `agent_browser.py start|stop|status|open|vnc` (docs/spec/04 §6.1)."""
+"""CLI for the agent browser: `agent_browser.py start|stop|status|open|vnc` (specs/04 §6.1)."""
 
 from __future__ import annotations
 

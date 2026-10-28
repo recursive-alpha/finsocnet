@@ -1,4 +1,4 @@
-"""TradingView ideas and Pine scripts through the agent browser (docs/spec/05 §3.5). Selectors are unverified against the live
+"""TradingView ideas and Pine scripts through the agent browser (specs/05 §3.5). Selectors are unverified against the live
 site (account required); the parser reads JSON-LD / Open Graph first and falls back to page text."""
 
 from __future__ import annotations

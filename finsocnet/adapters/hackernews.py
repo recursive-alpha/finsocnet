@@ -1,4 +1,4 @@
-"""Hacker News via the Algolia API (docs/spec/05 §4). No session."""
+"""Hacker News via the Algolia API (specs/05 §4). No session."""
 
 from __future__ import annotations
 

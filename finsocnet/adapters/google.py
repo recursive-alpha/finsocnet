@@ -1,4 +1,4 @@
-"""Google Web/News search through the agent browser (docs/spec/05 §2.9). Strict budget; CAPTCHA pages exit 3."""
+"""Google Web/News search through the agent browser (specs/05 §2.9). Strict budget; CAPTCHA pages exit 3."""
 
 from __future__ import annotations
 

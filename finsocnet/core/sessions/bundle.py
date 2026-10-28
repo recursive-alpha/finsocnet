@@ -1,4 +1,4 @@
-"""Encrypted session bundles (docs/spec/04 §3.2): age-encrypted tar.gz of manifest, cookies, localStorage, history."""
+"""Encrypted session bundles (specs/04 §3.2): age-encrypted tar.gz of manifest, cookies, localStorage, history."""
 
 from __future__ import annotations
 

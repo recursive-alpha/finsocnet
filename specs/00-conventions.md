@@ -62,7 +62,7 @@ evals/
   transform/  dedup/  search/  attribution/   # golden cases (06)
 tests/
   unit/  integration/  fixtures/<platform>/   # offline fixtures (HTML/JSON recorded responses)
-docs/spec/                              # this spec
+specs/                              # this spec
 data/                                   # gitignored runtime data (§8)
 ```
 

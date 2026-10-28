@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SEC adapter CLI (docs/spec/05-platform-skills.md)."""
+"""SEC adapter CLI (specs/05-platform-skills.md)."""
 
 from finsocnet.adapters.sec import SEC
 from finsocnet.core.platform import run_platform_cli

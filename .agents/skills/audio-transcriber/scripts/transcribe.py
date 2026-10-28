@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Local Whisper transcription (docs/spec/05-platform-skills.md §2.2). Standard envelope; not a platform adapter."""
+"""Local Whisper transcription (specs/05-platform-skills.md §2.2). Standard envelope; not a platform adapter."""
 
 from __future__ import annotations
 

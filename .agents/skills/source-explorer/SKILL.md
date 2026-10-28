@@ -9,7 +9,7 @@ metadata:
   priority: "P2"
   status: ready
   phase: "5"
-  spec: docs/spec/06-explore-improve-eval.md
+  spec: specs/06-explore-improve-eval.md
 ---
 
 # Source Explorer

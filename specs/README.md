@@ -1,7 +1,7 @@
 # FinSocNet Specification (v2)
 
 > **Status:** Draft v2 for review — 2026-10-28. Replaces v1 (Chroma + MiniLM, local browser, `.env` credentials).
-> **Audience:** implementing AI agents and human reviewers. This file is the entry point; the detail lives in `docs/spec/`.
+> **Audience:** implementing AI agents and human reviewers. This file is the entry point; the detail lives in the numbered files of this folder.
 > **Rule:** if code and spec disagree, the spec wins. If the spec is ambiguous, stop and ask; do not guess.
 
 ---
@@ -9,22 +9,22 @@
 ## 0. How to Use This Spec (Implementing Agents Read First)
 
 1. Read this file completely. It has the goals, the decisions (§3) and the hard rules (§4).
-2. Find your phase in [`docs/spec/08-phases.md`](docs/spec/08-phases.md). Implement **one phase at a time**, in order.
+2. Find your phase in [`08-phases.md`](08-phases.md). Implement **one phase at a time**, in order.
 3. Read the documents that phase lists. Every phase lists its acceptance tests; a phase is done only when they pass.
 4. Do not implement anything listed in §4 "Never do". If a task seems to require it, stop and report.
 
 | Doc | Contents |
 |---|---|
-| [`docs/spec/00-conventions.md`](docs/spec/00-conventions.md) | Repo layout, Python conventions, script contract, JSON envelope, exit codes, ID formats, shared record schemas, SKILL.md template, testing rules |
-| [`docs/spec/01-database.md`](docs/spec/01-database.md) | Full DDL, FTS5 tables and triggers, views, migration 003 with legacy data mapping, `kb` CLI reference |
-| [`docs/spec/02-knowledge-cards.md`](docs/spec/02-knowledge-cards.md) | Knowledge Card JSON Schema, claim grammar, vocabulary rules and seed, transformer instructions, few-shot examples, Query Card |
-| [`docs/spec/03-pipelines.md`](docs/spec/03-pipelines.md) | Agent procedures: mining, dedup, search, person matching, speaker attribution, rulebook synthesis; candidate retrieval algorithm |
-| [`docs/spec/04-sessions-browser.md`](docs/spec/04-sessions-browser.md) | Session bridge (local export → remote import), bundle format, agent browser, budgets, checkpoints |
-| [`docs/spec/05-platform-skills.md`](docs/spec/05-platform-skills.md) | Platform adapter contract and every platform skill (YouTube … Discord, Substack, Stack Exchange, forums, …) |
-| [`docs/spec/06-explore-improve-eval.md`](docs/spec/06-explore-improve-eval.md) | Source explorer loop, self-improver, evaluation sets and scoring |
-| [`docs/spec/07-harness-integration.md`](docs/spec/07-harness-integration.md) | Multi-harness install, slash commands, CLI/TUI changes, skill installer (§5) |
-| [`docs/spec/08-phases.md`](docs/spec/08-phases.md) | Ordered implementation phases, tasks, acceptance tests, removal list |
-| [`docs/spec/09-checklist.md`](docs/spec/09-checklist.md) | Status: what is done, what is missing, known problems, decisions waiting on the user |
+| [`00-conventions.md`](00-conventions.md) | Repo layout, Python conventions, script contract, JSON envelope, exit codes, ID formats, shared record schemas, SKILL.md template, testing rules |
+| [`01-database.md`](01-database.md) | Full DDL, FTS5 tables and triggers, views, migration 003 with legacy data mapping, `kb` CLI reference |
+| [`02-knowledge-cards.md`](02-knowledge-cards.md) | Knowledge Card JSON Schema, claim grammar, vocabulary rules and seed, transformer instructions, few-shot examples, Query Card |
+| [`03-pipelines.md`](03-pipelines.md) | Agent procedures: mining, dedup, search, person matching, speaker attribution, rulebook synthesis; candidate retrieval algorithm |
+| [`04-sessions-browser.md`](04-sessions-browser.md) | Session bridge (local export → remote import), bundle format, agent browser, budgets, checkpoints |
+| [`05-platform-skills.md`](05-platform-skills.md) | Platform adapter contract and every platform skill (YouTube … Discord, Substack, Stack Exchange, forums, …) |
+| [`06-explore-improve-eval.md`](06-explore-improve-eval.md) | Source explorer loop, self-improver, evaluation sets and scoring |
+| [`07-harness-integration.md`](07-harness-integration.md) | Multi-harness install, slash commands, CLI/TUI changes, skill installer (§5) |
+| [`08-phases.md`](08-phases.md) | Ordered implementation phases, tasks, acceptance tests, removal list |
+| [`09-checklist.md`](09-checklist.md) | Status: what is done, what is missing, known problems, decisions waiting on the user |
 
 ---
 
@@ -89,7 +89,7 @@ These decisions are final for v2. Implementing agents must not reverse them. Eac
 
 ### ADR-003 — Knowledge Cards as the unit of knowledge.
 
-**Decision.** All knowledge is stored as cards (`docs/spec/02`), never as free text chunks. Raw text stays in `contents`/`content_segments` for reading and quoting.
+**Decision.** All knowledge is stored as cards (`02`), never as free text chunks. Raw text stays in `contents`/`content_segments` for reading and quoting.
 **Why.** Enables lexical retrieval without vectors (ADR-001), reliable dedup comparisons, per-person rulebooks, and contradiction tracking.
 
 ### ADR-004 — Agent-judged deduplication.

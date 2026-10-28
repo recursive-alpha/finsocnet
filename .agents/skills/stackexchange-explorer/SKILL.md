@@ -9,7 +9,7 @@ metadata:
   priority: "P2"
   status: ready
   phase: "6"
-  spec: docs/spec/05-platform-skills.md
+  spec: specs/05-platform-skills.md
 ---
 
 # Stack Exchange Explorer (incl. Stack Overflow)
@@ -41,7 +41,7 @@ uv run $S fetch <question url|id> --site S [--comments] [--ingest]
 | `list <tag|user_id> --site S` | questions by tag or a user's answers |
 | `fetch <question url|id> --site S` | question + all answers |
 
-Common flags (docs/spec/00-conventions.md §3): `--ingest --run R` stores the record (writes require a run id); `--enqueue --run R` adds unseen items to the explore queue; `--save-cursor` stores the paging position in `sources.cursor_json` so the next `list` continues where it stopped; `--cursor C` overrides it. Output is always the JSON envelope `{ok, command, data, warnings, meta}`.
+Common flags (specs/00-conventions.md §3): `--ingest --run R` stores the record (writes require a run id); `--enqueue --run R` adds unseen items to the explore queue; `--save-cursor` stores the paging position in `sources.cursor_json` so the next `list` continues where it stopped; `--cursor C` overrides it. Output is always the JSON envelope `{ok, command, data, warnings, meta}`.
 
 ## Procedure
 

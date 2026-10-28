@@ -1,4 +1,4 @@
-"""`finsocnet`: entry point (docs/spec/07 §1). Heavy commands live in `finsocnet.core.*_cli` and are dispatched before argparse so
+"""`finsocnet`: entry point (specs/07 §1). Heavy commands live in `finsocnet.core.*_cli` and are dispatched before argparse so
 that their own parsers (and one-envelope output) stay in charge."""
 
 from __future__ import annotations

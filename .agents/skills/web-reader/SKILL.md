@@ -9,7 +9,7 @@ metadata:
   priority: "P1"
   status: ready
   phase: "4"
-  spec: docs/spec/05-platform-skills.md
+  spec: specs/05-platform-skills.md
 ---
 
 # Web Reader
@@ -40,7 +40,7 @@ uv run $S (inspect_media.py) <url>
 | `discover <url>` | ItemRefs: RSS/Atom feeds, sitemap, outbound links, PDFs, embedded YouTube/Vimeo, `<video>`, `.vtt/.srt` tracks |
 | `web.py discover <url>` | feeds, outbound links, embedded media, caption tracks and PDFs as ItemRefs |
 
-Common flags (docs/spec/00-conventions.md §3): `--ingest --run R` stores the record (writes require a run id); `--enqueue --run R` adds unseen items to the explore queue; `--save-cursor` stores the paging position in `sources.cursor_json` so the next `list` continues where it stopped; `--cursor C` overrides it. Output is always the JSON envelope `{ok, command, data, warnings, meta}`.
+Common flags (specs/00-conventions.md §3): `--ingest --run R` stores the record (writes require a run id); `--enqueue --run R` adds unseen items to the explore queue; `--save-cursor` stores the paging position in `sources.cursor_json` so the next `list` continues where it stopped; `--cursor C` overrides it. Output is always the JSON envelope `{ok, command, data, warnings, meta}`.
 
 ## Procedure
 
@@ -72,7 +72,7 @@ Common flags (docs/spec/00-conventions.md §3): `--ingest --run R` stores the re
 
 ## Notes
 
-- Canonical URL removes tracking params (`utm_*`, `fbclid`, `gclid`, …) — see docs/spec/00 §4.
+- Canonical URL removes tracking params (`utm_*`, `fbclid`, `gclid`, …) — see specs/00 §4.
 
 
 ## References

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Papers adapter CLI (docs/spec/05-platform-skills.md)."""
+"""Papers adapter CLI (specs/05-platform-skills.md)."""
 
 from finsocnet.adapters.papers import Papers
 from finsocnet.core.platform import run_platform_cli

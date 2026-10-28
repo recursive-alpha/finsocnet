@@ -1,4 +1,4 @@
-"""Migration tests of docs/spec/01-database.md §5.4 against a fixture v1 database."""
+"""Migration tests of specs/01-database.md §5.4 against a fixture v1 database."""
 
 from __future__ import annotations
 

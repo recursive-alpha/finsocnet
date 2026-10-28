@@ -1,4 +1,4 @@
-"""YouTube via yt-dlp and youtube-transcript-api, Whisper fallback (docs/spec/05 §2.1)."""
+"""YouTube via yt-dlp and youtube-transcript-api, Whisper fallback (specs/05 §2.1)."""
 
 from __future__ import annotations
 

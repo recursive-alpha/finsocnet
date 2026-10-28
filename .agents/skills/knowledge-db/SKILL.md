@@ -9,7 +9,7 @@ metadata:
   priority: "P0"
   status: ready
   phase: "0"
-  spec: docs/spec/01-database.md
+  spec: specs/01-database.md
 ---
 
 # Knowledge DB (`finsocnet kb`)
@@ -46,7 +46,7 @@ All commands: `uv run finsocnet kb <group> <command> …` (same as `uv run .agen
 | person / skill | `person candidates\|upsert\|alias add\|appearance add\|get\|list\|cards\|merge`; `skill upsert\|get\|list` |
 | queue / gap / history | `queue add\|next\|update\|list`; `gap add\|list\|update`; `history pending\|mark` |
 
-Full reference with outputs: `docs/spec/01-database.md` §6.
+Full reference with outputs: `specs/01-database.md` §6.
 
 ## Procedures
 
@@ -71,4 +71,4 @@ Full reference with outputs: `docs/spec/01-database.md` §6.
 
 ## Why SQLite only
 
-See `SPEC.md` ADR-001: one transaction for card + citations + links + index + decision, no second store to drift, the vocabulary-based card format makes lexical search work, and the agent makes the semantic decisions. Do not add Chroma, embeddings or a vector extension.
+See `specs/README.md` ADR-001: one transaction for card + citations + links + index + decision, no second store to drift, the vocabulary-based card format makes lexical search work, and the agent makes the semantic decisions. Do not add Chroma, embeddings or a vector extension.

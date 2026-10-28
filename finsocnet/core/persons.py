@@ -1,4 +1,4 @@
-"""Canonical persons, aliases, appearances, merge (docs/spec/03-pipelines.md §5–§6, 01 §2.3)."""
+"""Canonical persons, aliases, appearances, merge (specs/03-pipelines.md §5–§6, 01 §2.3)."""
 
 from __future__ import annotations
 

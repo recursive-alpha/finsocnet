@@ -1,4 +1,4 @@
-"""Podcasts: iTunes directory, RSS feeds, Podcasting 2.0 transcripts (docs/spec/05 §2.3)."""
+"""Podcasts: iTunes directory, RSS feeds, Podcasting 2.0 transcripts (specs/05 §2.3)."""
 
 from __future__ import annotations
 

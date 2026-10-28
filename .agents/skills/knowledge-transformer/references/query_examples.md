@@ -1,6 +1,6 @@
 # Query Card examples (kt-1.0)
 
-Schema: `finsocnet/core/schemas/query_card.schema.json` (`docs/spec/02-knowledge-cards.md` §7). Map concepts with `kb vocab lookup`; never add vocabulary for a query. Add filters only when the question clearly implies them.
+Schema: `finsocnet/core/schemas/query_card.schema.json` (`specs/02-knowledge-cards.md` §7). Map concepts with `kb vocab lookup`; never add vocabulary for a query. Add filters only when the question clearly implies them.
 
 ## Q1 — general trade management
 "should I hold overnight or close same day?"

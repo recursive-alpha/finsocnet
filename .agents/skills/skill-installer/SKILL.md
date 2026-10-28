@@ -9,7 +9,7 @@ metadata:
   priority: "P2"
   status: ready
   phase: "5"
-  spec: docs/spec/07-harness-integration.md
+  spec: specs/07-harness-integration.md
 ---
 
 # Skill Installer
@@ -86,4 +86,4 @@ uv run $S discard <staging_id>                              # delete a staging f
 
 - `references/link_formats.md` — every supported link and how it resolves.
 - `references/review_checklist.md` — scanner rules (B/H/M), what to check by reading, `review.json` schema, report template.
-- `docs/spec/07-harness-integration.md` §5 — lock file, staging layout, limits.
+- `specs/07-harness-integration.md` §5 — lock file, staging layout, limits.

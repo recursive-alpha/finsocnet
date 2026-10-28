@@ -1,4 +1,4 @@
-"""`finsocnet kb …`: the database CLI (docs/spec/01-database.md §6). Every command prints one JSON envelope."""
+"""`finsocnet kb …`: the database CLI (specs/01-database.md §6). Every command prints one JSON envelope."""
 
 from __future__ import annotations
 

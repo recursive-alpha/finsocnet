@@ -1,6 +1,6 @@
 # Agent Operating Guide
 
-FinSocNet is an agent-operated knowledge network. **You are the only model in it**: scripts fetch, store, validate, search and score; you read, judge and write. The spec is the source of truth: [`SPEC.md`](SPEC.md) and [`docs/spec/`](docs/spec/). If code and spec disagree, the spec wins; if the spec is ambiguous, ask.
+FinSocNet is an agent-operated knowledge network. **You are the only model in it**: scripts fetch, store, validate, search and score; you read, judge and write. The spec is the source of truth: [`specs/README.md`](specs/README.md) and [`specs/`](specs/). If code and spec disagree, the spec wins; if the spec is ambiguous, ask.
 
 ## What it does
 
@@ -77,4 +77,4 @@ Slash commands (source in `commands/`): `/finsocnet`, `:search`, `:card`, `:pers
 
 ## Development
 
-`uv run pytest` runs the offline suite (live tests: `-m live`). Config is in `.env` (see `.env.example`; no credentials), `config/*.yaml`. Implementation status and open questions: [`docs/spec/09-checklist.md`](docs/spec/09-checklist.md).
+`uv run pytest` runs the offline suite (live tests: `-m live`). Config is in `.env` (see `.env.example`; no credentials), `config/*.yaml`. Implementation status and open questions: [`specs/09-checklist.md`](specs/09-checklist.md).

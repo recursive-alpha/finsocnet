@@ -9,7 +9,7 @@ metadata:
   priority: "P2"
   status: ready
   phase: "6"
-  spec: docs/spec/05-platform-skills.md
+  spec: specs/05-platform-skills.md
 ---
 
 # Research Explorer (SSRN, NBER, OpenAlex, Semantic Scholar)
@@ -39,7 +39,7 @@ uv run $S fetch <doi|ssrn url|openalex id> [--pdf] [--ingest]
 | `profile <author id|name>` | author works and topics |
 | `fetch <doi|ssrn url|openalex id>` | metadata + abstract; `--pdf` ingests open-access full text |
 
-Common flags (docs/spec/00-conventions.md §3): `--ingest --run R` stores the record (writes require a run id); `--enqueue --run R` adds unseen items to the explore queue; `--save-cursor` stores the paging position in `sources.cursor_json` so the next `list` continues where it stopped; `--cursor C` overrides it. Output is always the JSON envelope `{ok, command, data, warnings, meta}`.
+Common flags (specs/00-conventions.md §3): `--ingest --run R` stores the record (writes require a run id); `--enqueue --run R` adds unseen items to the explore queue; `--save-cursor` stores the paging position in `sources.cursor_json` so the next `list` continues where it stopped; `--cursor C` overrides it. Output is always the JSON envelope `{ok, command, data, warnings, meta}`.
 
 ## Procedure
 

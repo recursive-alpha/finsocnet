@@ -1,4 +1,4 @@
-"""Medium: RSS for listings, agent browser + trafilatura for articles (docs/spec/05 §2.6). Session optional."""
+"""Medium: RSS for listings, agent browser + trafilatura for articles (specs/05 §2.6). Session optional."""
 
 from __future__ import annotations
 

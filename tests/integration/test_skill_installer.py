@@ -1,4 +1,4 @@
-"""skill-installer (docs/spec/07 §5.6): quarantine, block/high rules, review verification, install, update, remove. Offline."""
+"""skill-installer (specs/07 §5.6): quarantine, block/high rules, review verification, install, update, remove. Offline."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Exploration frontier, knowledge gaps and browsing history (docs/spec/01 §2.7, §6.7; 06 §1)."""
+"""Exploration frontier, knowledge gaps and browsing history (specs/01 §2.7, §6.7; 06 §1)."""
 
 from __future__ import annotations
 

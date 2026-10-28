@@ -1,4 +1,4 @@
-"""Text normalization (docs/spec/00-conventions.md §5)."""
+"""Text normalization (specs/00-conventions.md §5)."""
 
 from __future__ import annotations
 

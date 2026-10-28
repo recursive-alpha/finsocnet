@@ -1,6 +1,6 @@
 """Sources, contents and segments: add_content(), get_content(), view, chunks, status changes, search.
 
-Write semantics follow docs/spec/01-database.md §3.1. Contents, segments and citations are never deleted.
+Write semantics follow specs/01-database.md §3.1. Contents, segments and citations are never deleted.
 """
 
 from __future__ import annotations
@@ -292,7 +292,7 @@ def describe_locator(kind: str, locator: dict[str, Any], author: str | None) -> 
 
 
 def view_content(conn: sqlite3.Connection, content_id: str, from_seq: int | None = None, to_seq: int | None = None) -> dict[str, Any]:
-    """Render segments for the agent (docs/spec/03-pipelines.md §1.2)."""
+    """Render segments for the agent (specs/03-pipelines.md §1.2)."""
     c = _require(conn, content_id)
     bounds = conn.execute("SELECT COALESCE(MIN(seq), 0) AS lo, COALESCE(MAX(seq), -1) AS hi FROM content_segments WHERE content_id = ?", (content_id,)).fetchone()
     lo = bounds["lo"] if from_seq is None else from_seq

@@ -1,4 +1,4 @@
-"""Bluesky via the public AppView (docs/spec/05 §3.11)."""
+"""Bluesky via the public AppView (specs/05 §3.11)."""
 
 from __future__ import annotations
 

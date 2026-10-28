@@ -9,7 +9,7 @@ metadata:
   priority: "P0"
   status: ready
   phase: "1"
-  spec: docs/spec/02-knowledge-cards.md
+  spec: specs/02-knowledge-cards.md
 ---
 
 # Knowledge Transformer

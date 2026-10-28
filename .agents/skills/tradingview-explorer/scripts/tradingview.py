@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""TradingView adapter CLI (docs/spec/05-platform-skills.md)."""
+"""TradingView adapter CLI (specs/05-platform-skills.md)."""
 
 from finsocnet.adapters.tradingview import TradingView
 from finsocnet.core.platform import run_platform_cli

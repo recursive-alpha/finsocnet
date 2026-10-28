@@ -9,7 +9,7 @@ metadata:
   priority: "P0"
   status: ready
   phase: "1"
-  spec: docs/spec/03-pipelines.md
+  spec: specs/03-pipelines.md
 ---
 
 # Knowledge Dedup
@@ -84,4 +84,4 @@ Link relations: `related`, `contradicts`, `prerequisite`, `example_of`, `refines
 ## References
 
 - `references/decision_examples.md` — 12 worked decisions. Read before the first dedup of a session.
-- `docs/spec/03-pipelines.md` §2 (candidate algorithm) and §3 (this procedure).
+- `specs/03-pipelines.md` §2 (candidate algorithm) and §3 (this procedure).

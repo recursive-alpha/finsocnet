@@ -1,4 +1,4 @@
-"""GitHub REST API (docs/spec/05 §3.10)."""
+"""GitHub REST API (specs/05 §3.10)."""
 
 from __future__ import annotations
 

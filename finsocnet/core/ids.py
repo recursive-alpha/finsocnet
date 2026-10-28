@@ -1,4 +1,4 @@
-"""Identifier builders and parsers (docs/spec/00-conventions.md §4). Never hand-format IDs."""
+"""Identifier builders and parsers (specs/00-conventions.md §4). Never hand-format IDs."""
 
 from __future__ import annotations
 

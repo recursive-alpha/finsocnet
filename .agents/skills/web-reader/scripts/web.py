@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Web adapter CLI (docs/spec/05-platform-skills.md)."""
+"""Web adapter CLI (specs/05-platform-skills.md)."""
 
 from finsocnet.adapters.web import Web
 from finsocnet.core.platform import run_platform_cli

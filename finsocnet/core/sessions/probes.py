@@ -1,4 +1,4 @@
-"""Login probes (docs/spec/04 §4.3): `logged_in` needs the session cookies AND a probe page that is neither a login wall
+"""Login probes (specs/04 §4.3): `logged_in` needs the session cookies AND a probe page that is neither a login wall
 nor a checkpoint."""
 
 from __future__ import annotations

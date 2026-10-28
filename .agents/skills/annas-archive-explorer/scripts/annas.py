@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Anna's Archive adapter CLI (docs/spec/05-platform-skills.md §2.12)."""
+"""Anna's Archive adapter CLI (specs/05-platform-skills.md §2.12)."""
 
 from finsocnet.adapters.annas import Annas
 from finsocnet.core.platform import run_platform_cli

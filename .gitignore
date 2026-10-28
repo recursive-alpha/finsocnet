@@ -6,6 +6,6 @@ __pycache__/
 .pytest_cache/
 *.log
 
-# Runtime data (docs/spec/00-conventions.md §8): everything under data/ except the placeholder
+# Runtime data (specs/00-conventions.md §8): everything under data/ except the placeholder
 data/*
 !data/.gitkeep

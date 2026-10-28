@@ -1,4 +1,4 @@
-"""Skill installer core (docs/spec/07 §5, `.agents/skills/skill-installer/references/review_checklist.md`).
+"""Skill installer core (specs/07 §5, `.agents/skills/skill-installer/references/review_checklist.md`).
 
 Nothing staged is ever executed: files are fetched, hashed, scanned as text/bytes and copied. Subprocess is used only for `git clone`
 (hooks disabled) on a remote URL; no staged path is passed to any interpreter."""

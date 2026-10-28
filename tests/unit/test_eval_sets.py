@@ -25,6 +25,6 @@ def test_set_size(name, minimum):
 
 @pytest.mark.parametrize("name", ["transform", "dedup", "attribution", "search"])
 def test_baseline_report_matches_stored_outputs(name):
-    stored = json.loads((ROOT / "docs" / "improvements" / "eval-2026-10-28" / f"{name}.json").read_text())
+    stored = json.loads((ROOT / "specs" / "improvements" / "eval-2026-10-28" / f"{name}.json").read_text())
     fresh = getattr(eval_cli, f"score_{name}")(ROOT / "evals" / "baseline" / "2026-10-28")
     assert fresh["metrics"] == stored["metrics"]

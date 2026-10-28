@@ -1,4 +1,4 @@
-"""CLI of the skill-installer skill (docs/spec/07 §5.1)."""
+"""CLI of the skill-installer skill (specs/07 §5.1)."""
 
 from __future__ import annotations
 

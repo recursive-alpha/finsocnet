@@ -1,6 +1,6 @@
 # Evaluation sets
 
-Golden cases for `finsocnet eval` (docs/spec/06-explore-improve-eval.md). Cases are fictional and hand-checked.
+Golden cases for `finsocnet eval` (specs/06-explore-improve-eval.md). Cases are fictional and hand-checked.
 
 | Set | Layout | Scoring |
 |---|---|---|
@@ -19,7 +19,7 @@ instruction change it is meant to test, and have the user review it.
 ## Sizes and baseline
 
 transform 30 · dedup 40 · search 30 (over `search/fixture_db.sql`, 68 cards) · attribution 15 (spec 06 §3.1 minimums).
-`evals/baseline/2026-10-28/` holds the agent outputs for every case and `docs/improvements/eval-2026-10-28/*.json` the scores:
+`evals/baseline/2026-10-28/` holds the agent outputs for every case and `specs/improvements/eval-2026-10-28/*.json` the scores:
 transform validity 1.0 / recall 1.0 / precision 1.0 · dedup accuracy 1.0 / wrong-merge 0.0 · attribution 1.0 · search recall@10 0.956, MRR 1.0.
 The author of the agent outputs also wrote the cases, so this is a regression baseline, not independent evidence; `tests/unit/test_eval_sets.py` keeps both honest.
 Regenerate: scratch generators live next to the sets (`search/gen_fixture.py`); transform/dedup cases were generated from a script and are plain JSON now.

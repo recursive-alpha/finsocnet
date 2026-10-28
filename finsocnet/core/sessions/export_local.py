@@ -1,5 +1,5 @@
 """Local side of the session bridge: collect cookies from the user's browser and write an encrypted bundle
-(docs/spec/04 §3). Methods are tried in order: A (copy the profile and let the same Chrome decrypt it over CDP),
+(specs/04 §3). Methods are tried in order: A (copy the profile and let the same Chrome decrypt it over CDP),
 B (rookiepy), C (ask the user for an extension export). Only counts are ever printed."""
 
 from __future__ import annotations

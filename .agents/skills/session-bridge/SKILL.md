@@ -9,7 +9,7 @@ metadata:
   priority: "P1"
   status: ready
   phase: "3"
-  spec: docs/spec/04-sessions-browser.md
+  spec: specs/04-sessions-browser.md
 ---
 
 # Session Bridge

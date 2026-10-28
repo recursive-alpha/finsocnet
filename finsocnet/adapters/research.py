@@ -1,4 +1,4 @@
-"""OpenAlex and Semantic Scholar (docs/spec/05 §3.9). SSRN search goes through the agent browser (not implemented here)."""
+"""OpenAlex and Semantic Scholar (specs/05 §3.9). SSRN search goes through the agent browser (not implemented here)."""
 
 from __future__ import annotations
 

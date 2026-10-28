@@ -1,4 +1,4 @@
-"""Person rulebooks stored in `person_skills` (docs/spec/03-pipelines.md §7). Nothing is written to disk (P7)."""
+"""Person rulebooks stored in `person_skills` (specs/03-pipelines.md §7). Nothing is written to disk (P7)."""
 
 from __future__ import annotations
 

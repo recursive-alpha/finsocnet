@@ -1,4 +1,4 @@
-"""kb content semantics (docs/spec/01-database.md §3.1) and the envelope contract (00 §3)."""
+"""kb content semantics (specs/01-database.md §3.1) and the envelope contract (00 §3)."""
 
 from __future__ import annotations
 

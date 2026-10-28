@@ -9,7 +9,7 @@ metadata:
   priority: "P2"
   status: ready
   phase: "8"
-  spec: docs/spec/07-harness-integration.md
+  spec: specs/07-harness-integration.md
 ---
 
 # FinSocNet

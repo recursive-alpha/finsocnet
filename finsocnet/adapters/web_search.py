@@ -1,4 +1,4 @@
-"""DuckDuckGo web search via ddgs (docs/spec/05 §2.8). Search only; use web-reader to read a result."""
+"""DuckDuckGo web search via ddgs (specs/05 §2.8). Search only; use web-reader to read a result."""
 
 from __future__ import annotations
 

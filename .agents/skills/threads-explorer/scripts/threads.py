@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Threads adapter CLI (docs/spec/05-platform-skills.md)."""
+"""Threads adapter CLI (specs/05-platform-skills.md)."""
 
 from finsocnet.adapters.social import Threads
 from finsocnet.core.platform import run_platform_cli

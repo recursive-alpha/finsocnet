@@ -1,4 +1,4 @@
-"""Agent runs, lessons and feedback (docs/spec/01-database.md §2.1, §2.7)."""
+"""Agent runs, lessons and feedback (specs/01-database.md §2.1, §2.7)."""
 
 from __future__ import annotations
 

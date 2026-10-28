@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Reddit adapter CLI (docs/spec/05-platform-skills.md)."""
+"""Reddit adapter CLI (specs/05-platform-skills.md)."""
 
 from finsocnet.adapters.reddit import Reddit
 from finsocnet.core.platform import run_platform_cli

@@ -1,4 +1,4 @@
-"""Final acceptance checklist of docs/spec/08-phases.md as executable checks."""
+"""Final acceptance checklist of specs/08-phases.md as executable checks."""
 
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ def frontmatter(p: Path) -> dict:
 
 
 def test_sqlite_only_no_vector_stack():
-    bad = re.compile(r"chromadb|sentence_transformers|SentenceTransformer|vector_store")  # the grep of docs/spec/08 Phase 0
+    bad = re.compile(r"chromadb|sentence_transformers|SentenceTransformer|vector_store")  # the grep of specs/08 Phase 0
     offenders = [str(p.relative_to(ROOT)) for p in PY if bad.search(p.read_text(encoding="utf-8"))]
     assert offenders == []
     deps = (ROOT / "pyproject.toml").read_text()

@@ -1,6 +1,6 @@
-# Per-platform domains, login probes and checkpoint patterns (docs/spec/04-sessions-browser.md §4.3).
+# Per-platform domains, login probes and checkpoint patterns (specs/04-sessions-browser.md §4.3).
 # Cookie names below follow the spec; items marked "verify" must be re-checked against the real site during the live
-# session test (see docs/spec/04 §9) and corrected here.
+# session test (see specs/04 §9) and corrected here.
 # refresh_hours: how often an active source of the platform is re-crawled (default 24 for social, 168 for blogs/forums).
 x:
   requires_session: true

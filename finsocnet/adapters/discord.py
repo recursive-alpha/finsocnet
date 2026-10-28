@@ -1,5 +1,5 @@
 """Discord: user mode through the agent browser (reads the client's own REST responses; the script never sends requests with the
-token) and bot mode with the official API (docs/spec/05 §3.1).
+token) and bot mode with the official API (specs/05 §3.1).
 
 ToS: automating a user account violates Discord's terms ("self-bots") and can get the account banned. Use a secondary account,
 keep budgets low, read only (SPEC §9 Q2). Bot mode is only for servers where the user added the bot."""

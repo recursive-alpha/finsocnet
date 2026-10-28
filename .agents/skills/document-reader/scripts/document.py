@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Document reader CLI: fetch a file or URL, scan the drop folder (docs/spec/05-platform-skills.md §2.11)."""
+"""Document reader CLI: fetch a file or URL, scan the drop folder (specs/05-platform-skills.md §2.11)."""
 
 from finsocnet.adapters.document import Document
 from finsocnet.core import config, content, runs

@@ -61,7 +61,7 @@ finsocnet session push [FILE]          # default: newest bundle in ~/.local/shar
 
 `--from-dir` scans a folder recursively, detects every file by content (not extension), merges all cookies (newest `expires` wins for the same `(name, domain, path)`), and reports per file what was found.
 
-**Spike required in Phase 3:** verify method A on Linux, macOS and Windows (Chrome ≥ 127 app-bound encryption). Record results in `docs/spec/04-sessions-browser.md` §9.
+**Spike required in Phase 3:** verify method A on Linux, macOS and Windows (Chrome ≥ 127 app-bound encryption). Record results in `specs/04-sessions-browser.md` §9.
 
 ### 3.2 Bundle format
 

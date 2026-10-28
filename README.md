@@ -2,7 +2,7 @@
 
 **FinSocNet is an agent-operated knowledge network for finance and trading.** It finds the people who publish market knowledge (video, podcasts, social networks, chats, newsletters, forums, Q&A sites, code, papers, filings, books), stores everything they publish in one SQLite file, has your AI harness rewrite it into canonical **Knowledge Cards**, merges duplicates with the agent's judgment, and then answers questions with citations and hands out per-person rulebooks.
 
-No vector database, no embeddings, no LLM calls from scripts: the harness agent (Claude Code, Codex, Hermes, Pi, OMP, OpenClaw) does all the reading and judging; scripts only fetch, store, validate, search and score. Skills follow the open [Agent Skills specification](https://agentskills.io). Design and decisions: [`SPEC.md`](SPEC.md), [`docs/spec/`](docs/spec/).
+No vector database, no embeddings, no LLM calls from scripts: the harness agent (Claude Code, Codex, Hermes, Pi, OMP, OpenClaw) does all the reading and judging; scripts only fetch, store, validate, search and score. Skills follow the open [Agent Skills specification](https://agentskills.io). Design and decisions: [`specs/README.md`](specs/README.md), [`specs/`](specs/).
 
 ## How it works
 
@@ -48,7 +48,7 @@ About 45 skills in [`.agents/skills/`](.agents/skills/): the knowledge core (`kn
 
 ## Status
 
-Everything in the specification is implemented; what has been checked against real sites and what still waits for your accounts is listed in [`docs/spec/09-checklist.md`](docs/spec/09-checklist.md) and in each skill's `references/platform_notes.md`. Run the offline tests with `uv run pytest`.
+Everything in the specification is implemented; what has been checked against real sites and what still waits for your accounts is listed in [`specs/09-checklist.md`](specs/09-checklist.md) and in each skill's `references/platform_notes.md`. Run the offline tests with `uv run pytest`.
 
 ## Responsible use
 

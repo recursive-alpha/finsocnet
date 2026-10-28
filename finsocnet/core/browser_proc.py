@@ -1,4 +1,4 @@
-"""Start, stop and inspect the single agent Chrome (docs/spec/04 §6.1–6.2). Launch flags are normative: no automation flags,
+"""Start, stop and inspect the single agent Chrome (specs/04 §6.1–6.2). Launch flags are normative: no automation flags,
 no user-agent override, headed under Xvfb unless `--headless` is passed for debugging."""
 
 from __future__ import annotations

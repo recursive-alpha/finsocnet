@@ -1,4 +1,4 @@
-"""Any RSS/Atom feed (docs/spec/05 §3.7). Items use `web:<sha1(canonical_url)[:16]>` ids, the same as web-reader."""
+"""Any RSS/Atom feed (specs/05 §3.7). Items use `web:<sha1(canonical_url)[:16]>` ids, the same as web-reader."""
 
 from __future__ import annotations
 

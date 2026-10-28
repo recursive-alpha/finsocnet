@@ -1,4 +1,4 @@
-"""StockTwits (docs/spec/05 §4). The public API answers 403 to plain HTTP clients (checked 2026-10-28), so every call
+"""StockTwits (specs/05 §4). The public API answers 403 to plain HTTP clients (checked 2026-10-28), so every call
 goes through the agent browser, which loads the JSON endpoints like a page."""
 
 from __future__ import annotations

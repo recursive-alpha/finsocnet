@@ -1,4 +1,4 @@
-"""Session bridge: formats, bundles, import/reapply/purge, secret-leak test, login probes, budgets (docs/spec/04, 00 §10)."""
+"""Session bridge: formats, bundles, import/reapply/purge, secret-leak test, login probes, budgets (specs/04, 00 §10)."""
 
 from __future__ import annotations
 

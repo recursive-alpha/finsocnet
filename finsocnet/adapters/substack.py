@@ -1,4 +1,4 @@
-"""Substack JSON endpoints (docs/spec/05 §2.7). The endpoints are unofficial; behavior verified 2026-10-28:
+"""Substack JSON endpoints (specs/05 §2.7). The endpoints are unofficial; behavior verified 2026-10-28:
 `/api/v1/archive`, `/api/v1/posts/<slug>`, `/api/v1/post/<id>/comments` answer to plain HTTP for free posts. Publication
 search answers an empty list without a browser session."""
 

@@ -1,4 +1,4 @@
-"""Migration runner for `.sql` and `.py` migrations (docs/spec/01-database.md §5.1).
+"""Migration runner for `.sql` and `.py` migrations (specs/01-database.md §5.1).
 
 A `.py` migration defines `up(conn)`. Each migration runs in one transaction with foreign keys off, followed by
 `PRAGMA foreign_key_check`. A backup is taken before any pending migration is applied.

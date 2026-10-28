@@ -1,4 +1,4 @@
-"""Rate budgets per platform (docs/spec/04-sessions-browser.md §7), counted in `budget_usage`."""
+"""Rate budgets per platform (specs/04-sessions-browser.md §7), counted in `budget_usage`."""
 
 from __future__ import annotations
 

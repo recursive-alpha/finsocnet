@@ -57,7 +57,7 @@ FROM base AS runner
 COPY --from=py-builder /app/.venv /app/.venv
 
 # Copy Python codebase & specifications
-COPY pyproject.toml README.md SPEC.md AGENTS.md install.sh ./
+COPY pyproject.toml README.md specs/README.md AGENTS.md install.sh ./
 COPY finsocnet/ ./finsocnet/
 COPY migrations/ ./migrations/
 COPY legacy/ ./legacy/

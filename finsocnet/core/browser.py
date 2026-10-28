@@ -1,4 +1,4 @@
-"""The one agent browser, attached over CDP (docs/spec/04 §6, ADR-006). No script may call `chromium.launch()`,
+"""The one agent browser, attached over CDP (specs/04 §6, ADR-006). No script may call `chromium.launch()`,
 `launch_persistent_context()` or `browser.new_context()`: everything goes through `attach()` and `page()`."""
 
 from __future__ import annotations

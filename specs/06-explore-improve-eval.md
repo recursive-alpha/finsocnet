@@ -140,7 +140,7 @@ The skill must be safe to run repeatedly and concurrently (queue `next` marks it
 3. make the change (one topic per branch)
 4. finsocnet eval run --all --out data/work/<run>/eval_after.json
 5. accept only if the target set improves and no other set drops by more than 2 points
-6. write docs/improvements/<YYYYMMDD>-<topic>.md: lesson ids, change summary, before/after table
+6. write specs/improvements/<YYYYMMDD>-<topic>.md: lesson ids, change summary, before/after table
 7. commit; kb lesson update <ids> --status proposed --ref <branch>
 8. tell the user the branch name and the before/after table; never merge yourself
 ```

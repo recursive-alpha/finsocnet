@@ -1,4 +1,4 @@
-"""X/Twitter through the agent browser, reading the site's own GraphQL responses (docs/spec/05 §2.4). Session required.
+"""X/Twitter through the agent browser, reading the site's own GraphQL responses (specs/05 §2.4). Session required.
 The parser walks the JSON recursively, so it survives the frequent query-id and nesting changes."""
 
 from __future__ import annotations

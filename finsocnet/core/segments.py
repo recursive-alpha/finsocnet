@@ -1,4 +1,4 @@
-"""Helpers every adapter uses to build quotable segments (docs/spec/00 §7.1)."""
+"""Helpers every adapter uses to build quotable segments (specs/00 §7.1)."""
 
 from __future__ import annotations
 

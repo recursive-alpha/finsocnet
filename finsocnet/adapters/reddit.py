@@ -1,4 +1,4 @@
-"""Reddit JSON endpoints loaded through the agent browser, so cookies and proxy apply (docs/spec/05 §2.5)."""
+"""Reddit JSON endpoints loaded through the agent browser, so cookies and proxy apply (specs/05 §2.5)."""
 
 from __future__ import annotations
 

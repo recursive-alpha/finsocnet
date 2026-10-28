@@ -1,4 +1,4 @@
-"""Stack Exchange API 2.3 (docs/spec/05 §3.3). Honours `backoff` and stops below 10 quota."""
+"""Stack Exchange API 2.3 (specs/05 §3.3). Honours `backoff` and stops below 10 quota."""
 
 from __future__ import annotations
 

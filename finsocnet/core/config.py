@@ -1,4 +1,4 @@
-"""Environment loading and paths (docs/spec/00-conventions.md §6)."""
+"""Environment loading and paths (specs/00-conventions.md §6)."""
 
 from __future__ import annotations
 

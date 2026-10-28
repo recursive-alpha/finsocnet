@@ -1,4 +1,4 @@
-"""Documents: PDF, EPUB, DOCX, HTML, TXT/MD and audio/video recordings (docs/spec/05 §2.11). Nothing is ignored: scanned
+"""Documents: PDF, EPUB, DOCX, HTML, TXT/MD and audio/video recordings (specs/05 §2.11). Nothing is ignored: scanned
 pages are OCRed when `ocrmypdf` is installed, recordings go through Whisper."""
 
 from __future__ import annotations

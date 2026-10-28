@@ -410,5 +410,5 @@ Old script names (`explore_channel.py`, `extract_transcript.py`, `explore_user.p
 2. Create `.agents/skills/<platform>-explorer/` from the template (§1.4) with a SKILL.md whose description contains the platform name and typical user phrases.
 3. Implement the adapter: at least `fetch`; `list`/`search`/`profile` when the platform supports them.
 4. Record fixtures and write tests (§1.3).
-5. Add the skill to SPEC.md §5.2 and to this document.
+5. Add the skill to specs/README.md §5.2 and to this document.
 6. Add a `source-explorer` dispatch rule (06 §1.3) mapping URL patterns to the new skill.

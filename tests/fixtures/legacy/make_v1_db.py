@@ -1,4 +1,4 @@
-"""Build a v1 fixture database (the DDL of the current production DB + the sample rows of docs/spec/01-database.md §5.2).
+"""Build a v1 fixture database (the DDL of the current production DB + the sample rows of specs/01-database.md §5.2).
 
 Usage in tests: `make_v1_db(path)`. Transcript files are expected under `<root>/data/transcripts/` (see conftest).
 """

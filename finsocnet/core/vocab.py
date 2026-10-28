@@ -1,4 +1,4 @@
-"""Controlled vocabulary (docs/spec/02-knowledge-cards.md §4, 01 §2.4). Makes lexical search work without embeddings."""
+"""Controlled vocabulary (specs/02-knowledge-cards.md §4, 01 §2.4). Makes lexical search work without embeddings."""
 
 from __future__ import annotations
 

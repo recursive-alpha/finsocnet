@@ -1,4 +1,4 @@
-"""SQLite connection rules (docs/spec/01-database.md §1)."""
+"""SQLite connection rules (specs/01-database.md §1)."""
 
 from __future__ import annotations
 

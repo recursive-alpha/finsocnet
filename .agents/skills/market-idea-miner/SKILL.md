@@ -9,7 +9,7 @@ metadata:
   priority: "P0"
   status: ready
   phase: "1"
-  spec: docs/spec/03-pipelines.md
+  spec: specs/03-pipelines.md
 ---
 
 # Market Idea Miner

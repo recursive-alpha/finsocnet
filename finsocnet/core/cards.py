@@ -1,6 +1,6 @@
 """Knowledge Cards: validation, candidate retrieval, search, atomic decision commit, merge/retire/update/undo.
 
-Spec: docs/spec/02-knowledge-cards.md, 03-pipelines.md §2–§3, 01-database.md §3. No embeddings, no LLM (ADR-001/002).
+Spec: specs/02-knowledge-cards.md, 03-pipelines.md §2–§3, 01-database.md §3. No embeddings, no LLM (ADR-001/002).
 """
 
 from __future__ import annotations

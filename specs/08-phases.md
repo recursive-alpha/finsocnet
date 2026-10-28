@@ -6,7 +6,7 @@ Implement in order. Each phase lists what to read, the tasks, and the acceptance
 
 ## Phase 0 — Foundation and Cleanup
 
-**Read:** SPEC.md, 00, 01 §1–§2, §5.
+**Read:** specs/README.md, 00, 01 §1–§2, §5.
 
 **Tasks**
 1. Create `finsocnet/core/` modules: `config`, `db`, `output`, `ids`, `normalize`, `records`, `migrations` (moved + extended for `.py` migrations and auto-backup), `runs`.
@@ -62,12 +62,12 @@ Implement in order. Each phase lists what to read, the tasks, and the acceptance
 3. Legacy conversion (agent work, one run per person, tracked with `kb run`):
    - For each of the 66 `legacy_hypotheses`: find the quote in the content's segments (`kb content search`); if found → normal transform + dedup with that segment; if not found (content has no text) → card with a legacy citation (`segment_seq = NULL`, `quote_verified = 0`, `locator_json = {start_sec}` from the legacy timestamp). Requires a `--legacy` flag on `kb card commit` that relaxes only the quote check.
    - For each of the 9 person folders: read `SKILL.md` and `references/*.md`; every rule that is not yet a card becomes a card citing the original content (legacy citation if needed); then run `person-skill-synthesizer` for the person.
-   - Compare the new rulebook with the old folder; list rules lost or changed in `docs/improvements/legacy-conversion.md`.
+   - Compare the new rulebook with the old folder; list rules lost or changed in `specs/improvements/legacy-conversion.md`.
 4. After the user approves the comparison: delete `legacy/person-skills/` (the 9 folders), `legacy/meta-skills/` (`hypothesis-miner`, `skill-curator`, `user-skill-synthesizer`, `skill-explorer`) and `legacy/scripts/` (`rebuild_all_person_skills.py`, `rebuild_skills_data.py`, …), and repoint or remove `finsocnet strategy`; migration `004_drop_legacy.sql` drops `legacy_hypotheses`, `legacy_skills`, `legacy_users`, `legacy_contents`, `legacy_persons`, `legacy_person_appearances` (keep `legacy_id_map`).
 
 **Acceptance**
 - `kb skill get <person> --render markdown` works for all 9 persons; every rule references active card ids that cite that person; no timestamps in rulebooks.
-- `docs/improvements/legacy-conversion.md` lists 0 lost rules (or each loss is explained and approved).
+- `specs/improvements/legacy-conversion.md` lists 0 lost rules (or each loss is explained and approved).
 - `ls .agents/skills` contains no person folders.
 - Attribution eval set (≥ 10 cases) created; accuracy ≥ 0.85.
 

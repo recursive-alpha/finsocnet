@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Forum adapter CLI (docs/spec/05-platform-skills.md)."""
+"""Forum adapter CLI (specs/05-platform-skills.md)."""
 
 from finsocnet.adapters.forum import Forum
 from finsocnet.core.platform import run_platform_cli

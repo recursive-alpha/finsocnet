@@ -1,4 +1,4 @@
-"""Platform adapter contract and the standard CLI (docs/spec/05-platform-skills.md §1)."""
+"""Platform adapter contract and the standard CLI (specs/05-platform-skills.md §1)."""
 
 from __future__ import annotations
 

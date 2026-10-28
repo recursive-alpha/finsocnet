@@ -9,7 +9,7 @@ metadata:
   priority: "P1"
   status: ready
   phase: "2"
-  spec: docs/spec/03-pipelines.md
+  spec: specs/03-pipelines.md
 ---
 
 # Person Matcher
@@ -48,4 +48,4 @@ Knowledge belongs to people, not channels. One person can own a YouTube channel,
 
 ## Speaker attribution in interviews
 
-Questions and introductions → host. Long first-person answers about their own trading → guest. Use names spoken ("thanks, Tim"), turn-taking, topic continuity. Confidence 0.6–0.9 for interviews, 0.95 for solo content. Details: `docs/spec/03-pipelines.md` §6.
+Questions and introductions → host. Long first-person answers about their own trading → guest. Use names spoken ("thanks, Tim"), turn-taking, topic continuity. Confidence 0.6–0.9 for interviews, 0.95 for solo content. Details: `specs/03-pipelines.md` §6.

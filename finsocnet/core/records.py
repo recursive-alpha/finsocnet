@@ -1,4 +1,4 @@
-"""Record dataclasses and JSON-Schema validation (docs/spec/00-conventions.md §7)."""
+"""Record dataclasses and JSON-Schema validation (specs/00-conventions.md §7)."""
 
 from __future__ import annotations
 
