@@ -138,6 +138,8 @@ export interface Person {
   moniker: string | null;
   bio: string | null;
   avatar_url: string | null;
+  avatar_path?: string | null;
+  images?: Array<{ id: number; kind: string; platform: string | null; source_url: string; path: string; width: number | null; height: number | null }>;
   trading_style: string | null;
   primary_markets: string | null;
   verified_records: string | null;
@@ -287,4 +289,37 @@ export interface SkillItem {
   description: string;
   path?: string;
   categoryGroup?: string;
+}
+
+// ---- unified search (finsocnet kb search) ----
+
+export type SearchType = "cards" | "contents" | "persons" | "skills";
+export type SearchMode = "auto" | "hybrid" | "semantic" | "lexical";
+
+export interface SearchHit {
+  type: SearchType;
+  id: string;
+  title: string;
+  snippet: string | null;
+  score: number;
+  relevance: number;
+  ranks: { lex?: number; vec?: number } & Record<string, number>;
+  url?: string | null;
+  meta: Record<string, unknown>;
+}
+
+export interface SearchResponse {
+  query: string;
+  mode: string;
+  types: SearchType[];
+  filters: Record<string, unknown>;
+  total: number;
+  facets: Record<string, number>;
+  results: SearchHit[];
+}
+
+export interface EmbedStatus {
+  model: string;
+  provider: string;
+  kinds: Record<string, { embedded: number; pending: number }>;
 }

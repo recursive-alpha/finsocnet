@@ -294,3 +294,11 @@ def test_profile_avatar_extractors():
     assert reddit._icon({"snoovatar_img": "https://i.redd.it/snoovatar/avatars/x.png"}) == "https://i.redd.it/snoovatar/avatars/x.png" and reddit._icon({}) is None
     page = '<div class="tgme_channel_info_header"><i class="tgme_page_photo_image"><img src="https://cdn4.telesco.pe/file/x.jpg"></i><div class="tgme_channel_info_header_title">T</div></div>'
     assert telegram.parse_channel(page)["info"]["photo"] == "https://cdn4.telesco.pe/file/x.jpg"
+
+
+def test_youtube_channel_ids_are_not_treated_as_handles():
+    from finsocnet.adapters import youtube
+    assert youtube.channel_url("UCLn8btkaQ5hVWNMt9TxQtsQ") == "https://www.youtube.com/channel/UCLn8btkaQ5hVWNMt9TxQtsQ"
+    assert youtube.channel_url("@qullamaggie") == "https://www.youtube.com/@qullamaggie" and youtube.channel_url("qullamaggie") == "https://www.youtube.com/@qullamaggie"
+    assert youtube.channel_url("UCsomething") == "https://www.youtube.com/@UCsomething"  # too short for an id
+    assert youtube.channel_url("https://www.youtube.com/@x/videos") == "https://www.youtube.com/@x/videos"

@@ -19,6 +19,7 @@ import type { StatsData } from "@/lib/types";
 
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: Activity },
+  { href: "/search", label: "Search", icon: Search },
   { href: "/cards", label: "Cards", icon: Brain },
   { href: "/persons", label: "Traders", icon: UserCheck },
   { href: "/content", label: "Content", icon: Video },
@@ -121,11 +122,11 @@ export function Header() {
           </div>
 
           <Link
-            href="/cli"
+            href="/search"
             className="flex items-center gap-1 rounded-md border border-zinc-800 bg-zinc-900 px-2 py-1 text-xs font-mono text-zinc-400 hover:text-zinc-200 hover:border-zinc-700 transition-colors"
           >
             <Search className="h-3 w-3" />
-            <span className="text-[10px] hidden sm:inline">cli</span>
+            <span className="text-[10px] hidden sm:inline">search</span>
           </Link>
         </div>
       </div>

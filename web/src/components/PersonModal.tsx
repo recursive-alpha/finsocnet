@@ -12,6 +12,7 @@ import {
   User,
   X,
 } from "lucide-react";
+import { Avatar } from "./Avatar";
 import { Badge, CategoryBadge } from "./Badge";
 import type { KnowledgeCard, Person, PersonSkill } from "@/lib/types";
 
@@ -65,9 +66,7 @@ export function PersonModal({ personId, onClose, onSelectCard }: PersonModalProp
         {/* Header */}
         <div className="flex items-center justify-between border-b border-zinc-800/80 px-6 py-4 bg-zinc-900/50">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-300 font-bold font-mono">
-              {person?.canonical_name.slice(0, 2).toUpperCase() || "??"}
-            </div>
+            <Avatar name={person?.canonical_name || personId || "??"} path={person?.avatar_path} size={44} />
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-base font-bold text-zinc-100">

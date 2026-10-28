@@ -26,7 +26,7 @@ CREATE TABLE segment_translations (
     PRIMARY KEY (content_id, seq)
 );
 
--- Every item key an explorer has looked at, whether or not it was fetched (specs/11-visited-items.md).
+-- Every item key an explorer has looked at, whether or not it was fetched (specs/11-explore-visited-open-topics.md).
 -- `key` is the canonical item id (youtube:abc, reddit:1xg9, web:<hash>, ...).
 CREATE TABLE seen_items (
     key         TEXT PRIMARY KEY,

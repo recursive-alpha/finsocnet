@@ -175,7 +175,8 @@ def list_persons(conn: sqlite3.Connection, needs_review: bool = False, limit: in
             "SELECT a.id AS appearance_id, a.person_id, p.canonical_name, a.content_id, a.source_id, a.role, a.match_confidence, a.evidence "
             "FROM person_appearances a JOIN persons p ON p.id = a.person_id WHERE a.match_status = 'needs_review' ORDER BY a.id LIMIT ?", (limit,))]
     return [dict(r) for r in conn.execute(
-        "SELECT p.id, p.canonical_name, p.moniker, p.visibility, s.cards, s.appearances, s.sources FROM persons p JOIN person_stats s ON s.person_id = p.id ORDER BY s.cards DESC, p.id LIMIT ?", (limit,))]
+        "SELECT p.id, p.canonical_name, p.moniker, p.visibility, p.status, p.trading_style, p.primary_markets, p.verified_records, p.avatar_path, s.cards, s.appearances, s.sources, "
+        "s.cards AS cards_count FROM persons p JOIN person_stats s ON s.person_id = p.id ORDER BY s.cards DESC, p.id LIMIT ?", (limit,))]
 
 
 def person_cards(conn: sqlite3.Connection, person_id: str, category: str | None = None) -> dict[str, Any]:

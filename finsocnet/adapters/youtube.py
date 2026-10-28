@@ -80,6 +80,13 @@ def flat_ref(e: dict[str, Any]) -> dict[str, Any]:
                     e.get("description"), {"views": e.get("view_count"), "duration": e.get("duration")})
 
 
+def channel_url(target: str) -> str:
+    """A URL, a channel id (`UC` + 22 characters) or a handle (`@name` / `name`) -> the channel page URL."""
+    if target.startswith("http"):
+        return target
+    return f"https://www.youtube.com/{'channel/' if re.fullmatch(r'UC[\w-]{22}', target) else '@'}{target.lstrip('@')}"
+
+
 def channel_avatar(thumbs: list[dict[str, Any]]) -> str | None:
     """yt-dlp lists channel thumbnails: banners (wide) and `avatar_uncropped` (square). Prefer the square one."""
     sq = [t for t in thumbs if "avatar" in str(t.get("id", "")) and t.get("url")]
@@ -105,7 +112,7 @@ class YouTube(PlatformAdapter):
         return [i for i in items if since_ok(i["published_at"], since)][:limit]
 
     def profile(self, target, **_):
-        url = target if target.startswith("http") else f"https://www.youtube.com/{'channel/' if re.match(r'UC[\\w-]{22}', target) else '@'}{target.lstrip('@')}"
+        url = channel_url(target)
         with _ydl({"extract_flat": True, "playlistend": 1}) as y:
             r = y.extract_info(url.rstrip("/") + "/videos", download=False)
         cid = r.get("channel_id") or r.get("id")
@@ -115,7 +122,7 @@ class YouTube(PlatformAdapter):
                               avatar_url=channel_avatar(r.get("thumbnails") or []))
 
     def list(self, source, *, limit=50, cursor=None, since=None, tab="videos", **_):
-        base = source if source.startswith("http") else f"https://www.youtube.com/{'channel/' if re.match(r'UC[\\w-]{22}$', source) else '@'}{source.lstrip('@')}"
+        base = channel_url(source)
         tabs = ["videos", "shorts", "streams"] if tab == "all" else [tab]
         items: list[dict[str, Any]] = []
         cid = None

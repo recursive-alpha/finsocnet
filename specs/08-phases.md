@@ -164,6 +164,20 @@ Order: `stackexchange-explorer`, `rss-explorer`, `forum-explorer` (Discourse fir
 
 ---
 
+## Phase 9 — Semantic search, open exploration, images, REA, skill builder, UI
+
+**Read:** 10–15.
+
+**Tasks**
+1. Migrations `004`, `005`; `core/embed.py`, `translate.py`, `search.py`, `seen.py`, `media.py`; `kb embed|translate|seen|search`, `kb person avatar`, `card link|unlink`.
+2. Skills: `translator`, `reverse-anything`, `platform-skill-builder`; updates to `knowledge-search`, `market-idea-miner`, `knowledge-db`, `person-matcher`, `source-explorer`, all explorers (topic-free).
+3. `--ui` (`core/ui.py`); web `/search`, `/api/search|embed|media`, avatars.
+4. Root `README.md`, `docs/` (platform documentation), cover image and demo GIF.
+
+**Acceptance:** see each spec's acceptance section; `uv run pytest` green; `tsc`, `eslint` (new files) and `next build` green.
+
+---
+
 ## Final Acceptance Checklist (v2 done)
 
 - [ ] **SQLite only:** no `chromadb`, `sentence-transformers`, vector tables, or embedding code; `data/chroma_db` absent (ADR-001).

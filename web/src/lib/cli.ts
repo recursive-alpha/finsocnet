@@ -8,11 +8,13 @@ import type {
   ContentSegmentView,
   DedupDecision,
   DoctorReport,
+  EmbedStatus,
   Envelope,
   ExploreQueueItem,
   KnowledgeCard,
   KnowledgeGap,
   Person,
+  SearchResponse,
   PersonSkill,
   SkillItem,
   Source,
@@ -102,9 +104,10 @@ export async function runCliCommand<T = unknown>(
  * Run a finsocnet kb subcommand
  */
 export async function runKbCommand<T = unknown>(
-  args: string[]
+  args: string[],
+  timeoutMs: number = 30000
 ): Promise<Envelope<T>> {
-  return runCliCommand<T>(["kb", ...args]);
+  return runCliCommand<T>(["kb", ...args], timeoutMs);
 }
 
 // -------------------------------------------------------------
@@ -462,4 +465,57 @@ export async function getQueue(): Promise<ExploreQueueItem[]> {
     throw new Error(res.error?.message || "Failed to list queue");
   }
   return res.data.items || [];
+}
+
+// -------------------------------------------------------------
+// Unified search (cards, content text, persons, rulebooks)
+// -------------------------------------------------------------
+
+export interface SearchParams {
+  q: string;
+  types?: string[];
+  mode?: string;
+  limit?: number;
+  filters?: Record<string, string | string[] | undefined>;
+}
+
+const SEARCH_FLAGS: Record<string, string> = {
+  kind: "--kind",
+  category: "--category",
+  domain: "--domain",
+  horizon: "--horizon",
+  evidence_min: "--evidence-min",
+  person: "--person",
+  instrument: "--instrument",
+  min_persons: "--min-persons",
+  platform: "--platform",
+  content_type: "--content-type",
+  since: "--since",
+  language: "--language",
+  status: "--status",
+};
+
+export async function searchAll(params: SearchParams): Promise<{ data: SearchResponse; warnings: string[] }> {
+  const args = ["search", params.q, "--limit", String(params.limit ?? 40), "--mode", params.mode ?? "auto"];
+  if (params.types && params.types.length > 0) args.push("--types", params.types.join(","));
+  for (const [key, flag] of Object.entries(SEARCH_FLAGS)) {
+    const v = params.filters?.[key];
+    if (v === undefined || v === "" || (Array.isArray(v) && v.length === 0)) continue;
+    for (const one of Array.isArray(v) ? v : [v]) args.push(flag, one);
+  }
+  // execFile receives an argument vector, never a shell string: the query cannot inject anything.
+  // The first semantic query loads the embedding model, so allow more time than the default.
+  const res = await runKbCommand<SearchResponse>(args, 90000);
+  if (!res.ok) {
+    throw new Error(res.error?.message || "Search failed");
+  }
+  return { data: res.data, warnings: res.warnings || [] };
+}
+
+export async function getEmbedStatus(): Promise<EmbedStatus> {
+  const res = await runKbCommand<EmbedStatus>(["embed", "status"]);
+  if (!res.ok) {
+    throw new Error(res.error?.message || "Failed to read embedding status");
+  }
+  return res.data;
 }

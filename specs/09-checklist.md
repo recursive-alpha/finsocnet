@@ -1,6 +1,6 @@
 # 09 — Status Checklist (done / missing)
 
-> **Last checked:** 2026-10-28, on `main` (all eight phases implemented; 196 offline tests green). What is **not** done is listed under 2.x and 3.
+> **Last checked:** 2026-10-28, on `main` (all eight phases implemented; 236+ offline tests green). What is **not** done is listed under 2.x and 3.
 > **Who updates it:** the implementing agent ticks items at the end of each phase (same branch as the phase) and updates the date; the reviewer checks the ticks against the acceptance tests in `08-phases.md`.
 > Legend: `[x]` done and verified · `[~]` partly done (note says what is left) · `[ ]` missing.
 
@@ -139,6 +139,21 @@ Notes: `session_bridge.py keygen` was run once while testing and created `~/.con
 - [x] `AGENTS.md`, `README.md`, `.env.example` rewritten for v2; `install.sh` gets `--local`.
 - [x] Removed: v1 CLI commands (`search`, `rag`, `view`, `list`, `creators`, `contents`, `explore <platform>`, `migrate`), `finsocnet/db.py`, the v1 script-name wrappers and `core/legacy.py`.
 - [x] Final acceptance as tests (`tests/unit/test_repo_invariants.py`).
+
+### 2.9b Phase 9 — Semantic search, open exploration, images, REA, skill builder, UI (requested 2026-10-28)
+
+- [x] **ADR-009** (embeddings in SQLite, English only) replaces the embedding part of ADR-001; `AGENTS.md`, `specs/README.md` §3–§4 and the invariants updated (still no Chroma/faiss/torch).
+- [x] Default model chosen from MTEB results: `snowflake/snowflake-arctic-embed-m` via fastembed (ONNX, CPU). Real run: 87 cards, 9 persons, 44 rulebook sections, 780 segments embedded; search eval recall@10 lexical 0.956 → hybrid 0.978.
+- [x] **Translator skill**: the agent detects languages and translates (no heuristics in scripts). Real pass: 22 sources + 13 contents decided, 5,642 contents set, 2 segments translated.
+- [x] `kb search` (cards, contents, persons, rulebooks; filters; modes) and `kb card search --mode`.
+- [x] **Visited tracking** `seen_items`, `--new-only`, `kb seen`; **no topic limit** in explorers; discovery recipe in `source-explorer`.
+- [x] **Person images**: schema, downloader, `kb person avatar`, avatar_url from 14+ platforms. Real run: 5 of 9 persons now have a real avatar file (YouTube channels linked to the person). Not possible without a session: `mark-minervini`, `peter-brandt` (X, exit 3). Not attached on purpose: `mike-bellafiore` (the linked channel is the company's), `tim-furey` (no own source).
+- [x] **reverse-anything** (REA, static only) with a stub-based test suite and two live checks (`/bin/ls`, a SQLite file).
+- [x] **platform-skill-builder** with recipe adapter, probe, check, scaffold; live demo on `simonwillison.net` (Atom feed + page); `lobste.rs` correctly reported as `blocked` by robots.txt.
+- [x] **`--ui`** terminal view; **web `/search`**, `/api/search|embed|media`, avatars; `tsc`, `eslint` (new files), `next build` green; screenshots checked.
+- [x] Docs moved: design docs live in `specs/` (`specs/README.md` is the former `SPEC.md`); `docs/` is the platform documentation; root `README.md` rewritten with a cover image and a terminal demo GIF.
+- [~] Found while doing this: the YouTube adapter treated channel ids as handles (fixed, tested); the web-search backend errors mapped to INTERNAL (fixed); migration 005 had to be applied to the real database (done, backup in `data/backups/`).
+- [ ] **Data problems from v1 that cannot be fixed from here:** three `persons.verified_records` / `bio` strings lost their `$` amounts in the v1 database ("~,100 to over 0 million"); the v1 `avatar_url` values for 8 persons are guessed URLs that return 404 (real avatars were fetched from the linked channels instead). Please correct the figures by hand from the source.
 
 ## 2.10 Final acceptance checklist (08-phases.md)
 

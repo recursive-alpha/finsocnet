@@ -695,3 +695,18 @@ Runs inside one `BEGIN IMMEDIATE` transaction (batch files: one SAVEPOINT per de
 | `kb gap list [--status open]` / `kb gap update ID --status S [--filled-by 1,2]` W | |
 | `kb history pending [--limit 200]` / `kb history mark URL… --triage T` W | |
 | `kb decision list [--since] [--reviewed none]` / `kb decision review ID --verdict agreed|overturned [--note]` W | |
+
+---
+
+## 7. Migrations 004 and 005 (Phase 9)
+
+| Table / column | Purpose | Spec |
+|---|---|---|
+| `embeddings(kind, ref, model, dim, text_hash, vector, created_at)` PK `(kind, ref, model)` | float32 vectors of cards, segments, persons, rulebook sections, per model | 10 |
+| `segment_translations(content_id, seq, source_lang, text_en, run_id, created_at)` | English text of non-English segments (written by the agent) | 10 |
+| `seen_items(key, platform, kind, url, title, source_id, status, note, times_seen, first_seen, last_seen, run_id)` | every item an explorer looked at; `status` ∈ seen, queued, fetched, skipped, failed | 11 |
+| `person_images(id, person_id, kind, platform, source_url, path, sha256, mime, width, height, bytes, fetched_at, run_id)` unique `(person_id, sha256)` | stored pictures | 12 |
+| `persons.avatar_path`, `avatar_sha256`, `avatar_mime`, `avatar_fetched_at` | primary picture | 12 |
+| `sources.avatar_url`, `avatar_path`, `avatar_sha256` | icon of a channel / subreddit / profile | 12 |
+
+`contents.language` (existing column) is now decided by the agent (skill `translator`), per content or per source. Migration `006` (not written) will drop the `legacy_*` tables once the user approved the legacy conversion (09 §3).

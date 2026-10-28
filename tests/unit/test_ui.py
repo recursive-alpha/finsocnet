@@ -1,4 +1,4 @@
-"""`--ui`: terminal rendering of the envelope; the default stays one JSON object (specs/13-cli-ui-and-web.md §1)."""
+"""`--ui`: terminal rendering of the envelope; the default stays one JSON object (specs/15-cli-ui-and-web.md §1)."""
 
 from __future__ import annotations
 

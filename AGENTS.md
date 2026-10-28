@@ -21,17 +21,18 @@ FinSocNet is an agent-operated knowledge network. **You are the only model in it
 
 | Group | Skills |
 |---|---|
-| Knowledge core | `knowledge-db` (the `kb` CLI), `knowledge-transformer`, `knowledge-dedup`, `knowledge-search`, `market-idea-miner` |
+| Knowledge core | `knowledge-db` (the `kb` CLI), `knowledge-transformer`, `knowledge-dedup`, `knowledge-search`, `market-idea-miner`, `translator` |
 | People | `person-matcher`, `person-skill-synthesizer`, `person-skills-explorer` |
 | Access | `session-bridge`, `agent-browser` |
-| Loop | `source-explorer`, `self-improver`, `skill-installer`, `finsocnet` |
+| Loop | `source-explorer`, `self-improver`, `skill-installer`, `platform-skill-builder`, `finsocnet` |
 | Video and audio | `youtube-extractor`, `audio-transcriber`, `podcast-explorer`, `tiktok-explorer` |
 | Social | `x-explorer`, `reddit-explorer`, `bluesky-explorer`, `threads-explorer`, `instagram-explorer`, `facebook-explorer`, `linkedin-explorer`, `stocktwits-explorer`, `discord-explorer`, `telegram-explorer` |
 | Writing | `medium-explorer`, `substack-explorer`, `rss-explorer`, `seekingalpha-explorer`, `forum-explorer`, `stackexchange-explorer`, `hackernews-explorer`, `tradingview-explorer` |
 | Web | `web-searcher`, `google-searcher`, `web-reader`, `document-reader` |
 | Research and code | `paper-code-explorer`, `research-explorer`, `annas-archive-explorer`, `sec-edgar-explorer`, `github-explorer` |
+| Unreadable data | `reverse-anything` (REA: binaries, apps, databases, captures) |
 
-Platform skills share one contract (`search`, `profile`, `list`, `fetch`, `--ingest`); their code is in `finsocnet/adapters/`, the shared library in `finsocnet/core/`. Read the SKILL.md of a skill before using it.
+Docs: [`docs/`](docs/) is the platform documentation, [`specs/`](specs/) the design. Platform skills share one contract (`search`, `profile`, `list`, `fetch`, `--ingest`); their code is in `finsocnet/adapters/`, the shared library in `finsocnet/core/`. Read the SKILL.md of a skill before using it.
 
 ## The workflows
 
@@ -66,7 +67,8 @@ Every script prints one JSON envelope `{"ok", "command", "data", "warnings", "me
 
 | Command | Where |
 |---|---|
-| `finsocnet kb …` (init, migrate, backup, doctor, stats, run, content, card, vocab, person, skill, queue, gap, history, decision, lesson, feedback) | remote host |
+| `finsocnet kb …` (init, migrate, backup, doctor, stats, run, content, card, vocab, person, skill, queue, gap, seen, embed, translate, search, history, decision, lesson, feedback) | remote host |
+| `finsocnet search "<english text>" [--types …] [--mode …] [filters]` (alias of `kb search`), **`--ui` on any command** for a terminal view instead of JSON | remote host |
 | `finsocnet eval prepare\|score\|run` | remote host |
 | `finsocnet explore add`, `finsocnet persons review`, `finsocnet feedback` | remote host |
 | `finsocnet session init-local\|export\|push` | the user's own machine |

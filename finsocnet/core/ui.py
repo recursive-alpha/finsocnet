@@ -1,4 +1,4 @@
-"""Terminal rendering of the JSON envelope for people (`--ui`; specs/13-cli-ui-and-web.md §1).
+"""Terminal rendering of the JSON envelope for people (`--ui`; specs/15-cli-ui-and-web.md §1).
 
 Every command keeps its single JSON envelope as the default. With `--ui` (or FINSOCNET_UI=1) the same data is drawn with rich: tables for
 lists and search hits, panels for one record, key/value blocks for stats. Nothing here changes exit codes, and the data shown is exactly

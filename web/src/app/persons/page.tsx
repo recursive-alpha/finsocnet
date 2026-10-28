@@ -11,6 +11,7 @@ import {
   Video,
 } from "lucide-react";
 import { Badge } from "@/components/Badge";
+import { Avatar } from "@/components/Avatar";
 import { CardModal } from "@/components/CardModal";
 import { PersonModal } from "@/components/PersonModal";
 import type { Person } from "@/lib/types";
@@ -95,9 +96,7 @@ export default function PersonsPage() {
                 {/* Header */}
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-800 border border-zinc-700 text-zinc-200 font-bold font-mono text-base group-hover:border-emerald-500/60 transition-colors">
-                      {person.canonical_name.slice(0, 2).toUpperCase()}
-                    </div>
+                    <Avatar name={person.canonical_name} path={person.avatar_path} size={48} className="rounded-2xl group-hover:border-emerald-500/60 transition-colors" />
                     <div>
                       <h3 className="text-base font-bold text-zinc-100 group-hover:text-emerald-400 transition-colors">
                         {person.canonical_name}
@@ -142,7 +141,7 @@ export default function PersonsPage() {
               {/* Action Footer */}
               <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs font-mono">
                 <span className="text-zinc-500">
-                  {person.stats?.cards_count || 0} cards attributed
+                  {person.stats?.cards_count ?? (person as unknown as { cards_count?: number }).cards_count ?? 0} cards attributed
                 </span>
                 <span className="text-emerald-400 font-medium group-hover:translate-x-1 transition-transform flex items-center gap-1">
                   <span>View Rulebook</span>

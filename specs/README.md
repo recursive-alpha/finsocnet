@@ -25,6 +25,12 @@
 | [`07-harness-integration.md`](07-harness-integration.md) | Multi-harness install, slash commands, CLI/TUI changes, skill installer (§5) |
 | [`08-phases.md`](08-phases.md) | Ordered implementation phases, tasks, acceptance tests, removal list |
 | [`09-checklist.md`](09-checklist.md) | Status: what is done, what is missing, known problems, decisions waiting on the user |
+| [`10-semantic-search.md`](10-semantic-search.md) | ADR-009: embeddings in SQLite, MTEB model choice, agent-driven language detection and translation, hybrid and unified search |
+| [`11-explore-visited-open-topics.md`](11-explore-visited-open-topics.md) | Visited-item tracking (`seen_items`), `--new-only`, topic-free discovery |
+| [`12-person-images.md`](12-person-images.md) | Avatars and images stored as files, fields, rules, commands |
+| [`13-reverse-anything.md`](13-reverse-anything.md) | REA bridge for binaries, apps, databases, captures; safety rules |
+| [`14-platform-skill-builder.md`](14-platform-skill-builder.md) | Probe a site, write a recipe, check it live, scaffold a skill; custom platforms |
+| [`15-cli-ui-and-web.md`](15-cli-ui-and-web.md) | `--ui` terminal view and the Next.js UI that calls the CLI |
 
 ---
 
