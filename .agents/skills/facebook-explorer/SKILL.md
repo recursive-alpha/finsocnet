@@ -1,6 +1,6 @@
 ---
 name: facebook-explorer
-description: Read Facebook trading groups and pages through the agent browser with the user's imported session — group and page about info, feeds, posts with expanded text, comments and replies, and video posts transcribed with Whisper — and store them as FinSocNet content. Use for facebook.com/groups or page links, fb.watch videos, "what do <group> members say about …", including Vietnamese stock groups.
+description: Read Facebook groups and pages on any topic through the agent browser with the user's imported session — group and page about info, feeds, posts with expanded text, comments and replies, and video posts transcribed with Whisper — and store them as FinSocNet content. Use for facebook.com/groups or page links, fb.watch videos, "what do <group> members say about …", including Vietnamese stock groups.
 license: MIT
 compatibility: FinSocNet repository, agent-browser running, imported facebook.com session; yt-dlp + audio-transcriber for videos.
 metadata:

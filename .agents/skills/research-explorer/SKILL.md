@@ -1,6 +1,6 @@
 ---
 name: research-explorer
-description: Search academic and practitioner finance research beyond arXiv — OpenAlex and Semantic Scholar (keyless APIs), SSRN and NBER working papers — read abstracts and authors, find open-access PDFs and ingest them with document-reader as FinSocNet content. Use for SSRN/NBER/DOI links, "is there research on …", academic evidence for a trading claim, author lookups.
+description: Search academic and practitioner research on any topic beyond arXiv — OpenAlex and Semantic Scholar (keyless APIs), SSRN and NBER working papers — read abstracts and authors, find open-access PDFs and ingest them with document-reader as FinSocNet content. Use for SSRN/NBER/DOI links, "is there research on …", academic evidence for a trading claim, author lookups.
 license: MIT
 compatibility: FinSocNet repository with httpx; agent-browser for SSRN; OPENALEX_MAILTO optional.
 metadata:

@@ -1,6 +1,6 @@
 ---
 name: reddit-explorer
-description: Explore Reddit trading communities (r/RealDayTrading, r/Daytrading, r/algotrading, r/options, r/stocks, r/vietnamstocks…) — search posts and subreddits, list hot/new/top posts, read full threads with every comment level, read user histories, and store threads as FinSocNet content. Use for reddit.com links, r/ and u/ names, "what does Reddit say about …".
+description: Explore any Reddit community or user, on any topic (finance examples such as r/RealDayTrading, r/Daytrading, r/algotrading, r/options, r/vietnamstocks) — search posts and subreddits, list hot/new/top posts, read full threads with every comment level, read user histories, and store threads as FinSocNet content. Use for reddit.com links, r/ and u/ names, "what does Reddit say about …".
 license: MIT
 compatibility: FinSocNet repository, agent-browser running (JSON endpoints are loaded through it); reddit session optional.
 metadata:

@@ -71,9 +71,9 @@ def details_record(d: dict[str, Any], raw_path: str | None) -> dict[str, Any]:
 class Annas(PlatformAdapter):
     platform = "book"
     capabilities = frozenset({"search", "fetch", "download"})
-    opts = {"search": [(("--ext",), {"choices": ["pdf", "epub"]}), (("--lang",), {"default": "en"})]}
+    opts = {"search": [(("--ext",), {"choices": ["pdf", "epub"]}), (("--lang",), {"help": "language code, or omit for every language (the translator skill handles non-English)"})]}
 
-    def search(self, query, *, limit=15, since=None, ext=None, lang="en", **_):
+    def search(self, query, *, limit=15, since=None, ext=None, lang=None, **_):
         params = {"q": query, **({"ext": ext} if ext else {}), **({"lang": lang} if lang and lang != "all" else {})}
         final, html = _browser.load_html("book", f"{base_url()}/search?{urlencode(params)}", wait="domcontentloaded")
         if "check=1" in final or "ddos" in html[:3000].lower():

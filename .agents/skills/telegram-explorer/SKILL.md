@@ -1,6 +1,6 @@
 ---
 name: telegram-explorer
-description: Read Telegram trading channels and groups — public channels through the t.me/s web preview without login (posts, views, forwards, media), and private channels or groups through Telegram Web with the user's imported session — and store posts and messages as FinSocNet content. Use for t.me links, @channel names, signal/analysis channels, Vietnamese or international trading groups on Telegram.
+description: Read Telegram channels and groups on any topic — public channels through the t.me/s web preview without login (posts, views, forwards, media), and private channels or groups through Telegram Web with the user's imported session — and store posts and messages as FinSocNet content. Use for t.me links, @channel names, signal/analysis channels, Vietnamese or international trading groups on Telegram.
 license: MIT
 compatibility: FinSocNet repository; browser mode needs agent-browser and an imported web.telegram.org session.
 metadata:

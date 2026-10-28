@@ -1,6 +1,6 @@
 ---
 name: tiktok-explorer
-description: Explore TikTok trading creators — list a profile's videos, read captions and descriptions, transcribe speech with local Whisper — and store videos as FinSocNet content. Use for tiktok.com links, @handles of trading creators, short-form trading tips.
+description: Explore TikTok creators on any topic — list a profile's videos, read captions and descriptions, transcribe speech with local Whisper — and store videos as FinSocNet content. Use for tiktok.com links, @handles of trading creators, short-form trading tips.
 license: MIT
 compatibility: FinSocNet repository, agent-browser, yt-dlp with data/sessions/cookies.txt, audio-transcriber.
 metadata:

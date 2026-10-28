@@ -1,6 +1,6 @@
 ---
 name: medium-explorer
-description: Explore Medium for trading, quant and finance writing — tags, authors, publications and full articles including member-only stories with an imported member session — and store articles as FinSocNet content. Use for medium.com links, @authors, Medium publications such as Towards Data Science, "find Medium articles about backtesting / algorithmic trading".
+description: Explore Medium on any topic (trading, quant and finance writing included) — tags, authors, publications and full articles including member-only stories with an imported member session — and store articles as FinSocNet content. Use for medium.com links, @authors, Medium publications such as Towards Data Science, "find Medium articles about backtesting / algorithmic trading".
 license: MIT
 compatibility: FinSocNet repository, agent-browser running; medium session optional.
 metadata:

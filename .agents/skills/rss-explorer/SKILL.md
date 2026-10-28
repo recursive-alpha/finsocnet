@@ -1,6 +1,6 @@
 ---
 name: rss-explorer
-description: Follow any RSS or Atom feed — trader blogs, Ghost/WordPress/Beehiiv newsletters, news sites (CafeF, Vietstock, Reuters sections), YouTube channel feeds — discover a site's feeds, list new entries since the last check, and fetch full entries (from the feed or via web-reader) as FinSocNet content. Use for blogs and news sites, "follow this blog", cheap new-upload checks, or forwarding email newsletters through a feed.
+description: Follow any RSS or Atom feed on any topic — trader blogs, Ghost/WordPress/Beehiiv newsletters, news sites (CafeF, Vietstock, Reuters sections), YouTube channel feeds — discover a site's feeds, list new entries since the last check, and fetch full entries (from the feed or via web-reader) as FinSocNet content. Use for blogs and news sites, "follow this blog", cheap new-upload checks, or forwarding email newsletters through a feed.
 license: MIT
 compatibility: FinSocNet repository with feedparser; web-reader for entries without full content.
 metadata:

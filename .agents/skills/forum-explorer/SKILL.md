@@ -1,6 +1,6 @@
 ---
 name: forum-explorer
-description: Read trading forums of any engine — Elite Trader, BabyPips, Futures.io, Forex Factory, Trade2Win, F319 (Vietnam) and any Discourse, XenForo, vBulletin or phpBB forum — detect the engine, list boards and threads, read every page of a thread with each post's author, search, and store threads as FinSocNet content. Use for forum links, "what do forum traders say about …", long-running journal threads.
+description: Read forums of any engine and any topic — finance examples Elite Trader, BabyPips, Futures.io, Forex Factory, Trade2Win, F319 (Vietnam), and any Discourse, XenForo, vBulletin or phpBB forum — detect the engine, list boards and threads, read every page of a thread with each post's author, search, and store threads as FinSocNet content. Use for forum links, "what do forum traders say about …", long-running journal threads.
 license: MIT
 compatibility: FinSocNet repository, agent-browser running (Cloudflare-protected forums); config/forums.yaml.
 metadata:

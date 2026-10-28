@@ -1,6 +1,6 @@
 ---
 name: paper-code-explorer
-description: Search arXiv (q-fin, stat.ML, cs.LG) and Hugging Face / Papers With Code for quantitative finance and trading papers with open-source code, read abstracts and AI summaries, list trending papers, and download PDFs for document-reader. Use for arxiv.org links, "papers about market microstructure / momentum / RL trading", "is there code for this paper".
+description: Search arXiv (q-fin, stat.ML, cs.LG) and Hugging Face / Papers With Code for papers on any topic with open-source code (quantitative finance and trading included), read abstracts and AI summaries, list trending papers, and download PDFs for document-reader. Use for arxiv.org links, "papers about market microstructure / momentum / RL trading", "is there code for this paper".
 license: MIT
 compatibility: FinSocNet repository with uv.
 metadata:

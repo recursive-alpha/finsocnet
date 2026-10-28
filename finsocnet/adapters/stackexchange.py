@@ -15,7 +15,7 @@ from finsocnet.core.platform import PlatformAdapter, content_record, item_ref, l
 from finsocnet.core.segments import html_to_markdown, refs
 
 API = "https://api.stackexchange.com/2.3"
-SITES = {"quant", "money", "stackoverflow", "economics", "stats", "datascience"}
+SITES_HINT = {"quant", "money", "stackoverflow", "economics", "stats", "datascience"}  # examples only: any Stack Exchange site slug works (--site workplace, cooking, ...)
 CODE_RE = re.compile(r"<pre[^>]*>\s*<code[^>]*>(.*?)</code>\s*</pre>", re.S)
 
 

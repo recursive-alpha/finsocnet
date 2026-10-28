@@ -1,6 +1,6 @@
 ---
 name: podcast-explorer
-description: Find and ingest trading and finance podcasts (Chat With Traders, Market Wizards-style interviews, macro shows) — search the Apple Podcasts directory, read show RSS feeds, list episodes, and get transcripts from Podcasting 2.0 transcript tags, a matching YouTube upload, or local Whisper. Use for podcast names, Apple Podcasts links, RSS feeds, "interviews with <trader>", or guest appearances.
+description: Find and ingest podcasts on any topic (finance examples such as Chat With Traders, Market Wizards-style interviews, macro shows) — search the Apple Podcasts directory, read show RSS feeds, list episodes, and get transcripts from Podcasting 2.0 transcript tags, a matching YouTube upload, or local Whisper. Use for podcast names, Apple Podcasts links, RSS feeds, "interviews with <trader>", or guest appearances.
 license: MIT
 compatibility: FinSocNet repository, feedparser, audio-transcriber; youtube-extractor for cross-posted episodes.
 metadata:

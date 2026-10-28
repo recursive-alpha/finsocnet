@@ -1,6 +1,6 @@
 ---
 name: hackernews-explorer
-description: Search Hacker News stories and read full comment trees (quant, market structure, fintech, trading-system discussions) via the Algolia HN API, and store them as FinSocNet content. Use for news.ycombinator.com links or "what did HN say about …".
+description: Search Hacker News stories and read full comment trees on any topic (quant, market structure, fintech and trading-system discussions included) via the Algolia HN API, and store them as FinSocNet content. Use for news.ycombinator.com links or "what did HN say about …".
 license: MIT
 compatibility: FinSocNet repository with httpx.
 metadata:

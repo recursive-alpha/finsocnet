@@ -57,12 +57,12 @@ def file_record(repo: dict[str, Any], path: str, text: str, sha: str, raw_path: 
 class GitHub(PlatformAdapter):
     platform = "github"
     capabilities = frozenset({"search", "profile", "list", "fetch", "tree"})
-    opts = {"search": [(("--topic",), {"default": "algorithmic-trading"}), (("--language",), {})]}
+    opts = {"search": [(("--topic",), {"help": "optional GitHub topic filter, e.g. algorithmic-trading; none by default"}), (("--language",), {})]}
 
     def _get(self, path: str, **params: Any) -> Any:
         return http.get_json(f"{API}{path}", platform="github", params=params or None, headers=headers())
 
-    def search(self, query, *, limit=20, since=None, topic="algorithmic-trading", language=None, **_):
+    def search(self, query, *, limit=20, since=None, topic=None, language=None, **_):
         q = f"{query} topic:{topic}" if topic else query
         if language:
             q += f" language:{language}"

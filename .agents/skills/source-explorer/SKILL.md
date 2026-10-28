@@ -42,6 +42,26 @@ metadata:
 | crosslinks | links in known persons' bios/descriptions → `--origin person_crosslink` |
 | refresh | `kb source list --status active` older than `refresh_hours` → platform `list --enqueue --save-cursor` |
 
+## Discovering communities, channels and threads on any topic
+
+There is **no topic limit** in exploration: a seed can be a hobby, a language, a country, a profession, a niche. Finance is the default interest of the card miner, not a filter on what the explorers may find, store or follow (everything fetched is stored, "nothing ignored"; `market-idea-miner` writes cards only where there is finance knowledge, and every segment stays searchable by text and, once translated, by meaning).
+
+For a topic `T` (free text, any language) run the discovery recipe, enqueue what looks alive, and let normal explore steps do the rest:
+
+| Where | Command (every one is `--run R`, `--new-only` hides what you already saw) |
+|---|---|
+| Reddit communities | `reddit.py search "T" --type sr` → `reddit.py list r/<name> --sort top --t month` |
+| YouTube channels | `youtube.py search "T" --type channel`, then `list --tab all` |
+| Podcasts | `podcast.py search "T"` |
+| Stack Exchange (any of its ~180 sites) | `stackexchange.py search "T" --site <slug>`; the site list is at stackexchange.com/sites |
+| Forums (any engine) | `web_search.py search "T forum"` → `forum.py detect <url>` → `forum.py list <board>` |
+| Newsletters / blogs | `substack.py search "T"`, `medium.py search "T"`, `rss.py discover <site>` |
+| Telegram / Discord / Facebook groups | `web_search.py search "T site:t.me"`, `"T discord invite"`, `"T site:facebook.com/groups"`; then the platform skill (sessions where needed) |
+| Code and papers | `github.py search "T"` (no topic filter unless you pass `--topic`), `research.py search "T"`, `papers.py search "T"` |
+| Anything else | `web_search.py search "T"` / `google.py search` → `web.py fetch` |
+
+Steps: (1) pick the communities with the most activity and the most distinct authors, not the biggest; (2) `kb queue add --target <url|handle> --origin search_result --action crawl_source --reason "<why>" --priority 0.4..0.6`; (3) for a thread or channel that proves empty or off-purpose, `kb seen mark --key <id> --status skipped --note "<why>"` so the next discovery pass does not return to it; (4) when a topic needs people (experts, authors), run `person-matcher` on the authors who appear in several communities.
+
 ## Priorities (0..1, set by you with a reason)
 
 user 0.95 · gap asked ≥ 2 times 0.85 · open gap 0.75 · new content of a high-consensus person 0.7 · mentor/influence named by a known person 0.65 · book/paper cited by a known person 0.6 · crosslinked platform 0.55 · history entry 0.5 · generic search result 0.3–0.5 · source refresh 0.4.

@@ -1,6 +1,6 @@
 ---
 name: annas-archive-explorer
-description: Search Anna's Archive for trading and finance books, textbooks and papers (Market Wizards, Reminiscences, quant textbooks), read book details and mirrors by MD5, and download a chosen edition for document-reader to ingest. Use for "find the book …", "books by <trader>", a book cited by a trader, or target_kind=book queue items.
+description: Search Anna's Archive for books, textbooks and papers on any topic (finance examples such as Market Wizards, Reminiscences, quant textbooks), read book details and mirrors by MD5, and download a chosen edition for document-reader to ingest. Use for "find the book …", "books by <trader>", a book cited by a trader, or target_kind=book queue items.
 license: MIT
 compatibility: FinSocNet repository; agent-browser for DDoS-Guard pages.
 metadata:

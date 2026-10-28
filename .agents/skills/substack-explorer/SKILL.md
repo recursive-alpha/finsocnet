@@ -1,6 +1,6 @@
 ---
 name: substack-explorer
-description: Explore Substack newsletters on trading, macro and investing — search publications, read author profiles, list a publication's archive, read full posts (including paid posts with the user's subscription session), comments, Substack Notes and Substack podcast episodes, and store them as FinSocNet content. Use for *.substack.com links, custom-domain Substack newsletters, "newsletters about …".
+description: Explore Substack newsletters on any topic (trading, macro and investing included) — search publications, read author profiles, list a publication's archive, read full posts (including paid posts with the user's subscription session), comments, Substack Notes and Substack podcast episodes, and store them as FinSocNet content. Use for *.substack.com links, custom-domain Substack newsletters, "newsletters about …".
 license: MIT
 compatibility: FinSocNet repository, agent-browser running; substack session optional.
 metadata:

@@ -1,6 +1,6 @@
 ---
 name: discord-explorer
-description: Read trading Discord servers — list servers and channels, read text, forum and announcement channels and threads by day, search a server, and store messages as FinSocNet content — either through the agent browser with the user's imported Discord session (read-only) or with an official bot in servers the user administers. Use for discord.com/channels links, discord.gg invites, "what do people in <server> say about …".
+description: Read Discord servers on any topic — list servers and channels, read text, forum and announcement channels and threads by day, search a server, and store messages as FinSocNet content — either through the agent browser with the user's imported Discord session (read-only) or with an official bot in servers the user administers. Use for discord.com/channels links, discord.gg invites, "what do people in <server> say about …".
 license: MIT
 compatibility: FinSocNet repository; user mode needs agent-browser and an imported discord.com session; bot mode needs DISCORD_BOT_TOKEN for servers where the bot was added.
 metadata:

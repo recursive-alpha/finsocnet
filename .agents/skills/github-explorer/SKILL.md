@@ -1,6 +1,6 @@
 ---
 name: github-explorer
-description: Explore GitHub repositories with trading strategies, backtests, indicators and quant research — search by topic and language, read READMEs, list a repository's files, read selected source files as code segments — and store them as FinSocNet content so strategy logic becomes Knowledge Cards. Use for github.com links, "code for this strategy", repos linked from papers or creators.
+description: Explore GitHub repositories on any topic (trading strategies, backtests and quant research included) — search by optional topic and language, read READMEs, list a repository's files, read selected source files as code segments — and store them as FinSocNet content so strategy logic becomes Knowledge Cards. Use for github.com links, "code for this strategy", repos linked from papers or creators.
 license: MIT
 compatibility: FinSocNet repository with httpx; GITHUB_TOKEN optional (rate limit).
 metadata:

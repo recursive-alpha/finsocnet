@@ -1,6 +1,6 @@
 ---
 name: instagram-explorer
-description: Explore Instagram trading creators with the user's imported session — profiles, posts with captions and comments, reels transcribed with Whisper — and store them as FinSocNet content. Use for instagram.com profile, post or reel links.
+description: Explore Instagram creators on any topic with the user's imported session — profiles, posts with captions and comments, reels transcribed with Whisper — and store them as FinSocNet content. Use for instagram.com profile, post or reel links.
 license: MIT
 compatibility: FinSocNet repository, agent-browser, imported instagram.com session, yt-dlp + audio-transcriber.
 metadata:
