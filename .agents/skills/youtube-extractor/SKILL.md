@@ -1,55 +1,95 @@
 ---
 name: youtube-extractor
-description: Extract YouTube video transcripts with precise timestamps, fetch video metadata, and catalog channel uploads. Includes automated fallback to local openai/whisper-large-v3-turbo when captions are unavailable.
+description: Catalog YouTube channels (videos, shorts, live streams), read video metadata and full transcripts with timestamps (manual or auto captions, local Whisper fallback), search YouTube, and store everything as FinSocNet content. Use for YouTube URLs, @handles, channel ids, "get the transcript of …", "list all videos from …", "find YouTube videos about …", trader interviews and livestreams.
 license: MIT
+compatibility: FinSocNet repository with uv, yt-dlp, youtube-transcript-api; audio-transcriber for videos without captions; optional data/sessions/cookies.txt from session-bridge.
 metadata:
-  version: "1.0.0"
-  author: "finsocnet"
+  author: finsocnet
+  version: "2.0.0"
+  priority: "P1"
+  status: partial
+  phase: "4"
+  spec: docs/spec/05-platform-skills.md
 ---
 
 # YouTube Extractor
 
-Extract transcripts, video metadata, and channel catalogs from YouTube for analysis, summarization, and knowledge mining.
+> **Status: partial.** v1 scripts work today (see *Legacy commands*). The v2 adapter `scripts/youtube.py` below is built in Phase 4 and replaces them.
 
-## Capabilities
-1. **Video Transcripts:** Fetch full word-for-word transcripts with second-level timestamps (`[MM:SS] (XXX.Xs)`).
-2. **Video Metadata:** Extract title, channel ID, duration, description, view count, and tags.
-3. **Channel Discovery:** Enumerate latest or most popular videos from any creator handle (`@handle`), channel ID (`UC...`), or URL.
+Turns YouTube into FinSocNet content. Captions first, Whisper only when no captions exist. Uses the imported cookies file when present, which avoids "confirm you're not a bot" blocks on server IPs and unlocks members-only videos.
 
-## Workflow
+## When to use
 
-### 1. Extract a Video Transcript
-Run the extraction script with a video URL or 11-character video ID:
+- A YouTube video, short, live stream or channel URL / @handle / channel id.
+- "Transcript of this video", "all videos of this channel", "YouTube interviews with <trader>".
 
-```bash
-uv run .agents/skills/youtube-extractor/scripts/extract_transcript.py "https://www.youtube.com/watch?v=zU0i9rBbEkI"
-```
+## Before you start
 
-Outputs created in `data/transcripts/`:
-- `<video_id>.json`: Complete structured JSON (metadata + snippets with `start`, `duration`, `text`).
-- `<video_id>.txt`: Formatted transcript grouped into coherent ~20s blocks with timestamp headers.
+- None for public videos. `data/sessions/cookies.txt` (session-bridge) is used automatically when present.
 
-To print directly to terminal:
-```bash
-uv run .agents/skills/youtube-extractor/scripts/extract_transcript.py <video_id> --print --limit-lines 30
-```
-
-### Fallback to Local Whisper
-- `--force-whisper`: Bypass YouTube captions and transcribe using local `openai/whisper-large-v3-turbo`.
-- Automatic fallback: If YouTube subtitles are missing, `extract_transcript.py` automatically downloads the audio track and invokes the local Whisper transcriber.
-
-### 2. Explore a Creator Channel
-Catalog videos for any channel handle or URL:
+## Commands
 
 ```bash
-uv run .agents/skills/youtube-extractor/scripts/explore_channel.py "@HumbledTraderOfficial" --limit 20 --sort latest --save-json data/channels/humbled_trader.json
+S=.agents/skills/youtube-extractor/scripts/youtube.py
+uv run $S search "<query>" [--limit 20] [--type video|channel]
+uv run $S profile <@handle|channel url|UC…> [--ingest]
+uv run $S list <channel> [--tab videos|shorts|streams|all] [--limit 50] [--since YYYY-MM-DD] [--save-cursor] [--enqueue]
+uv run $S fetch <url|video_id> [--ingest] [--force-whisper]
 ```
 
-Options:
-- `--limit <N>`: Number of entries to inspect (default: 0 for all).
-- `--tab <all|videos|shorts|streams|playlists>`: Channel tab to explore (default: `all` captures long-form videos, shorts, and live streams).
-- `--sort <latest|popular>`: Sort order.
-- `--save-json <path>`: Save video list for downstream batch mining.
+| Command | Returns |
+|---|---|
+| `search "<query>"` | ItemRef[] via yt-dlp ytsearch |
+| `profile <@handle|channel url|UC…>` | ProfileRecord: title, description, links, subscribers, channel id |
+| `list <channel>` | newest first; cursor = last seen video id |
+| `fetch <url|video_id>` | ContentRecord with transcript segments |
+
+Common flags (docs/spec/00-conventions.md §3): `--ingest --run R` stores the record (writes require a run id); `--enqueue --run R` adds unseen items to the explore queue; `--save-cursor` stores the paging position in `sources.cursor_json` so the next `list` continues where it stopped; `--cursor C` overrides it. Output is always the JSON envelope `{ok, command, data, warnings, meta}`.
+
+## Procedure
+
+1. `uv run finsocnet kb run start --skill youtube-extractor --goal "<goal>" --harness <h> --model <m>` → `R`. If a parent skill (source-explorer, knowledge-search) already started a run, reuse its `R`.
+2. Channel: `profile --ingest` → `person-matcher` on the channel owner → `list --tab all --enqueue --save-cursor --run R`.
+3. Video: `fetch <url> --ingest --run R` → then `market-idea-miner` on the returned content id.
+4. If `extra.caption_source` is `auto` and the transcript looks garbled (many `[Music]`, wrong language), refetch with `--force-whisper`.
+5. Read `warnings` in every envelope (`truncated`, `cap_reached`, `partial`) and pass them on to the user or the queue item; nothing is dropped silently.
+6. `uv run finsocnet kb run end --run R --outcome success|partial|failed --stats '{…}'` when you started the run.
+
+## Stored as
+
+| Field | Value |
+|---|---|
+| content id | `youtube:<videoId>` (11 chars) |
+| source id | `youtube:channel:<UC…>` |
+| content_type | `video`, `short`, `stream` |
+| segments | caption lines merged into windows ≤ 45 s / ≤ 600 chars; `kind=transcript`, `locator={start_sec,end_sec}` |
+| extra | `caption_source` (manual/auto/whisper), `caption_lang`, `chapters`, `long_form` (> 3 h) |
+| links / mentions | URLs, @handles, $TICKERS from the description |
+
+## Errors
+
+| Exit · code | Do |
+|---|---|
+| 2 `USAGE` / `RUN_REQUIRED` / `UNSUPPORTED` | fix the call; writes need `--run R` |
+| 4 `RATE_LIMITED` / `BUDGET_EXHAUSTED` | stop this platform; queue item → `deferred` with `retry_after_sec` |
+| 5 `NOT_FOUND` / `GONE` | queue item → `failed`; already stored content stays (status `gone`) |
+| 1 `INTERNAL` | `kb lesson add --skill youtube-extractor --kind script_bug …` with the error, then report |
+
+## Notes
+
+- Caption order: manual original language → manual en → auto original → auto en → Whisper.
+- Streams longer than 3 h are still fully transcribed (nothing ignored).
+
+## Legacy commands (v1, until Phase 4)
+
+```bash
+uv run .agents/skills/youtube-extractor/scripts/extract_transcript.py "<url-or-id>"
+uv run .agents/skills/youtube-extractor/scripts/explore_channel.py "@handle" --tab all --limit 20 --save-json data/channels/<name>.json
+```
+
+v1 scripts write the v1 schema. After migration 003 their output is converted; do not mix v1 ingestion with v2 runs on the same database.
 
 ## References
-See [references/extraction_notes.md](references/extraction_notes.md) for details on fallback transcript mechanisms and channel URL normalization.
+
+- `references/platform_notes.md` — endpoints, selectors and open items to verify; record platform changes here.
+- `references/extraction_notes.md` — caption and yt-dlp notes from v1

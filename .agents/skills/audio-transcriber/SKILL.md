@@ -1,44 +1,83 @@
 ---
 name: audio-transcriber
-description: Extract audio streams from YouTube or local media and transcribe with local openai/whisper-large-v3-turbo. Use when YouTube transcripts are missing, degraded, or for offline local speech-to-text.
+description: Transcribe speech to timestamped text with local Whisper (openai/whisper-large-v3-turbo, int8) from a local audio/video file or any yt-dlp-supported URL — YouTube, podcast enclosures, Twitch VODs, Vimeo, Rumble, Kick, X/TikTok/Instagram videos. Use when a platform has no captions, for podcasts and livestreams, or when the user asks to "transcribe" a recording.
 license: MIT
+compatibility: FinSocNet repository with uv, faster-whisper, yt-dlp and ffmpeg; GPU optional (WHISPER_DEVICE=auto).
 metadata:
-  version: "1.0.0"
-  author: "finsocnet"
+  author: finsocnet
+  version: "2.0.0"
+  priority: "P1"
+  status: partial
+  phase: "4"
+  spec: docs/spec/05-platform-skills.md
 ---
 
-# Audio Transcriber (Whisper Large V3 Turbo)
+# Audio Transcriber
 
-Extract voice/audio from YouTube videos or local video files and generate high-accuracy word/segment transcripts using the local `openai/whisper-large-v3-turbo` model.
+> **Status: partial.** v1 scripts work today (see *Legacy commands*). The v2 adapter `scripts/transcribe.py` below is built in Phase 4 and replaces them.
 
-## Features
-- **Voice/Audio Extraction:** Downloads the cleanest audio track from YouTube using `yt-dlp` and resamples to 16kHz mono WAV using `ffmpeg`.
-- **Local Whisper Engine:** Runs `openai/whisper-large-v3-turbo` with `int8` quantization for fast CPU execution and low memory consumption.
-- **Timestamp Synchronization:** Generates snippet-level timestamps (`start`, `duration`, `text`) fully compatible with the downstream hypothesis miner and knowledge database.
+The only model FinSocNet scripts run (ADR-002 exception: speech-to-text, not reasoning). Other skills call it and build their own ContentRecord from its segments.
 
-## Usage
+## When to use
 
-### 1. Extract Audio from YouTube Video
+- A platform skill reports no captions/transcript.
+- "Transcribe this audio/video/podcast/livestream".
+
+## Before you start
+
+- ffmpeg installed. Whisper model downloads on first use (~1.6 GB).
+
+## Commands
+
 ```bash
-uv run .agents/skills/audio-transcriber/scripts/extract_audio.py "https://www.youtube.com/watch?v=zU0i9rBbEkI"
+S=.agents/skills/audio-transcriber/scripts/transcribe.py
+uv run $S transcribe <url-or-path> [--language auto|en|vi|…] [--content-id ID]
+uv run $S transcribe <url> --cookies
 ```
-*Saves to `data/audio/<video_id>.wav` (16kHz mono).*
 
-### 2. Transcribe Audio File with Whisper Large V3 Turbo
-```bash
-uv run .agents/skills/audio-transcriber/scripts/transcribe_whisper.py "data/audio/zU0i9rBbEkI.wav" --video-id "zU0i9rBbEkI" --title "AI Trading Lessons" --ingest-db
-```
-*Outputs:*
-- `data/transcripts/<video_id>.json`: Timed snippets array.
-- `data/transcripts/<video_id>.txt`: Formatted reading transcript.
-- Automatically indexes chunks into Chroma and records into `knowledge.db` if `--ingest-db` is passed.
+| Command | Returns |
+|---|---|
+| `transcribe <url-or-path>` | `{segments:[{start_sec,end_sec,text}], language, model, duration_sec, cache_path}` |
+| `transcribe <url> --cookies` | use data/sessions/cookies.txt for gated media |
 
-### 3. All-in-One Audio Download & Transcribe
-You can pipe extraction directly to transcription:
+Not a platform adapter: it returns segments and does not write to the database itself. Output is the JSON envelope `{ok, command, data, warnings, meta}`.
+
+## Procedure
+
+1. Called by another skill: run `transcribe`; the caller merges segments into ≤ 45 s windows and stores its own ContentRecord.
+2. User asks to transcribe a URL: run the matching platform skill's `fetch --ingest` instead (it calls this skill and stores the result). A local recording: `document-reader fetch <path> --ingest --run R` (it calls this skill). The cache means the audio is transcribed only once.
+
+## Stored as
+
+| Field | Value |
+|---|---|
+| cache | `data/transcripts/<sha256(audio)[:16]>.json` — same audio is never transcribed twice |
+| output | segments with `start_sec`, `end_sec`, `text`; language detected |
+
+## Errors
+
+| Exit · code | Do |
+|---|---|
+| 2 `USAGE` / `RUN_REQUIRED` / `UNSUPPORTED` | fix the call; writes need `--run R` |
+| 4 `RATE_LIMITED` / `BUDGET_EXHAUSTED` | stop this platform; queue item → `deferred` with `retry_after_sec` |
+| 5 `NOT_FOUND` / `GONE` | queue item → `failed`; already stored content stays (status `gone`) |
+| 1 `INTERNAL` | `kb lesson add --skill audio-transcriber --kind script_bug …` with the error, then report |
+
+## Notes
+
+- VAD filter on, `word_timestamps=False`.
+- `--diarize` (speaker labels via whisperX/pyannote) is a later option, not part of v2.
+
+## Legacy commands (v1, until Phase 4)
+
 ```bash
-AUDIO_FILE=$(uv run .agents/skills/audio-transcriber/scripts/extract_audio.py "<VIDEO_URL>" | grep "Path:" | awk '{print $2}')
-uv run .agents/skills/audio-transcriber/scripts/transcribe_whisper.py "$AUDIO_FILE" --ingest-db
+uv run .agents/skills/audio-transcriber/scripts/extract_audio.py "<url>"
+uv run .agents/skills/audio-transcriber/scripts/transcribe_whisper.py "data/audio/<id>.wav" --video-id "<id>"
 ```
+
+v1 scripts write the v1 schema. After migration 003 their output is converted; do not mix v1 ingestion with v2 runs on the same database.
 
 ## References
-See [references/model_guide.md](references/model_guide.md) for CPU/GPU benchmarks, VRAM requirements, and quantization flags.
+
+- `references/platform_notes.md` — endpoints, selectors and open items to verify; record platform changes here.
+- `references/model_guide.md` — Whisper model, device and compute type

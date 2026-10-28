@@ -1,37 +1,90 @@
 ---
 name: web-reader
-description: Render dynamic web pages, extract article text, capture screenshots, and inspect embedded videos, media streams, and captions using Playwright Chromium automation. Use when reading websites, SPAs, or extracting media from web pages.
+description: Read any web page through the agent browser (JavaScript rendered, with the user's sessions) and extract clean article text, tables and comments; discover a site's RSS feeds, outbound links, PDFs and embedded videos or caption tracks; take screenshots. Use for any URL no specialised platform skill handles — blogs, personal trader sites, news, course pages — or to inspect a page for media.
 license: MIT
+compatibility: FinSocNet repository, agent-browser running, trafilatura.
 metadata:
-  version: "1.0.0"
-  author: "finsocnet"
+  author: finsocnet
+  version: "2.0.0"
+  priority: "P1"
+  status: partial
+  phase: "4"
+  spec: docs/spec/05-platform-skills.md
 ---
 
-# Web Reader (Playwright)
+# Web Reader
 
-Automates headless Chromium browsing to extract clean reader-friendly content, render dynamic SPAs, take screenshots, and detect video/audio players and caption tracks.
+> **Status: partial.** v1 scripts work today (see *Legacy commands*). The v2 adapter `scripts/web.py` below is built in Phase 4 and replaces them.
 
-## Capabilities
-1. **Dynamic Page Extraction:** Renders JavaScript, bypasses static limits, and strips ads/scripts to yield clean markdown.
-2. **Media & Caption Inspection:** Detects HTML5 `<video>` tags, `<track>` subtitle files, iframe embeds (YouTube, Vimeo, Rumble), and network `.m3u8` / `.vtt` streams.
-3. **Visual Snapshots:** Saves full-page screenshots for layout verification.
+The fallback reader. Attaches to the agent browser (never launches its own Chromium), extracts with trafilatura, and hands PDFs to `document-reader`.
 
-## Usage
+## When to use
 
-### 1. Read Any Web Page
+- Any URL without a dedicated platform skill (see source-explorer dispatch).
+- "Read this page", "what's on this site", "find the videos/feeds on this site".
+
+## Before you start
+
+- Agent browser running.
+
+## Commands
+
 ```bash
-uv run .agents/skills/web-reader/scripts/read_page.py "https://qullamaggie.com"
+S=.agents/skills/web-reader/scripts/web.py
+uv run $S fetch <url> [--screenshot PATH] [--ingest]
+uv run $S discover <url>
+uv run $S (inspect_media.py) <url>
 ```
 
-### 2. Inspect a Page for Embedded Videos and Captions
+| Command | Returns |
+|---|---|
+| `fetch <url>` | ContentRecord (paragraphs); PDFs delegated to document-reader |
+| `discover <url>` | ItemRefs: RSS/Atom feeds, sitemap, outbound links, PDFs, embedded YouTube/Vimeo, `<video>`, `.vtt/.srt` tracks |
+| `(inspect_media.py) <url>` | embedded media and caption tracks (former inspect_video.py) |
+
+Common flags (docs/spec/00-conventions.md §3): `--ingest --run R` stores the record (writes require a run id); `--enqueue --run R` adds unseen items to the explore queue; `--save-cursor` stores the paging position in `sources.cursor_json` so the next `list` continues where it stopped; `--cursor C` overrides it. Output is always the JSON envelope `{ok, command, data, warnings, meta}`.
+
+## Procedure
+
+1. `uv run finsocnet kb run start --skill web-reader --goal "<goal>" --harness <h> --model <m>` → `R`. If a parent skill (source-explorer, knowledge-search) already started a run, reuse its `R`.
+2. Unknown site: `discover` first → enqueue feeds (rss-explorer), videos (youtube/audio), PDFs (document-reader) → `fetch --ingest --run R` the page itself.
+3. Short extraction (< 200 chars) → the DOM fallback runs automatically; if still empty, take a screenshot and look at it.
+4. Read `warnings` in every envelope (`truncated`, `cap_reached`, `partial`) and pass them on to the user or the queue item; nothing is dropped silently.
+5. `uv run finsocnet kb run end --run R --outcome success|partial|failed --stats '{…}'` when you started the run.
+
+## Stored as
+
+| Field | Value |
+|---|---|
+| content id | `web:<sha1(canonical_url)[:16]>` |
+| source id | `web:site:<host>` |
+| content_type | `page` |
+| segments | paragraphs `{para}`; tables as text; page comments as `comment` |
+
+## Errors
+
+| Exit · code | Do |
+|---|---|
+| 2 `USAGE` / `RUN_REQUIRED` / `UNSUPPORTED` | fix the call; writes need `--run R` |
+| 3 `LOGIN_REQUIRED` / `CHECKPOINT` | follow session-bridge *exit code 3*; for optional sessions continue with public data and say what was not readable |
+| 4 `RATE_LIMITED` / `BUDGET_EXHAUSTED` | stop this platform; queue item → `deferred` with `retry_after_sec` |
+| 5 `NOT_FOUND` / `GONE` | queue item → `failed`; already stored content stays (status `gone`) |
+| 7 `BROWSER_UNAVAILABLE` | `agent_browser.py start`, retry once |
+| 1 `INTERNAL` | `kb lesson add --skill web-reader --kind script_bug …` with the error, then report |
+
+## Notes
+
+- Canonical URL removes tracking params (`utm_*`, `fbclid`, `gclid`, …) — see docs/spec/00 §4.
+
+## Legacy commands (v1, until Phase 4)
+
 ```bash
-uv run .agents/skills/web-reader/scripts/inspect_video.py "https://qullamaggie.com"
+uv run .agents/skills/web-reader/scripts/read_page.py "<url>" [--screenshot data/screenshots/x.png]
+uv run .agents/skills/web-reader/scripts/inspect_video.py "<url>"
 ```
 
-### 3. Capture Full-Page Screenshot
-```bash
-uv run .agents/skills/web-reader/scripts/read_page.py "https://qullamaggie.com" --screenshot data/screenshots/qullamaggie.png
-```
+v1 scripts write the v1 schema. After migration 003 their output is converted; do not mix v1 ingestion with v2 runs on the same database.
 
 ## References
-See [references/playwright_guide.md](references/playwright_guide.md) for timeout configurations and CSS selector scoping.
+
+- `references/platform_notes.md` — endpoints, selectors and open items to verify; record platform changes here.

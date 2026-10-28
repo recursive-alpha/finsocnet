@@ -1,38 +1,83 @@
 ---
 name: paper-code-explorer
-description: Explore scientific research papers and open-source code implementations across arXiv and Papers With Code (Hugging Face Papers). Search quantitative finance, ML trading algorithms, and market microstructure, and retrieve GitHub code repositories and PDFs.
+description: Search arXiv (q-fin, stat.ML, cs.LG) and Hugging Face / Papers With Code for quantitative finance and trading papers with open-source code, read abstracts and AI summaries, list trending papers, and download PDFs for document-reader. Use for arxiv.org links, "papers about market microstructure / momentum / RL trading", "is there code for this paper".
 license: MIT
+compatibility: FinSocNet repository with uv.
 metadata:
-  version: "1.0.0"
-  author: "finsocnet"
+  author: finsocnet
+  version: "2.0.0"
+  priority: "P1"
+  status: partial
+  phase: "4"
+  spec: docs/spec/05-platform-skills.md
 ---
 
-# Paper & Code Explorer (arXiv & Papers With Code)
+# Paper & Code Explorer (arXiv)
 
-Research tool for scientific papers and open-source code implementations across arXiv and Papers With Code (Hugging Face Papers index). Discovers quantitative finance algorithms, market microstructure research, deep learning trading models, and verified GitHub repositories.
+> **Status: partial.** v1 scripts work today (see *Legacy commands*). The v2 adapter `scripts/papers.py` below is built in Phase 4 and replaces them.
 
-## Capabilities
-1. **Search Papers with Open-Source Code:** Search arXiv literature and filter exclusively for papers with public GitHub code implementations (`--has-code`).
-2. **Paper Details & PDF Downloads:** Retrieve full abstracts, AI summaries, author lists, linked models/datasets, and download open-access PDFs (`data/papers/<arxiv_id>.pdf`).
-3. **Trending AI & Quant Research:** Inspect daily upvoted papers across machine learning and algorithmic trading.
-4. **Knowledge DB Integration:** Automatically ingests papers, abstracts, and code links into `data/knowledge.db` (`platform='arxiv'`, `content_type='paper'`).
+Paper metadata and abstracts are stored as `metadata_only`; full text comes from `--pdf` → document-reader. Linked GitHub repos are enqueued for github-explorer.
 
-## Usage
+## When to use
 
-### 1. Search Papers with Open-Source Code Repositories
+- arXiv ids/URLs, quant research topics, paper + code lookups.
+
+## Before you start
+
+- None.
+
+## Commands
+
 ```bash
-uv run .agents/skills/paper-code-explorer/scripts/search_papers.py "market microstructure trading" --has-code --ingest-db
+S=.agents/skills/paper-code-explorer/scripts/papers.py
+uv run $S search "<query>" [--has-code] [--category q-fin.TR] [--limit 20]
+uv run $S fetch <arxiv id|url> [--pdf] [--ingest]
+uv run $S trending [--limit 10] [--has-code]
 ```
 
-### 2. Inspect Paper and Download Open-Access PDF
-```bash
-uv run .agents/skills/paper-code-explorer/scripts/get_paper.py "2610.34467" --auto-download --ingest-db
-```
+| Command | Returns |
+|---|---|
+| `search "<query>"` | ItemRef[] `arxiv:<id>` |
+| `fetch <arxiv id|url>` | metadata + abstract; `--pdf` downloads and ingests full text |
+| `trending` | HF daily papers |
 
-### 3. Explore Daily Trending Papers
+Common flags (docs/spec/00-conventions.md §3): `--ingest --run R` stores the record (writes require a run id); `--enqueue --run R` adds unseen items to the explore queue; `--save-cursor` stores the paging position in `sources.cursor_json` so the next `list` continues where it stopped; `--cursor C` overrides it. Output is always the JSON envelope `{ok, command, data, warnings, meta}`.
+
+## Procedure
+
+1. `uv run finsocnet kb run start --skill paper-code-explorer --goal "<goal>" --harness <h> --model <m>` → `R`. If a parent skill (source-explorer, knowledge-search) already started a run, reuse its `R`.
+2. `search` → choose → `fetch --pdf --ingest --run R` → market-idea-miner.
+3. Repos in `links` → `kb queue add --target <repo url> --origin citation`.
+4. Read `warnings` in every envelope (`truncated`, `cap_reached`, `partial`) and pass them on to the user or the queue item; nothing is dropped silently.
+5. `uv run finsocnet kb run end --run R --outcome success|partial|failed --stats '{…}'` when you started the run.
+
+## Stored as
+
+| Field | Value |
+|---|---|
+| content id | `arxiv:<id>` (no version; version in `extra.version`) |
+| content_type | `paper` |
+
+## Errors
+
+| Exit · code | Do |
+|---|---|
+| 2 `USAGE` / `RUN_REQUIRED` / `UNSUPPORTED` | fix the call; writes need `--run R` |
+| 4 `RATE_LIMITED` / `BUDGET_EXHAUSTED` | stop this platform; queue item → `deferred` with `retry_after_sec` |
+| 5 `NOT_FOUND` / `GONE` | queue item → `failed`; already stored content stays (status `gone`) |
+| 1 `INTERNAL` | `kb lesson add --skill paper-code-explorer --kind script_bug …` with the error, then report |
+
+## Legacy commands (v1, until Phase 4)
+
 ```bash
+uv run .agents/skills/paper-code-explorer/scripts/search_papers.py "<query>" --has-code
+uv run .agents/skills/paper-code-explorer/scripts/get_paper.py "<id>" --auto-download
 uv run .agents/skills/paper-code-explorer/scripts/explore_trending.py --limit 5 --has-code
 ```
 
+v1 scripts write the v1 schema. After migration 003 their output is converted; do not mix v1 ingestion with v2 runs on the same database.
+
 ## References
-See [references/qfin_categories.md](references/qfin_categories.md) for arXiv quantitative finance taxonomy (`q-fin.TR`, `q-fin.PM`, `q-fin.RM`).
+
+- `references/platform_notes.md` — endpoints, selectors and open items to verify; record platform changes here.
+- `references/qfin_categories.md` — arXiv q-fin categories

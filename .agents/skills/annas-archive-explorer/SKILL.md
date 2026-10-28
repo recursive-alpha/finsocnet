@@ -1,38 +1,88 @@
 ---
 name: annas-archive-explorer
-description: Explore Anna's Archive (https://annas-archive.gl) to discover and retrieve trading books, technical analysis textbooks, quant research papers, and download mirrors by title, author, or MD5 hash.
+description: Search Anna's Archive for trading and finance books, textbooks and papers (Market Wizards, Reminiscences, quant textbooks), read book details and mirrors by MD5, and download a chosen edition for document-reader to ingest. Use for "find the book …", "books by <trader>", a book cited by a trader, or target_kind=book queue items.
 license: MIT
+compatibility: FinSocNet repository; agent-browser for DDoS-Guard pages.
 metadata:
-  version: "1.0.0"
-  author: "finsocnet"
+  author: finsocnet
+  version: "2.0.0"
+  priority: "P1"
+  status: partial
+  phase: "4"
+  spec: docs/spec/05-platform-skills.md
 ---
 
 # Anna's Archive Explorer
 
-Research tool for Anna's Archive (`https://annas-archive.gl`) to find trading books, academic finance papers, author bibliographies, and download mirrors across LibGen, Z-Library, and Sci-Hub.
+> **Status: partial.** v1 scripts work today (see *Legacy commands*). The v2 adapter `scripts/annas.py` below is built in Phase 4 and replaces them.
 
-## Capabilities
-1. **Search Catalog:** Search by title, author, topic, or ISBN with format filters (`--ext pdf`, `--ext epub`).
-2. **Book Details & Mirrors:** Extract descriptions and direct download mirrors for any MD5 hash.
-3. **Session & DDoS-Guard Manager:** Interactive browser session saver to `data/sessions/annas_archive_session.json`.
-4. **Knowledge DB Integration:** Ingests discovered books and texts directly into `data/knowledge.db` (`platform='annas_archive'`).
+Search and metadata are always allowed; downloads happen only on an explicit `download` call. Downloading copyrighted books may be illegal where the user lives — mention this when the user asks to download.
 
-## Usage
+## When to use
 
-### 1. Search for Trading Books
+- A book title/author, a book mentioned in content, `target_kind=book`.
+
+## Before you start
+
+- Agent browser running when mirrors show DDoS-Guard.
+
+## Commands
+
 ```bash
-uv run .agents/skills/annas-archive-explorer/scripts/search_archive.py "Market Wizards" --ext pdf --ingest-db
+S=.agents/skills/annas-archive-explorer/scripts/annas.py
+uv run $S search "<title or author>" [--ext pdf|epub] [--lang en|vi] [--limit 20]
+uv run $S fetch <md5> [--ingest]
+uv run $S download <md5> [--mirror N]
 ```
 
-### 2. Inspect Specific Book by MD5 or URL
+| Command | Returns |
+|---|---|
+| `search "<title or author>"` | ItemRef[] with `id = book:<md5>` |
+| `fetch <md5>` | metadata_only content: title, author, year, description, mirrors |
+| `download <md5>` | file in `data/books/<md5>.<ext>`, then run `document-reader fetch` on it |
+
+Common flags (docs/spec/00-conventions.md §3): `--ingest --run R` stores the record (writes require a run id); `--enqueue --run R` adds unseen items to the explore queue; `--save-cursor` stores the paging position in `sources.cursor_json` so the next `list` continues where it stopped; `--cursor C` overrides it. Output is always the JSON envelope `{ok, command, data, warnings, meta}`.
+
+## Procedure
+
+1. `uv run finsocnet kb run start --skill annas-archive-explorer --goal "<goal>" --harness <h> --model <m>` → `R`. If a parent skill (source-explorer, knowledge-search) already started a run, reuse its `R`.
+2. `search` → pick the best edition (language, format, completeness) → `fetch --ingest` → `download` → `document-reader fetch data/books/<md5>.<ext> --ingest --run R` → market-idea-miner (8000-char chunks).
+3. Read `warnings` in every envelope (`truncated`, `cap_reached`, `partial`) and pass them on to the user or the queue item; nothing is dropped silently.
+4. `uv run finsocnet kb run end --run R --outcome success|partial|failed --stats '{…}'` when you started the run.
+
+## Stored as
+
+| Field | Value |
+|---|---|
+| content id | `book:<md5>` |
+| content_type | `book` |
+
+## Errors
+
+| Exit · code | Do |
+|---|---|
+| 2 `USAGE` / `RUN_REQUIRED` / `UNSUPPORTED` | fix the call; writes need `--run R` |
+| 3 `LOGIN_REQUIRED` / `CHECKPOINT` | follow session-bridge *exit code 3*; for optional sessions continue with public data and say what was not readable |
+| 4 `RATE_LIMITED` / `BUDGET_EXHAUSTED` | stop this platform; queue item → `deferred` with `retry_after_sec` |
+| 5 `NOT_FOUND` / `GONE` | queue item → `failed`; already stored content stays (status `gone`) |
+| 7 `BROWSER_UNAVAILABLE` | `agent_browser.py start`, retry once |
+| 1 `INTERNAL` | `kb lesson add --skill annas-archive-explorer --kind script_bug …` with the error, then report |
+
+## Notes
+
+- v1 `session_manager.py` is replaced by the agent browser profile.
+
+## Legacy commands (v1, until Phase 4)
+
 ```bash
-uv run .agents/skills/annas-archive-explorer/scripts/get_book_details.py "86288c0a3bf9f6f84c12558338407e76"
+uv run .agents/skills/annas-archive-explorer/scripts/search_archive.py "Market Wizards" --ext pdf
+uv run .agents/skills/annas-archive-explorer/scripts/get_book_details.py "<md5>"
+uv run .agents/skills/annas-archive-explorer/scripts/session_manager.py --interactive   # DDoS-Guard clearance; replaced by the agent browser profile
 ```
 
-### 3. Clear DDoS-Guard Session (Interactive)
-```bash
-uv run .agents/skills/annas-archive-explorer/scripts/session_manager.py --interactive
-```
+v1 scripts write the v1 schema. After migration 003 their output is converted; do not mix v1 ingestion with v2 runs on the same database.
 
 ## References
-See [references/annas_archive_guide.md](references/annas_archive_guide.md) for mirror domains and search operator guidelines.
+
+- `references/platform_notes.md` — endpoints, selectors and open items to verify; record platform changes here.
+- `references/annas_archive_guide.md` — mirrors, search filters, download flow
