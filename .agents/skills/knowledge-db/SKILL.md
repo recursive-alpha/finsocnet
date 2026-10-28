@@ -41,7 +41,7 @@ All commands: `uv run finsocnet kb <group> <command> …` (same as `uv run .agen
 | source | `source upsert --file F` W; `source get\|list`; `source cursor ID --set C` W |
 | content | `content add --file F` W; `get ID`; `view ID [--from-seq A --to-seq B]`; `chunks ID [--max-chars 12000] [--overlap 2]`; `list [--status] [--platform]`; `claim ID` W; `done ID --upto-seq N --cards N` W; `fail ID --error T` W; `link-duplicate ID --of OTHER` W; `search "<text>" [--content ID] [--person P]` |
 | vocab | `vocab lookup "<phrase>"`; `vocab add --file F` W; `vocab update\|merge` W; `vocab list\|export` |
-| card | `card validate --file F`; `card candidates --file F [--limit 10]`; `card commit --file F` W; `card search --query-card F \| --text Q`; `card get ID [--citations --links --history]`; `card list`; `card update\|merge\|retire\|undo` W; `citation attribute ID --person P --role R --confidence C` W |
+| card | `card validate --file F`; `card candidates --file F [--limit 10]`; `card commit --file F` W; `card search --query-card F \| --text Q`; `card get ID [--citations --links --history]`; `card list`; `card update\|merge\|retire\|undo` W; `card link\|unlink --from A --to B [--relation related] --reason R` W (add or remove one link after the fact; snapshots card A first); `citation attribute ID --person P --role R --confidence C` W |
 | decision | `decision list [--reviewed none]`; `decision review ID --verdict agreed\|overturned` W |
 | person / skill | `person candidates\|upsert\|alias add\|appearance add\|get\|list\|cards\|merge`; `skill upsert\|get\|list` |
 | queue / gap / history | `queue add\|next\|update\|list`; `gap add\|list\|update`; `history pending\|mark` |

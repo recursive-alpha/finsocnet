@@ -682,6 +682,32 @@ def merge_cards(conn: sqlite3.Connection, src: int, dst: int, reason: str, run_i
     return {"merged": src, "into": dst, "citations_moved": moved, "citations_skipped": skipped}
 
 
+def link_cards(conn: sqlite3.Connection, src: int, dst: int, relation: str, reason: str, run_id: int) -> dict[str, Any]:
+    """Add a link between two active cards after the fact (self-improver data fix). The source card is snapshotted first; `unlink_cards` reverts it."""
+    if relation not in ("related", "contradicts", "prerequisite", "example_of", "refines"):
+        raise CliError("VALIDATION_ERROR", f"unknown relation {relation!r}")
+    if src == dst:
+        raise CliError("VALIDATION_ERROR", "cannot link a card to itself")
+    with transaction(conn):
+        _require_active(conn, src)
+        _require_active(conn, dst)
+        if conn.execute("SELECT 1 FROM card_links WHERE from_card = ? AND to_card = ? AND relation = ?", (src, dst, relation)).fetchone():
+            return {"from_card": src, "to_card": dst, "relation": relation, "status": "exists"}
+        _snapshot(conn, src, f"link {relation} -> {dst}: {reason}", run_id)
+        conn.execute("INSERT INTO card_links (from_card, to_card, relation, rationale, run_id) VALUES (?, ?, ?, ?, ?)", (src, dst, relation, reason, run_id))
+    return {"from_card": src, "to_card": dst, "relation": relation, "status": "created"}
+
+
+def unlink_cards(conn: sqlite3.Connection, src: int, dst: int, relation: str, reason: str, run_id: int) -> dict[str, Any]:
+    """Remove one link (the inverse of `link_cards`); the source card is snapshotted first, so the link is recoverable from `card_history`."""
+    with transaction(conn):
+        if not conn.execute("SELECT 1 FROM card_links WHERE from_card = ? AND to_card = ? AND relation = ?", (src, dst, relation)).fetchone():
+            raise CliError("NOT_FOUND", f"no {relation} link {src} -> {dst}")
+        _snapshot(conn, src, f"unlink {relation} -> {dst}: {reason}", run_id)
+        conn.execute("DELETE FROM card_links WHERE from_card = ? AND to_card = ? AND relation = ?", (src, dst, relation))
+    return {"from_card": src, "to_card": dst, "relation": relation, "status": "removed"}
+
+
 def undo(conn: sqlite3.Connection, history_id: int, run_id: int) -> dict[str, Any]:
     """Restore a card's fields from a snapshot and move its citations back (links are re-added, never removed)."""
     h = conn.execute("SELECT * FROM card_history WHERE id = ?", (history_id,)).fetchone()

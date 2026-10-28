@@ -454,6 +454,16 @@ def cmd_card_merge(ctx: Ctx) -> Result:
     return Result(cards_mod.merge_cards(ctx.conn(), a.src, a.dst, a.reason, ctx.run_id()))
 
 
+def cmd_card_link(ctx: Ctx) -> Result:
+    a = ctx.args
+    return Result(cards_mod.link_cards(ctx.conn(), a.src, a.dst, a.relation, a.reason, ctx.run_id()))
+
+
+def cmd_card_unlink(ctx: Ctx) -> Result:
+    a = ctx.args
+    return Result(cards_mod.unlink_cards(ctx.conn(), a.src, a.dst, a.relation, a.reason, ctx.run_id()))
+
+
 def cmd_card_retire(ctx: Ctx) -> Result:
     return Result(cards_mod.retire_card(ctx.conn(), ctx.args.id, ctx.args.reason, ctx.run_id()))
 
@@ -790,6 +800,12 @@ def build_parser() -> _Parser:
     p.add_argument("--from", dest="src", type=int, required=True)
     p.add_argument("--into", dest="dst", type=int, required=True)
     p.add_argument("--reason", required=True)
+    for name, fn in (("link", cmd_card_link), ("unlink", cmd_card_unlink)):
+        p = leaf(g, ("card", name), name, fn)
+        p.add_argument("--from", dest="src", type=int, required=True)
+        p.add_argument("--to", dest="dst", type=int, required=True)
+        p.add_argument("--relation", default="related", choices=["related", "contradicts", "prerequisite", "example_of", "refines"])
+        p.add_argument("--reason", required=True)
     p = leaf(g, ("card", "retire"), "retire", cmd_card_retire)
     p.add_argument("id", type=int)
     p.add_argument("--reason", required=True)

@@ -301,3 +301,21 @@ def test_retire_update_and_citation_attribution(seeded, run_id):
     assert cards.list_cards(seeded) == []
     d = cards.list_decisions(seeded, reviewed="none")
     assert d and cards.review_decision(seeded, d[0]["id"], "agreed", "ok")["reviewed"] == "agreed"
+
+
+def test_link_and_unlink_are_snapshotted_and_idempotent(seeded, run_id):
+    commit(seeded, run_id, make_decision())
+    commit(seeded, run_id, make_decision(second_card(), "new", [], ))
+    assert cards.link_cards(seeded, 2, 1, "related", "same topic", run_id)["status"] == "created"
+    assert cards.link_cards(seeded, 2, 1, "related", "same topic", run_id)["status"] == "exists"
+    assert [(l["from_card"], l["to_card"], l["relation"]) for l in cards.get_card(seeded, 2, links=True)["links"]] == [(2, 1, "related")]
+    hist = cards.get_card(seeded, 2, history=True)["history"]
+    assert any("link related -> 1" in h["reason"] for h in hist)
+    with pytest.raises(CliError):
+        cards.link_cards(seeded, 2, 2, "related", "self", run_id)
+    with pytest.raises(CliError):
+        cards.link_cards(seeded, 2, 1, "likes", "bad relation", run_id)
+    assert cards.unlink_cards(seeded, 2, 1, "related", "wrong", run_id)["status"] == "removed"
+    with pytest.raises(CliError) as e:
+        cards.unlink_cards(seeded, 2, 1, "related", "again", run_id)
+    assert e.value.code == "NOT_FOUND"
