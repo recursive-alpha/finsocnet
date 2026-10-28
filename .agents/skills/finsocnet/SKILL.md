@@ -1,82 +1,71 @@
 ---
 name: finsocnet
-description: Explore, search, filter, and inspect mined creator trading hypotheses, setups, and verbatim quotes across financial social media channels via single-binary Go CLI and Chat TUI.
+description: Entry point to FinSocNet, the financial social intelligence system — database stats, cited answers from trading knowledge, trader rulebooks and comparisons, exploration of new creators and sources across YouTube, podcasts, X, Reddit, Discord, Telegram, Substack, Medium, forums, Stack Exchange, TradingView, Facebook, SEC filings, papers and books, session status, feedback, and self-improvement. Use for /finsocnet commands, when the user asks what FinSocNet knows about a trading topic or trader, or how to use the system; it routes to the specialised skills.
+license: MIT
+compatibility: Requires the FinSocNet repository (uv) on the host where the harness runs; local machines only need `finsocnet session` commands.
 metadata:
-  version: "0.1.0"
+  author: finsocnet
+  version: "2.0.0"
+  priority: "P2"
+  status: partial
+  phase: "8"
+  spec: docs/spec/07-harness-integration.md
 ---
 
-# FinSocNet: Financial Social Network Hypothesis Explorer
+# FinSocNet
 
-A high-performance single-binary tool and interactive Chat TUI (built in Go) to explore mined trading hypotheses, verify second-level timestamped quotes, and bridge requests to harness agents (Claude, Codex, Pi, Hermes, OpenClaw, OMP, DeepSeek Harness/DSH).
+> **Status: partial.** Commands marked v1 work today; the rest arrive with the phases in `docs/spec/08-phases.md`. v1 hypothesis commands (`finsocnet search/view/hypo`) are replaced by cards in Phase 1.
 
-## 1. When to Activate
+## Route the request
 
-Activate this skill when:
-- Searching or verifying empirical trading hypotheses mined from creator channels (Lance Breitstein, Qullamaggie, SMB Capital, Trader Dante, Chat With Traders, Humbled Trader).
-- Finding specific trading setups by category (`holding_period`, `execution`, `risk_management`, `stock_selection`, `edge`).
-- Inspecting ground-truth transcript quotes, holding periods, statistical claims, and invalidation rules.
-- Requesting automated backtests, rule reviews, or hypothesis critiques across harness agents.
+| User wants | Use |
+|---|---|
+| numbers: how much do we know | `/finsocnet` → `uv run finsocnet kb stats` |
+| an answer about trading/finance | `knowledge-search` |
+| a trader's strategy | `person-skills-explorer` (v1 today: `uv run finsocnet strategy <name>`) |
+| compare traders | `person-skills-explorer` compare procedure |
+| a specific card | `uv run finsocnet kb card get <id> --citations --links` |
+| who is this person | `person-matcher` |
+| add / explore a creator, URL, book or topic | `finsocnet explore add <target>` then `source-explorer` |
+| mine a stored item | `market-idea-miner` |
+| login problems on a platform | `session-bridge` |
+| browser problems | `agent-browser` |
+| improve the system, clean duplicates | `self-improver` |
+| install / update / remove a skill from a link | `skill-installer` |
+| report a wrong answer/card | `uv run finsocnet feedback <type> <id> -1 "<comment>"` |
 
-## 2. CLI Execution Commands
+## Slash commands
 
-Run directly from any terminal or bash tool:
+| Command | Behaviour |
+|---|---|
+| `/finsocnet` | stats summary: persons, sources, contents by status, cards, citations, top consensus cards, open gaps, queue, session health |
+| `/finsocnet:search <question>` | knowledge-search |
+| `/finsocnet:card <id>` | card with citations (links with timestamps) and links |
+| `/finsocnet:person <id or name>` | profile, aliases, appearances, stats |
+| `/finsocnet:strategy <person> [category] [--rebuild]` | rulebook; `--rebuild` runs person-skill-synthesizer first |
+| `/finsocnet:compare <a,b> <topic>` | side-by-side rules |
+| `/finsocnet:explore <target>` | enqueue + one explore step for it |
+| `/finsocnet:explore-step` | one source-explorer step (for loops/schedules) |
+| `/finsocnet:mine <content_id>` | market-idea-miner |
+| `/finsocnet:gaps` | open knowledge gaps |
+| `/finsocnet:sessions` | session status per platform |
+| `/finsocnet:improve` | one self-improver run |
+| `/finsocnet:feedback <type> <id> <+1\|-1> [comment]` | record feedback |
+| `/finsocnet:skills` | core vs installed skills, versions, outdated |
+| `/finsocnet:install-skill <link>` | skill-installer: check, review, confirm, install |
 
-```bash
-# 1. Search hypotheses by statement, setup, or keywords
-finsocnet search "daily positions"
-finsocnet search "breakout"
+## CLI
 
-# 2. View full hypothesis card with verbatim quotes and timestamps
-finsocnet view 2
-finsocnet view 18
+| Command | Where |
+|---|---|
+| `finsocnet kb …`, `finsocnet eval …` | remote host |
+| `finsocnet explore add`, `finsocnet persons review`, `finsocnet feedback` | remote host |
+| `finsocnet session init-local\|export\|push` | user's local machine |
+| `finsocnet install <claude\|omp\|pi\|hermes\|codex\|openclaw\|all>` | where the harness runs |
+| `finsocnet tui` | remote host |
 
-# 3. Filter hypotheses by category or direction
-finsocnet hypo holding_period
-finsocnet hypo short
-finsocnet hypo execution long
+## Principles to respect in every answer
 
-# 4. Creator and channel intelligence
-finsocnet creators
-finsocnet contents
-finsocnet skills
-
-# 5. Database metrics and statistics
-finsocnet stats
-
-# 6. Dispatch prompt to harness agent with auto-injected hypothesis context
-finsocnet claude "analyze execution risk on #2"
-finsocnet codex "write a polars backtest for #3"
-finsocnet hermes "verify invalidation conditions on #5"
-finsocnet dsh "evaluate statistical edge for #1"
-```
-
-## 3. Interactive Chat TUI (Codex / OMP Style)
-
-Launch the interactive chat interface:
-```bash
-finsocnet
-```
-
-Inside the TUI, use slash commands with tab-autocompletion:
-- `/search <query>`: Live search across statement, setup conditions, and quotes
-- `/view <id>`: Inspect detailed card and set active hypothesis context
-- `/hypo [cat/dir]`: Filterable hypotheses table
-- `/creators`: Creator and channel statistics
-- `/contents`: Ingested video sources and URLs
-- `/skills`: Catalog of synthesized User Agent Skills
-- `/stats`: Summary metrics
-- `/<agent> <prompt>`: Send prompt to any harness agent (`/claude`, `/codex`, `/pi`, `/hermes`, `/openclaw`, `/omp`, `/dsh`)
-- `/agents`: Check health and installation of all harness agents
-- `/help`: Command manual
-- `/exit` or `/quit`: Exit TUI
-
-## 4. Hypothesis Data Rubric
-
-Every hypothesis retrieved via `finsocnet` adheres to the empirical rubric:
-1. **Category:** `holding_period`, `stock_selection`, `execution`, `risk_management`, `edge`.
-2. **Direction:** `LONG`, `SHORT`, `BOTH`, or `NEUTRAL`.
-3. **Falsifiable Statement:** Precise cause-and-effect proposition.
-4. **Setup Conditions:** Explicit filters (e.g. `ADR >= 4.0%`, daily breakout, RVOL).
-5. **Holding Period:** Intraday same-day close vs overnight swing.
-6. **Empirical Evidence:** Reported win rate or edge differential.
-7. **Verbatim Quote:** Timestamped transcript excerpt (`[MM:SS]`).
+- Every claim comes from a card with a citation; say when you add general knowledge.
+- Show consensus (how many people) and contradictions, not only one view.
+- Persons marked `private_source` (closed groups) are not exported to other harnesses.
