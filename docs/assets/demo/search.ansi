@@ -1,0 +1,13 @@
+[1m kb.search [0m [2m──────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[1m“how to size a position after a losing streak”[0m  mode [1mhybrid[0m  [1;36mcards[0m 30  · 30 hits
+                                                                                                                      
+ [1m#  [0m[1m [0m [1m [0m[1mtype          [0m[1m [0m [1m [0m[1mmatch      [0m[1m [0m [1m [0m[1mtitle                       [0m[1m [0m [1m [0m[1msnippet                              [0m[1m [0m [1m [0m[1mid      [0m 
+ ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+ 1     [1;36mcards/rule    [0m   █████ 1.00    cap any overnight position …   IF holding a stock overnight THEN SI…   13       
+ 2     [1;36mcards/rule    [0m   █████ 0.99    exponential bet sizing on t…   IF a setup is an A+ setup THEN SIZE …   3        
+ 3     [1;36mcards/observa…[0m   ████░ 0.88    1% risk survives a 20-trade…   a 20-trade losing_streak TENDS TO pr…   81       
+ 4     [1;36mcards/rule    [0m   ████░ 0.85    never risk more than 1.25% …   IF sizing a position THEN SIZE it so…   22       
+ 5     [1;36mcards/rule    [0m   ████░ 0.84    use fractional Kelly (25-50…   IF sizing positions with the kelly_c…   78       
+ 6     [1;36mcards/rule    [0m   ████░ 0.83    pit rule: get out right awa…   IF the market ticks against the posi…   54       
+                                                                                                                      
+                                                                                                               [2m1320 ms[0m

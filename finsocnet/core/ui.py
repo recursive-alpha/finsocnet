@@ -92,15 +92,15 @@ def r_search(data: dict[str, Any]) -> list[Any]:
         out.append(Text(f"filters: {_short(data['filters'], 160)}", style="dim"))
     t = Table(box=box.SIMPLE_HEAD, header_style="bold", pad_edge=False, expand=True)
     t.add_column("#", width=3, no_wrap=True)
-    t.add_column("type", width=15, no_wrap=True, overflow="ellipsis")
-    t.add_column("match", width=13, no_wrap=True)
-    t.add_column("title", ratio=2, overflow="ellipsis", no_wrap=True)
-    t.add_column("snippet", ratio=3, overflow="ellipsis", no_wrap=True)
-    t.add_column("id", width=12, no_wrap=True, overflow="ellipsis")
+    t.add_column("type", width=14, no_wrap=True, overflow="ellipsis")
+    t.add_column("match", width=11, no_wrap=True)
+    t.add_column("title", ratio=3, overflow="ellipsis", no_wrap=True)
+    t.add_column("snippet", ratio=4, overflow="ellipsis", no_wrap=True)
+    t.add_column("id", width=8, no_wrap=True, overflow="ellipsis")
     for i, h in enumerate(data.get("results", []), 1):
         extra = h.get("meta", {})
         tag = extra.get("kind") or extra.get("platform") or extra.get("category") or ""
-        t.add_row(str(i), Text(f"{h['type']}" + (f"/{tag}" if tag else ""), style=TYPE_STYLE.get(h["type"], "white")), _bar(h.get("relevance", 0)) + f" {h.get('relevance', 0):.2f}",
+        t.add_row(str(i), Text(f"{h['type']}" + (f"/{tag}" if tag else ""), style=TYPE_STYLE.get(h["type"], "white")), _bar(h.get("relevance", 0), 5) + f" {h.get('relevance', 0):.2f}",
                   _short(h.get("title"), 200), _short((h.get("snippet") or "").replace("«", "").replace("»", ""), 300), _short(h["id"], 40))
     out.append(t)
     return out
@@ -174,10 +174,7 @@ def r_generic(data: Any) -> list[Any]:
         elif isinstance(v, list) and v:
             out.append(Text(f"{k}: {_short(v, 160)}"))
         elif isinstance(v, dict) and v:
-            if all(not isinstance(x, (dict, list)) for x in v.values()):
-                out.append(kv_table(v, k))
-            else:
-                out.append(Panel(Syntax(json.dumps(v, ensure_ascii=False, indent=1, default=str)[:3000], "json"), title=k, border_style="dim"))
+            out.append(kv_table(v, k))  # nested values are summarised by _short (lists as "a, b, c …", dicts as k=v)
     return out or [Text("(empty)")]
 
 

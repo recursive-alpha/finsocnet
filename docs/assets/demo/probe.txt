@@ -1,0 +1,14 @@
+{
+ "host": "lobste.rs",
+ "feeds": [
+  "https://lobste.rs/rss"
+ ],
+ "robots": {
+  "blocks_everything": true,
+  "content_signals": [
+   "ai-input=no, ai-train=no, search=yes"
+  ]
+ },
+ "strategy": "blocked"
+}
+robots.txt disallows everything for generic crawlers: do NOT build a scraper; ask the user (an offic

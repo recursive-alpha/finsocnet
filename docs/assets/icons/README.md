@@ -1,0 +1,1 @@
+Platform glyphs from [simple-icons](https://simpleicons.org) (CC0 1.0, v13.21.0), used only to show which platforms the skills read in `cover.svg`. The names and logos belong to their owners; their use here is nominative and does not imply endorsement.

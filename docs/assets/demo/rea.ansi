@@ -1,0 +1,17 @@
+[1m file.fetch [0m [2m─────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+[3m                                                       content                                                        [0m
+                                                                                                                      
+ [2mid          [0m[2m [0m  file:941ea15328f750ae                                                                                 
+ [2mcontent_type[0m[2m [0m  file                                                                                                  
+ [2mtitle       [0m[2m [0m  ls (elf, REA inspect-artifact)                                                                        
+ [2murl         [0m[2m [0m  —                                                                                                     
+ [2msegments    [0m[2m [0m  11                                                                                                    
+ [2mchars       [0m[2m [0m  5797                                                                                                  
+ [2mpublished_at[0m[2m [0m  —                                                                                                     
+ [2mauthor      [0m[2m [0m  —                                                                                                     
+ [2mpreview     [0m[2m [0m  File: ls Format: elf SHA-256: 2726eb35864608ff34969fbf45ef4afcbba95eefed5ce5653c9c0124c4cd26cf REA    
+ [2m             [0m  operation:…,  ai_13d95c29e6c6e51b274c4e0424c7a3bf2c2abcbf7245545ae1bc0b4bceb9db01,  { "manifest_id":  
+ [2m             [0m  "agm_64c3be277adaad929ae99a5644a41871b2dd195b15a692e4bb0017ae33154b3a", "root_arti…                   
+ [2mrecord_path [0m[2m [0m  data/records/file/941ea15328f750ae.json                                                               
+                                                                                                                      
+                                                                                                               [2m1342 ms[0m

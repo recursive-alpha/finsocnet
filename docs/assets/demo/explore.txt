@@ -1,0 +1,1 @@
+{"ok":true,"command":"explore.add","data":{"id":20,"status":"created","classified_as":{"target_kind":"query","platform":"","skill":"web-searcher","action":"search"}},"warnings":[],"meta":{"elapsed_ms"
