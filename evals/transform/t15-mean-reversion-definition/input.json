@@ -1,0 +1,13 @@
+{
+ "content_id": "book:eval00000000000000000000000000015",
+ "platform": "book",
+ "chunk_view": "CONTENT book:eval00000000000000000000000000015 | video | \"Quant Basics\" | 2026-09-02\nSEGMENTS 0-0 of 0-0\n[#0 | page 200] Mean reversion is the tendency of a price or a spread to move back toward its long run average after an extreme move away from it.",
+ "cast": [
+  {
+   "person_id": "example-author",
+   "role": "author",
+   "name": "Example Author"
+  }
+ ],
+ "note": ""
+}

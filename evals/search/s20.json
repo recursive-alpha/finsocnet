@@ -1,0 +1,11 @@
+{
+ "question": "how should I add to a winning position",
+ "expected_card_refs": [
+  "add_on_flag",
+  "pullback_20ema_add",
+  "exposure_ramp"
+ ],
+ "must_not": [
+  "lookahead"
+ ]
+}

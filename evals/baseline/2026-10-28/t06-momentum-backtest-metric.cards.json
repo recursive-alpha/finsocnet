@@ -1,0 +1,47 @@
+[
+ {
+  "card_version": 1,
+  "domain": "trading_strategy",
+  "horizon": "n/a",
+  "instruments": [
+   "equities"
+  ],
+  "regime": [],
+  "aliases": [
+   "12-1 momentum"
+  ],
+  "entities": [],
+  "numbers": {
+   "sharpe_ratio_gross": 0.6,
+   "sharpe_ratio_net": 0.3,
+   "sample_start_year": 2005,
+   "sample_end_year": 2020
+  },
+  "evidence_level": "backtested",
+  "invalidation": null,
+  "notes": null,
+  "conditions": [],
+  "kind": "metric",
+  "category": "research_method",
+  "subject": "12-1 momentum strategy Sharpe ratio on S&P 500 constituents",
+  "claim": "the 12-1 month momentum strategy HAS sharpe_ratio = 0.6 before transaction_costs and 0.3 after costs ON S&P 500 constituents 2005-2020",
+  "action": "NONE",
+  "terms": [
+   "sharpe_ratio",
+   "momentum",
+   "backtest",
+   "transaction_costs"
+  ],
+  "citation": {
+   "content_id": "stackexchange:quant:eval01",
+   "segment_seq": 0,
+   "quote": "a 12-1 month momentum strategy delivered a Sharpe ratio of 0.6 before transaction costs, and about 0.3 after costs",
+   "speaker": {
+    "person_id": null,
+    "handle": "member_0",
+    "role": "member",
+    "confidence": 1.0
+   }
+  }
+ }
+]

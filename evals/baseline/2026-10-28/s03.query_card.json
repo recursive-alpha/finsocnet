@@ -1,0 +1,1 @@
+{"subject": "when to stop trading for the day", "terms": ["daily_loss_limit", "r_multiple", "losing_streak"], "aliases": ["stop for the day", "circuit breaker", "cut size after red days", "sit on your hands"], "intent": "find_rules"}

@@ -1,0 +1,18 @@
+{
+ "content_id": "podcast:cccccccccccc:evalep26",
+ "platform": "podcast",
+ "chunk_view": "CONTENT podcast:cccccccccccc:evalep26 | video | \"Scaling out with Example Guest\" | 2026-09-02\nSEGMENTS 0-1 of 0-1\n[#0 | 00:00-00:20 | speaker ?] How do you take profits?\n[#1 | 00:20-00:40 | speaker ?] I sell a third at one R, a third at two R, and the last third I trail under the 10 EMA. That way I always pay myself and still catch the big ones.",
+ "cast": [
+  {
+   "person_id": "example-host",
+   "role": "host",
+   "name": "Example Host"
+  },
+  {
+   "person_id": "example-guest",
+   "role": "guest",
+   "name": "Example Guest"
+  }
+ ],
+ "note": ""
+}

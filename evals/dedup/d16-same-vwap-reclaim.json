@@ -1,0 +1,68 @@
+{
+ "new_card": {
+  "kind": "setup",
+  "domain": "trading_strategy",
+  "category": "entry_and_execution",
+  "subject": "buy the reclaim of vwap",
+  "claim": "IF stock dips under vwap AND reclaims it and holds on tf_5m THEN LONG",
+  "conditions": [
+   "stock dipped under vwap",
+   "reclaims and holds on the 5 minute chart"
+  ],
+  "action": "LONG",
+  "horizon": "intraday",
+  "instruments": [
+   "equities"
+  ],
+  "terms": [
+   "vwap_reclaim",
+   "vwap",
+   "tf_5m"
+  ],
+  "aliases": [],
+  "numbers": {},
+  "evidence_level": "claimed",
+  "card_version": 1,
+  "citation": {
+   "content_id": "youtube:evaldedup01",
+   "segment_seq": 0,
+   "quote": "placeholder quote text",
+   "speaker": {
+    "person_id": "p2",
+    "role": "owner",
+    "confidence": 0.9
+   }
+  }
+ },
+ "candidates": [
+  {
+   "id": 11,
+   "kind": "setup",
+   "domain": "trading_strategy",
+   "category": "entry_and_execution",
+   "subject": "vwap reclaim long",
+   "claim": "IF price loses vwap AND reclaims it on tf_5m THEN LONG on the reclaim",
+   "conditions": [
+    "price lost vwap",
+    "price reclaims it on the 5 minute chart"
+   ],
+   "action": "LONG",
+   "horizon": "intraday",
+   "instruments": [
+    "equities"
+   ],
+   "terms": [
+    "vwap_reclaim",
+    "vwap",
+    "tf_5m"
+   ],
+   "aliases": [],
+   "numbers": {},
+   "evidence_level": "claimed",
+   "status": "active"
+  }
+ ],
+ "expected_decision": "same",
+ "expected_target": 11,
+ "note": ""
+}

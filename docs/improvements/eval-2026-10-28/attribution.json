@@ -1,0 +1,14 @@
+{
+ "set": "attribution",
+ "n": 15,
+ "metrics": {
+  "accuracy": 1.0
+ },
+ "failures": [],
+ "targets": {
+  "accuracy": {
+   "target": ">= 0.85",
+   "met": true
+  }
+ }
+}

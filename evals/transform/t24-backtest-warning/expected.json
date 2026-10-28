@@ -1,0 +1,20 @@
+{
+ "cards": [
+  {
+   "kind": "rule",
+   "category": [
+    "research_method"
+   ],
+   "action": [
+    "AVOID",
+    "NONE"
+   ],
+   "terms": [
+    "overfitting",
+    "walk_forward",
+    "out_of_sample"
+   ],
+   "segment_seq": 0
+  }
+ ]
+}

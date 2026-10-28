@@ -1,0 +1,12 @@
+{
+ "question": "how do I use volume when trading",
+ "expected_card_refs": [
+  "rvol_confirm",
+  "thin_volume_trap",
+  "vcp_def",
+  "tape_signature"
+ ],
+ "must_not": [
+  "journal_practice"
+ ]
+}

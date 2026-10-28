@@ -1,0 +1,49 @@
+[
+ {
+  "card_version": 1,
+  "domain": "trading_strategy",
+  "horizon": "swing_days",
+  "instruments": [
+   "equities"
+  ],
+  "regime": [],
+  "aliases": [
+   "sell a third at one R",
+   "trail under the 10 EMA"
+  ],
+  "entities": [],
+  "numbers": {
+   "first_target_r": 1,
+   "second_target_r": 2
+  },
+  "evidence_level": "anecdotal",
+  "invalidation": null,
+  "notes": null,
+  "conditions": [
+   "position reaches 1R",
+   "position reaches 2R"
+  ],
+  "kind": "rule",
+  "category": "trade_management",
+  "subject": "scale out in thirds at 1R and 2R and trail the last third",
+  "claim": "IF position reaches 1 r_multiple THEN EXIT_PARTIAL a third AND at 2 r_multiple EXIT_PARTIAL a third AND HOLD the last third with a trailing_stop under ema_10",
+  "action": "EXIT_PARTIAL",
+  "terms": [
+   "scaling_out",
+   "r_multiple",
+   "ema_10",
+   "trailing_stop"
+  ],
+  "citation": {
+   "content_id": "podcast:cccccccccccc:evalep26",
+   "segment_seq": 1,
+   "quote": "I sell a third at one R, a third at two R, and the last third I trail under the 10 EMA",
+   "speaker": {
+    "person_id": "example-guest",
+    "handle": null,
+    "role": "guest",
+    "confidence": 0.9
+   }
+  }
+ }
+]

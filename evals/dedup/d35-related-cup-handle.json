@@ -1,0 +1,68 @@
+{
+ "new_card": {
+  "kind": "setup",
+  "domain": "trading_strategy",
+  "category": "setup_and_screening",
+  "subject": "buy a cup with handle breakout",
+  "claim": "IF cup_with_handle AND price breaks the handle high on volume_surge THEN LONG",
+  "conditions": [
+   "cup with handle",
+   "breaks the handle high on a volume surge"
+  ],
+  "action": "LONG",
+  "horizon": "swing_weeks",
+  "instruments": [
+   "equities"
+  ],
+  "terms": [
+   "cup_with_handle",
+   "breakout",
+   "volume_surge"
+  ],
+  "aliases": [],
+  "numbers": {},
+  "evidence_level": "claimed",
+  "card_version": 1,
+  "citation": {
+   "content_id": "youtube:evaldedup01",
+   "segment_seq": 0,
+   "quote": "placeholder quote text",
+   "speaker": {
+    "person_id": "p2",
+    "role": "owner",
+    "confidence": 0.9
+   }
+  }
+ },
+ "candidates": [
+  {
+   "id": 16,
+   "kind": "setup",
+   "domain": "trading_strategy",
+   "category": "setup_and_screening",
+   "subject": "buy a flat base breakout",
+   "claim": "IF flat_base AND price breaks the pivot on volume_surge THEN LONG",
+   "conditions": [
+    "flat base",
+    "breaks the pivot on a volume surge"
+   ],
+   "action": "LONG",
+   "horizon": "swing_weeks",
+   "instruments": [
+    "equities"
+   ],
+   "terms": [
+    "flat_base",
+    "breakout",
+    "volume_surge"
+   ],
+   "aliases": [],
+   "numbers": {},
+   "evidence_level": "claimed",
+   "status": "active"
+  }
+ ],
+ "expected_decision": "related",
+ "expected_target": null,
+ "note": "a different pattern with the same trigger"
+}

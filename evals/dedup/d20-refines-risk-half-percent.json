@@ -1,0 +1,70 @@
+{
+ "new_card": {
+  "kind": "rule",
+  "domain": "trading_strategy",
+  "category": "risk_and_sizing",
+  "subject": "risk half a percent in drawdown",
+  "claim": "IF opening a trade AND account is in a drawdown THEN SIZE so the stop risks at most 0.5% of the account",
+  "conditions": [
+   "opening a trade",
+   "account in a drawdown"
+  ],
+  "action": "SIZE",
+  "horizon": "n/a",
+  "instruments": [
+   "equities"
+  ],
+  "terms": [
+   "risk_per_trade",
+   "position_sizing",
+   "max_drawdown"
+  ],
+  "aliases": [],
+  "numbers": {
+   "risk_pct": 0.5
+  },
+  "evidence_level": "claimed",
+  "card_version": 1,
+  "citation": {
+   "content_id": "youtube:evaldedup01",
+   "segment_seq": 0,
+   "quote": "placeholder quote text",
+   "speaker": {
+    "person_id": "p2",
+    "role": "owner",
+    "confidence": 0.9
+   }
+  }
+ },
+ "candidates": [
+  {
+   "id": 12,
+   "kind": "rule",
+   "domain": "trading_strategy",
+   "category": "risk_and_sizing",
+   "subject": "risk one percent per trade",
+   "claim": "IF opening a trade THEN SIZE so the stop risks at most 1% of the account",
+   "conditions": [
+    "opening a trade"
+   ],
+   "action": "SIZE",
+   "horizon": "n/a",
+   "instruments": [
+    "equities"
+   ],
+   "terms": [
+    "risk_per_trade",
+    "position_sizing"
+   ],
+   "aliases": [],
+   "numbers": {
+    "risk_pct": 1
+   },
+   "evidence_level": "claimed",
+   "status": "active"
+  }
+ ],
+ "expected_decision": "refines",
+ "expected_target": 12,
+ "note": "adds a drawdown condition"
+}

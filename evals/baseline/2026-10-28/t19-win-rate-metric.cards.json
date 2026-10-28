@@ -1,0 +1,46 @@
+[
+ {
+  "card_version": 1,
+  "domain": "trading_strategy",
+  "horizon": "n/a",
+  "instruments": [
+   "equities"
+  ],
+  "regime": [],
+  "aliases": [
+   "42 percent win rate",
+   "0.5 R expectancy"
+  ],
+  "entities": [],
+  "numbers": {
+   "win_rate_pct": 42,
+   "winner_to_loser_ratio": 2.5,
+   "expectancy_r": 0.5
+  },
+  "evidence_level": "anecdotal",
+  "invalidation": null,
+  "notes": null,
+  "conditions": [],
+  "kind": "metric",
+  "category": "psychology_and_review",
+  "subject": "year win rate 42% with 2.5x winners gave 0.5 R expectancy",
+  "claim": "the trader HAS win_rate = 42 percent AND winners 2.5 times losers GIVING expectancy of about 0.5 r_multiple per trade OVER the year",
+  "action": "NONE",
+  "terms": [
+   "win_rate",
+   "expectancy",
+   "r_multiple"
+  ],
+  "citation": {
+   "content_id": "youtube:evalvid0019",
+   "segment_seq": 0,
+   "quote": "this year my win rate was 42 percent but my average winner was 2.5 times my average loser, so the expectancy per trade came out at about 0.5 R",
+   "speaker": {
+    "person_id": "example-owner",
+    "handle": null,
+    "role": "owner",
+    "confidence": 0.95
+   }
+  }
+ }
+]

@@ -1,0 +1,44 @@
+[
+ {
+  "card_version": 1,
+  "domain": "trading_strategy",
+  "horizon": "intraday",
+  "instruments": [
+   "equities"
+  ],
+  "regime": [],
+  "aliases": [
+   "walk away from the screen",
+   "write down what I felt"
+  ],
+  "entities": [],
+  "numbers": {},
+  "evidence_level": "anecdotal",
+  "invalidation": null,
+  "notes": null,
+  "conditions": [
+   "after a big loss"
+  ],
+  "kind": "practice",
+  "category": "psychology_and_review",
+  "subject": "walk away and journal the emotion after a big loss",
+  "claim": "stepping away from the screen for the rest of the day and writing down the feeling before the trade IMPROVES emotional_control FOR traders after a big loss",
+  "action": "NONE",
+  "terms": [
+   "revenge_trading",
+   "trade_journal",
+   "emotional_control"
+  ],
+  "citation": {
+   "content_id": "youtube:evalvid0016",
+   "segment_seq": 0,
+   "quote": "after a big loss I walk away from the screen for the rest of the day and write down what I felt before the trade",
+   "speaker": {
+    "person_id": "example-owner",
+    "handle": null,
+    "role": "owner",
+    "confidence": 0.95
+   }
+  }
+ }
+]

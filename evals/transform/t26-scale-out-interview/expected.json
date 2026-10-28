@@ -1,0 +1,21 @@
+{
+ "cards": [
+  {
+   "kind": "rule",
+   "category": [
+    "trade_management"
+   ],
+   "action": [
+    "EXIT_PARTIAL",
+    "HOLD"
+   ],
+   "terms": [
+    "scaling_out",
+    "r_multiple",
+    "ema_10",
+    "trailing_stop"
+   ],
+   "segment_seq": 1
+  }
+ ]
+}

@@ -1,0 +1,12 @@
+{
+ "question": "how do I trade the first minutes after the open",
+ "expected_card_refs": [
+  "orb_5m",
+  "open_chop",
+  "gap_and_go",
+  "premarket_prep"
+ ],
+ "must_not": [
+  "real_yields"
+ ]
+}

@@ -1,0 +1,22 @@
+{
+ "cards": [
+  {
+   "kind": "observation",
+   "category": [
+    "market_dynamics",
+    "setup_and_screening"
+   ],
+   "action": [
+    "NONE",
+    "LONG",
+    null
+   ],
+   "terms": [
+    "breakout",
+    "volume_dry_up",
+    "base"
+   ],
+   "segment_seq": 0
+  }
+ ]
+}

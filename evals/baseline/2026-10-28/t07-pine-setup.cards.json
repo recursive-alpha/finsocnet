@@ -1,0 +1,46 @@
+[
+ {
+  "card_version": 1,
+  "domain": "trading_strategy",
+  "horizon": "swing_days",
+  "instruments": [
+   "equities"
+  ],
+  "regime": [],
+  "aliases": [
+   "ta.crossover(close, ta.ema(close, 20))"
+  ],
+  "entities": [],
+  "numbers": {
+   "volume_multiple": 1.5,
+   "volume_average_bars": 20
+  },
+  "evidence_level": "claimed",
+  "invalidation": null,
+  "notes": null,
+  "conditions": [
+   "close crosses above ema_20",
+   "volume above 1.5x the 20-bar average volume"
+  ],
+  "kind": "setup",
+  "category": "entry_and_execution",
+  "subject": "long entry on ema_20 cross with volume expansion",
+  "claim": "IF close crosses above ema_20 AND volume exceeds 1.5 times its 20-bar average THEN LONG at the entry",
+  "action": "LONG",
+  "terms": [
+   "ema_20",
+   "rvol"
+  ],
+  "citation": {
+   "content_id": "tradingview:script:evalpine1",
+   "segment_seq": 0,
+   "quote": "longCondition = ta.crossover(close, ta.ema(close, 20)) and volume > ta.sma(volume, 20) * 1.5",
+   "speaker": {
+    "person_id": "example-pine",
+    "handle": null,
+    "role": "author",
+    "confidence": 1.0
+   }
+  }
+ }
+]

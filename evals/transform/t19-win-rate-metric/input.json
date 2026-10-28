@@ -1,0 +1,13 @@
+{
+ "content_id": "youtube:evalvid0019",
+ "platform": "youtube",
+ "chunk_view": "CONTENT youtube:evalvid0019 | video | \"My numbers this year\" | 2026-09-02\nSEGMENTS 0-0 of 0-0\n[#0 | 00:00-00:20 | speaker ?] this year my win rate was 42 percent but my average winner was 2.5 times my average loser, so the expectancy per trade came out at about 0.5 R.",
+ "cast": [
+  {
+   "person_id": "example-owner",
+   "role": "owner",
+   "name": "Example Owner"
+  }
+ ],
+ "note": ""
+}

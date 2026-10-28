@@ -1,0 +1,11 @@
+{
+ "question": "when should I take a scratch or exit a failing trade",
+ "expected_card_refs": [
+  "scratch_rule",
+  "flag_stop",
+  "stop_before_entry"
+ ],
+ "must_not": [
+  "kelly_caution"
+ ]
+}

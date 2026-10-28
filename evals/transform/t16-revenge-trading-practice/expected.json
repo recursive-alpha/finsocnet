@@ -1,0 +1,20 @@
+{
+ "cards": [
+  {
+   "kind": "practice",
+   "category": [
+    "psychology_and_review"
+   ],
+   "action": [
+    "NONE",
+    "AVOID",
+    null
+   ],
+   "terms": [
+    "revenge_trading",
+    "trade_journal"
+   ],
+   "segment_seq": 0
+  }
+ ]
+}

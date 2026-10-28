@@ -1,0 +1,116 @@
+{
+ "new_card": {
+  "kind": "rule",
+  "domain": "trading_strategy",
+  "category": "entry_and_execution",
+  "subject": "no entries in the first quarter hour",
+  "claim": "IF market_open within the first 15 minutes THEN AVOID new entries",
+  "conditions": [
+   "within the first 15 minutes after the open"
+  ],
+  "action": "AVOID",
+  "horizon": "intraday",
+  "instruments": [
+   "equities"
+  ],
+  "terms": [
+   "market_open",
+   "opening_range"
+  ],
+  "aliases": [],
+  "numbers": {},
+  "evidence_level": "claimed",
+  "card_version": 1,
+  "citation": {
+   "content_id": "youtube:evaldedup01",
+   "segment_seq": 0,
+   "quote": "placeholder quote text",
+   "speaker": {
+    "person_id": "p2",
+    "role": "owner",
+    "confidence": 0.9
+   }
+  }
+ },
+ "candidates": [
+  {
+   "id": 13,
+   "kind": "rule",
+   "domain": "trading_strategy",
+   "category": "entry_and_execution",
+   "subject": "add on the first pullback to the 20 ema",
+   "claim": "IF breakout holds ema_20 on a pullback THEN ADD to the position",
+   "conditions": [
+    "breakout",
+    "pullback holds the 20 ema"
+   ],
+   "action": "ADD",
+   "horizon": "swing_weeks",
+   "instruments": [
+    "equities"
+   ],
+   "terms": [
+    "ema_20",
+    "pullback",
+    "breakout"
+   ],
+   "aliases": [],
+   "numbers": {},
+   "evidence_level": "claimed",
+   "status": "active"
+  },
+  {
+   "id": 18,
+   "kind": "rule",
+   "domain": "trading_strategy",
+   "category": "entry_and_execution",
+   "subject": "stay out of the first 15 minutes",
+   "claim": "IF market_open within the first 15 minutes THEN AVOID new entries",
+   "conditions": [
+    "within the first 15 minutes after the open"
+   ],
+   "action": "AVOID",
+   "horizon": "intraday",
+   "instruments": [
+    "equities"
+   ],
+   "terms": [
+    "market_open",
+    "opening_range"
+   ],
+   "aliases": [],
+   "numbers": {},
+   "evidence_level": "claimed",
+   "status": "active"
+  },
+  {
+   "id": 12,
+   "kind": "rule",
+   "domain": "trading_strategy",
+   "category": "risk_and_sizing",
+   "subject": "risk one percent per trade",
+   "claim": "IF opening a trade THEN SIZE so the stop risks at most 1% of the account",
+   "conditions": [
+    "opening a trade"
+   ],
+   "action": "SIZE",
+   "horizon": "n/a",
+   "instruments": [
+    "equities"
+   ],
+   "terms": [
+    "risk_per_trade",
+    "position_sizing"
+   ],
+   "aliases": [],
+   "numbers": {
+    "risk_pct": 1
+   },
+   "evidence_level": "claimed",
+   "status": "active"
+  }
+ ],
+ "expected_decision": "same",
+ "expected_target": 18,
+ "note": "one correct candidate among three"
+}

@@ -1,0 +1,90 @@
+[
+ {
+  "card_version": 1,
+  "domain": "trading_strategy",
+  "horizon": "intraday",
+  "instruments": [
+   "equities"
+  ],
+  "regime": [],
+  "aliases": [
+   "first red day short",
+   "fail at the high of day"
+  ],
+  "entities": [],
+  "numbers": {},
+  "evidence_level": "anecdotal",
+  "invalidation": null,
+  "notes": null,
+  "conditions": [
+   "stock ran for several days in a row",
+   "first red day",
+   "fails at the high of day",
+   "loses vwap"
+  ],
+  "kind": "setup",
+  "category": "entry_and_execution",
+  "subject": "short the first red day after a multi-day run",
+  "claim": "IF stock ran several days in a row AND first_red_day AND fails at the high_of_day AND loses vwap THEN SHORT the stock",
+  "action": "SHORT",
+  "terms": [
+   "first_red_day",
+   "parabolic_short",
+   "vwap",
+   "high_of_day"
+  ],
+  "citation": {
+   "content_id": "youtube:evalvid0020",
+   "segment_seq": 0,
+   "quote": "after a stock runs for several days in a row the first red day is where I start looking to short, I want to see it fail at the high of day and lose VWAP",
+   "speaker": {
+    "person_id": "example-owner",
+    "handle": null,
+    "role": "owner",
+    "confidence": 0.95
+   }
+  }
+ },
+ {
+  "card_version": 1,
+  "domain": "trading_strategy",
+  "horizon": "intraday",
+  "instruments": [
+   "equities"
+  ],
+  "regime": [],
+  "aliases": [
+   "cover half",
+   "trail the rest"
+  ],
+  "entities": [],
+  "numbers": {},
+  "evidence_level": "anecdotal",
+  "invalidation": null,
+  "notes": null,
+  "conditions": [
+   "short position is working",
+   "first flush occurs"
+  ],
+  "kind": "rule",
+  "category": "trade_management",
+  "subject": "cover half into the first flush and trail the rest",
+  "claim": "IF short is working AND first flush occurs THEN EXIT_PARTIAL half of the position AND HOLD the rest with a trailing_stop",
+  "action": "EXIT_PARTIAL",
+  "terms": [
+   "partial_profit",
+   "trailing_stop"
+  ],
+  "citation": {
+   "content_id": "youtube:evalvid0020",
+   "segment_seq": 1,
+   "quote": "I cover half into the first flush and trail the rest",
+   "speaker": {
+    "person_id": "example-owner",
+    "handle": null,
+    "role": "owner",
+    "confidence": 0.95
+   }
+  }
+ }
+]

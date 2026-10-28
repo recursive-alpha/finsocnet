@@ -1,0 +1,10 @@
+{
+ "question": "how do shorts get squeezed",
+ "expected_card_refs": [
+  "short_squeeze",
+  "consolidation_tension"
+ ],
+ "must_not": [
+  "weekly_review"
+ ]
+}

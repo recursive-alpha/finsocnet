@@ -1,0 +1,44 @@
+[
+ {
+  "card_version": 1,
+  "domain": "trading_strategy",
+  "horizon": "swing_days",
+  "instruments": [
+   "equities"
+  ],
+  "regime": [],
+  "aliases": [
+   "IV crush",
+   "right on direction and still lose money"
+  ],
+  "entities": [],
+  "numbers": {},
+  "evidence_level": "claimed",
+  "invalidation": null,
+  "notes": null,
+  "conditions": [
+   "options held through the earnings report"
+  ],
+  "kind": "mechanism",
+  "category": "market_dynamics",
+  "subject": "implied volatility collapses after earnings and hurts long options",
+  "claim": "implied_volatility rising into earnings and collapsing after the report CAUSES long options to lose value BECAUSE the premium priced in the event",
+  "action": "NONE",
+  "terms": [
+   "implied_volatility",
+   "earnings",
+   "options"
+  ],
+  "citation": {
+   "content_id": "youtube:evalvid0030",
+   "segment_seq": 0,
+   "quote": "implied volatility is bid up into earnings and collapses right after the report, so buying options before the number means you can be right on direction and still lose money",
+   "speaker": {
+    "person_id": "example-owner",
+    "handle": null,
+    "role": "owner",
+    "confidence": 0.95
+   }
+  }
+ }
+]

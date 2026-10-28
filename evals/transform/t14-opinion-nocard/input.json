@@ -1,0 +1,13 @@
+{
+ "content_id": "reddit:evalpost14",
+ "platform": "reddit",
+ "chunk_view": "CONTENT reddit:evalpost14 | video | \"Is TSLA a buy?\" | 2026-09-02\nSEGMENTS 0-0 of 0-0\n[#0 | comment t1_k0 | u/example_0 | score 12] TSLA is definitely going to moon next quarter, I am all in, don't miss out.",
+ "cast": [
+  {
+   "person_id": null,
+   "handle": "u/example_0",
+   "role": "commenter"
+  }
+ ],
+ "note": ""
+}

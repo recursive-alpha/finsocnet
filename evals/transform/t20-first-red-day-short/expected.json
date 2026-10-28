@@ -1,0 +1,33 @@
+{
+ "cards": [
+  {
+   "kind": "setup",
+   "category": [
+    "setup_and_screening",
+    "entry_and_execution"
+   ],
+   "action": "SHORT",
+   "terms": [
+    "first_red_day",
+    "parabolic_short",
+    "vwap"
+   ],
+   "segment_seq": 0
+  },
+  {
+   "kind": "rule",
+   "category": [
+    "trade_management"
+   ],
+   "action": [
+    "EXIT_PARTIAL",
+    "HOLD"
+   ],
+   "terms": [
+    "partial_profit",
+    "trailing_stop"
+   ],
+   "segment_seq": 1
+  }
+ ]
+}

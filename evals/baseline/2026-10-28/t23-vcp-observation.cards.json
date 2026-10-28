@@ -1,0 +1,47 @@
+[
+ {
+  "card_version": 1,
+  "domain": "trading_strategy",
+  "horizon": "swing_weeks",
+  "instruments": [
+   "equities"
+  ],
+  "regime": [],
+  "aliases": [
+   "tight base",
+   "loose wide bases"
+  ],
+  "entities": [],
+  "numbers": {
+   "sample_size": 200
+  },
+  "evidence_level": "anecdotal",
+  "invalidation": null,
+  "notes": null,
+  "conditions": [
+   "tight base",
+   "volume dries up in the last three weeks"
+  ],
+  "kind": "observation",
+  "category": "setup_and_screening",
+  "subject": "breakouts from tight bases with drying volume worked more often",
+  "claim": "breakout from a tight base with volume_dry_up in the last three weeks TENDS TO work more often THAN breakout from a loose wide base WHEN reviewed over 200 breakouts",
+  "action": "NONE",
+  "terms": [
+   "breakout",
+   "volume_dry_up",
+   "base"
+  ],
+  "citation": {
+   "content_id": "substack:examplepub:eval23",
+   "segment_seq": 0,
+   "quote": "the ones that came out of a tight base with volume drying up in the last three weeks worked far more often than the ones from loose, wide bases",
+   "speaker": {
+    "person_id": "example-writer",
+    "handle": null,
+    "role": "author",
+    "confidence": 1.0
+   }
+  }
+ }
+]

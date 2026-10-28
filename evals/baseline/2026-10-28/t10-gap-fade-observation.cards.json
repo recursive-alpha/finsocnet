@@ -1,0 +1,44 @@
+[
+ {
+  "card_version": 1,
+  "domain": "trading_strategy",
+  "horizon": "swing_days",
+  "instruments": [
+   "equities"
+  ],
+  "regime": [],
+  "aliases": [
+   "gap up on earnings",
+   "keep fading"
+  ],
+  "entities": [],
+  "numbers": {},
+  "evidence_level": "claimed",
+  "invalidation": null,
+  "notes": null,
+  "conditions": [
+   "gap up on earnings",
+   "close near the low of the day"
+  ],
+  "kind": "observation",
+  "category": "market_dynamics",
+  "subject": "earnings gap-ups that close near the lows keep fading",
+  "claim": "earnings gap_up stocks TENDS TO keep fading for several days WHEN they close near the low of the day",
+  "action": "NONE",
+  "terms": [
+   "gap_up",
+   "earnings"
+  ],
+  "citation": {
+   "content_id": "youtube:evalvid0010",
+   "segment_seq": 0,
+   "quote": "stocks that gap up on earnings but then close near the lows of the day tend to keep fading for the next several days",
+   "speaker": {
+    "person_id": "example-owner",
+    "handle": null,
+    "role": "owner",
+    "confidence": 0.95
+   }
+  }
+ }
+]

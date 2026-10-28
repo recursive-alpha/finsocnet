@@ -1,0 +1,11 @@
+{
+ "question": "how do I short a parabolic stock",
+ "expected_card_refs": [
+  "first_red_day",
+  "parabolic_exhaustion",
+  "close_shorts_same_day"
+ ],
+ "must_not": [
+  "walk_away"
+ ]
+}

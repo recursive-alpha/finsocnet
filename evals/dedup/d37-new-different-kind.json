@@ -1,0 +1,115 @@
+{
+ "new_card": {
+  "kind": "practice",
+  "domain": "trading_strategy",
+  "category": "psychology_and_review",
+  "subject": "review every trade on Sunday",
+  "claim": "EVERY Sunday review all trades of the week in the trade_journal",
+  "conditions": [],
+  "action": "NONE",
+  "horizon": "n/a",
+  "instruments": [
+   "equities"
+  ],
+  "terms": [
+   "trade_review",
+   "trade_journal"
+  ],
+  "aliases": [],
+  "numbers": {},
+  "evidence_level": "claimed",
+  "card_version": 1,
+  "citation": {
+   "content_id": "youtube:evaldedup01",
+   "segment_seq": 0,
+   "quote": "placeholder quote text",
+   "speaker": {
+    "person_id": "p2",
+    "role": "owner",
+    "confidence": 0.9
+   }
+  }
+ },
+ "candidates": [
+  {
+   "id": 16,
+   "kind": "setup",
+   "domain": "trading_strategy",
+   "category": "setup_and_screening",
+   "subject": "buy a flat base breakout",
+   "claim": "IF flat_base AND price breaks the pivot on volume_surge THEN LONG",
+   "conditions": [
+    "flat base",
+    "breaks the pivot on a volume surge"
+   ],
+   "action": "LONG",
+   "horizon": "swing_weeks",
+   "instruments": [
+    "equities"
+   ],
+   "terms": [
+    "flat_base",
+    "breakout",
+    "volume_surge"
+   ],
+   "aliases": [],
+   "numbers": {},
+   "evidence_level": "claimed",
+   "status": "active"
+  },
+  {
+   "id": 14,
+   "kind": "mechanism",
+   "domain": "trading_strategy",
+   "category": "market_dynamics",
+   "subject": "short squeeze feedback loop",
+   "claim": "short_interest high AND price rises CAUSES shorts to cover, which pushes price higher",
+   "conditions": [
+    "high short interest",
+    "price rising"
+   ],
+   "action": "NONE",
+   "horizon": "n/a",
+   "instruments": [
+    "equities"
+   ],
+   "terms": [
+    "short_squeeze",
+    "short_interest"
+   ],
+   "aliases": [],
+   "numbers": {},
+   "evidence_level": "claimed",
+   "status": "active"
+  },
+  {
+   "id": 15,
+   "kind": "metric",
+   "domain": "trading_strategy",
+   "category": "research_method",
+   "subject": "momentum sharpe 0.6 before costs",
+   "claim": "momentum strategy on sp500 HAD sharpe_ratio 0.6 BEFORE transaction_costs in the 2005-2020 backtest",
+   "conditions": [],
+   "action": "NONE",
+   "horizon": "n/a",
+   "instruments": [
+    "equities"
+   ],
+   "terms": [
+    "momentum",
+    "sharpe_ratio",
+    "backtest",
+    "transaction_costs"
+   ],
+   "aliases": [],
+   "numbers": {
+    "sharpe": 0.6
+   },
+   "evidence_level": "backtested",
+   "status": "active"
+  }
+ ],
+ "expected_decision": "new",
+ "expected_target": null,
+ "note": "unrelated candidates"
+}

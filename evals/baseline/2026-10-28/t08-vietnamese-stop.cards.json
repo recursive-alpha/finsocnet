@@ -1,0 +1,44 @@
+[
+ {
+  "card_version": 1,
+  "domain": "trading_strategy",
+  "horizon": "n/a",
+  "instruments": [
+   "equities"
+  ],
+  "regime": [],
+  "aliases": [
+   "cắt lỗ",
+   "đóng cửa dưới MA20",
+   "không chần chừ"
+  ],
+  "entities": [],
+  "numbers": {},
+  "evidence_level": "anecdotal",
+  "invalidation": null,
+  "notes": null,
+  "conditions": [
+   "price closes below ma_20"
+  ],
+  "kind": "rule",
+  "category": "trade_management",
+  "subject": "cut the loss on a daily close below ma_20",
+  "claim": "IF daily close is below ma_20 THEN EXIT the position without hesitation",
+  "action": "EXIT",
+  "terms": [
+   "ma_20",
+   "stop_loss"
+  ],
+  "citation": {
+   "content_id": "forum:f319.com:evalthread1",
+   "segment_seq": 0,
+   "quote": "Mình luôn cắt lỗ khi giá đóng cửa dưới MA20, không chần chừ",
+   "speaker": {
+    "person_id": null,
+    "handle": "nhadautu_eval",
+    "role": "member",
+    "confidence": 1.0
+   }
+  }
+ }
+]

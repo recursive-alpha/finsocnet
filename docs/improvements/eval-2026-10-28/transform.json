@@ -1,0 +1,25 @@
+{
+ "set": "transform",
+ "n": 30,
+ "metrics": {
+  "validity": 1.0,
+  "recall": 1.0,
+  "precision": 1.0,
+  "no_card_accuracy": 1.0
+ },
+ "failures": [],
+ "targets": {
+  "validity": {
+   "target": ">= 1.0",
+   "met": true
+  },
+  "recall": {
+   "target": ">= 0.8",
+   "met": true
+  },
+  "precision": {
+   "target": ">= 0.75",
+   "met": true
+  }
+ }
+}

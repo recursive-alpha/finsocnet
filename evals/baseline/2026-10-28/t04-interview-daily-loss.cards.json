@@ -1,0 +1,44 @@
+[
+ {
+  "card_version": 1,
+  "domain": "trading_strategy",
+  "horizon": "intraday",
+  "instruments": [
+   "equities"
+  ],
+  "regime": [],
+  "aliases": [
+   "done until the next morning",
+   "close everything"
+  ],
+  "entities": [],
+  "numbers": {
+   "daily_loss_limit_pct": 2
+  },
+  "evidence_level": "anecdotal",
+  "invalidation": null,
+  "notes": null,
+  "conditions": [
+   "daily loss reaches 2% of the account"
+  ],
+  "kind": "rule",
+  "category": "risk_and_sizing",
+  "subject": "stop trading for the day at a 2% daily loss",
+  "claim": "IF daily_loss_limit of 2% of the account is reached THEN EXIT all positions THEN AVOID new trades UNTIL the next morning",
+  "action": "EXIT",
+  "terms": [
+   "daily_loss_limit"
+  ],
+  "citation": {
+   "content_id": "podcast:aaaaaaaaaaaa:evalep01",
+   "segment_seq": 1,
+   "quote": "My daily loss limit is two percent of the account. Once I hit it I close everything and I am done until the next morning",
+   "speaker": {
+    "person_id": "example-guest",
+    "handle": null,
+    "role": "guest",
+    "confidence": 0.9
+   }
+  }
+ }
+]

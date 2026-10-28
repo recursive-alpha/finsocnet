@@ -1,0 +1,90 @@
+{
+ "new_card": {
+  "kind": "practice",
+  "domain": "trading_strategy",
+  "category": "psychology_and_review",
+  "subject": "write the emotion before each trade",
+  "claim": "BEFORE each trade note the emotion felt in the trade_journal",
+  "conditions": [],
+  "action": "NONE",
+  "horizon": "n/a",
+  "instruments": [
+   "equities"
+  ],
+  "terms": [
+   "trade_journal",
+   "emotional_control"
+  ],
+  "aliases": [],
+  "numbers": {},
+  "evidence_level": "claimed",
+  "card_version": 1,
+  "citation": {
+   "content_id": "youtube:evaldedup01",
+   "segment_seq": 0,
+   "quote": "placeholder quote text",
+   "speaker": {
+    "person_id": "p2",
+    "role": "owner",
+    "confidence": 0.9
+   }
+  }
+ },
+ "candidates": [
+  {
+   "id": 12,
+   "kind": "rule",
+   "domain": "trading_strategy",
+   "category": "risk_and_sizing",
+   "subject": "risk one percent per trade",
+   "claim": "IF opening a trade THEN SIZE so the stop risks at most 1% of the account",
+   "conditions": [
+    "opening a trade"
+   ],
+   "action": "SIZE",
+   "horizon": "n/a",
+   "instruments": [
+    "equities"
+   ],
+   "terms": [
+    "risk_per_trade",
+    "position_sizing"
+   ],
+   "aliases": [],
+   "numbers": {
+    "risk_pct": 1
+   },
+   "evidence_level": "claimed",
+   "status": "active"
+  },
+  {
+   "id": 11,
+   "kind": "setup",
+   "domain": "trading_strategy",
+   "category": "entry_and_execution",
+   "subject": "vwap reclaim long",
+   "claim": "IF price loses vwap AND reclaims it on tf_5m THEN LONG on the reclaim",
+   "conditions": [
+    "price lost vwap",
+    "price reclaims it on the 5 minute chart"
+   ],
+   "action": "LONG",
+   "horizon": "intraday",
+   "instruments": [
+    "equities"
+   ],
+   "terms": [
+    "vwap_reclaim",
+    "vwap",
+    "tf_5m"
+   ],
+   "aliases": [],
+   "numbers": {},
+   "evidence_level": "claimed",
+   "status": "active"
+  }
+ ],
+ "expected_decision": "new",
+ "expected_target": null,
+ "note": "no overlap"
+}

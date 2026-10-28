@@ -1,0 +1,12 @@
+{
+ "question": "how do I handle emotions after a loss",
+ "expected_card_refs": [
+  "revenge_trading",
+  "halve_after_streak",
+  "negative_visualization",
+  "defense_first"
+ ],
+ "must_not": [
+  "fomc_volatility"
+ ]
+}

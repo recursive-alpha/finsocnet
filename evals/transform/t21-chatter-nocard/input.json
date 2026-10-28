@@ -1,0 +1,13 @@
+{
+ "content_id": "reddit:evalpost21",
+ "platform": "reddit",
+ "chunk_view": "CONTENT reddit:evalpost21 | video | \"Daily discussion\" | 2026-09-02\nSEGMENTS 0-1 of 0-1\n[#0 | comment t1_k0 | u/example_0 | score 12] Thanks for the welcome everyone, new here, still learning, will read the wiki first.\n[#1 | comment t1_k1 | u/example_1 | score 12] lol same, my first week was a disaster",
+ "cast": [
+  {
+   "person_id": null,
+   "handle": "u/example_0",
+   "role": "commenter"
+  }
+ ],
+ "note": ""
+}

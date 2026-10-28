@@ -1,0 +1,13 @@
+{
+ "content_id": "youtube:evalvid0013",
+ "platform": "youtube",
+ "chunk_view": "CONTENT youtube:evalvid0013 | video | \"Live stream\" | 2026-09-02\nSEGMENTS 0-1 of 0-1\n[#0 | 00:00-00:20 | speaker ?] good morning everybody, can you hear me okay, drop a one in the chat if the audio works,\n[#1 | 00:20-00:40 | speaker ?] alright we will give it a couple of minutes for people to join, grab a coffee,",
+ "cast": [
+  {
+   "person_id": "example-owner",
+   "role": "owner",
+   "name": "Example Owner"
+  }
+ ],
+ "note": ""
+}

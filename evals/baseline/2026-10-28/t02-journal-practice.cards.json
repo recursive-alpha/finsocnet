@@ -1,0 +1,42 @@
+[
+ {
+  "card_version": 1,
+  "domain": "trading_strategy",
+  "horizon": "n/a",
+  "instruments": [
+   "equities"
+  ],
+  "regime": [],
+  "aliases": [
+   "journal with screenshots",
+   "cutting winners early"
+  ],
+  "entities": [],
+  "numbers": {
+   "reported_months": 2
+  },
+  "evidence_level": "anecdotal",
+  "invalidation": null,
+  "notes": null,
+  "conditions": [],
+  "kind": "practice",
+  "category": "psychology_and_review",
+  "subject": "journaling every trade with screenshots exposes early exits",
+  "claim": "keeping a trade_journal with a screenshot of every trade IMPROVES holding of winners FOR discretionary traders",
+  "action": "NONE",
+  "terms": [
+   "trade_journal"
+  ],
+  "citation": {
+   "content_id": "reddit:evalpost01",
+   "segment_seq": 0,
+   "quote": "Keeping a journal with a screenshot of every trade finally made me see that I was cutting my winners way too early",
+   "speaker": {
+    "person_id": null,
+    "handle": "u/example_0",
+    "role": "commenter",
+    "confidence": 1.0
+   }
+  }
+ }
+]

@@ -1,0 +1,13 @@
+{
+ "question": "what stocks should I put on my watchlist",
+ "expected_card_refs": [
+  "adr_filter",
+  "liquidity_filter",
+  "in_play",
+  "relative_strength",
+  "premarket_prep"
+ ],
+ "must_not": [
+  "htf_setup"
+ ]
+}

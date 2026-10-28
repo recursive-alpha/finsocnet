@@ -103,6 +103,21 @@ S = [
  ("how to handle shorting in an uptrend", ["trend_never_short","close_shorts_same_day"], ["journal_practice"]),
  ("how should I review my trades to improve", ["journal_practice","weekly_review","demon_finder","negative_visualization"], ["htf_setup"]),
  ("why do growth stocks fall when interest rates rise", ["real_yields"], ["orb_5m"]),
+ ("what is the best way to size a position", ["risk_1pct","position_size_a_plus","kelly_caution","r_multiple_thinking"], ["short_squeeze"]),
+ ("how do I trade the first minutes after the open", ["orb_5m","open_chop","gap_and_go","premarket_prep"], ["real_yields"]),
+ ("how do I short a parabolic stock", ["first_red_day","parabolic_exhaustion","close_shorts_same_day"], ["walk_away"]),
+ ("what is a good momentum strategy result in a backtest", ["sharpe_momentum","costs_matter","relative_strength"], ["daily_plan"]),
+ ("how should I add to a winning position", ["add_on_flag","pullback_20ema_add","exposure_ramp"], ["lookahead"]),
+ ("what stocks should I put on my watchlist", ["adr_filter","liquidity_filter","in_play","relative_strength","premarket_prep"], ["htf_setup"]),
+ ("how do I use volume when trading", ["rvol_confirm","thin_volume_trap","vcp_def","tape_signature"], ["journal_practice"]),
+ ("why do options lose value", ["options_theta","zero_dte_cycles"], ["flag_stop"]),
+ ("how do I handle emotions after a loss", ["revenge_trading","halve_after_streak","negative_visualization","defense_first"], ["fomc_volatility"]),
+ ("what is the edge or expectancy of a strategy", ["expectancy_def","r_multiple_thinking","sharpe_momentum"], ["gap_and_go"]),
+ ("how do earnings gaps behave", ["ep_setup","earnings_gap_fade"], ["round_number_stops"]),
+ ("how do shorts get squeezed", ["short_squeeze","consolidation_tension"], ["weekly_review"]),
+ ("what moves the market on fed days", ["fomc_volatility","real_yields"], ["vwap_reclaim"]),
+ ("how do I read the order book and tape", ["level2_reading","tape_signature","stop_hunt"], ["survivorship"]),
+ ("when should I take a scratch or exit a failing trade", ["scratch_rule","flag_stop","stop_before_entry"], ["kelly_caution"]),
 ]
 for i, (qn, exp, mn) in enumerate(S, 1):
     json.dump({"question": qn, "expected_card_refs": exp, "must_not": mn}, open(f"evals/search/s{i:02d}.json", "w"), indent=1)

@@ -1,0 +1,65 @@
+{
+ "new_card": {
+  "kind": "rule",
+  "domain": "trading_strategy",
+  "category": "entry_and_execution",
+  "subject": "trade the open aggressively",
+  "claim": "IF market_open within the first 15 minutes THEN LONG strong opening movers",
+  "conditions": [
+   "within the first 15 minutes after the open"
+  ],
+  "action": "LONG",
+  "horizon": "intraday",
+  "instruments": [
+   "equities"
+  ],
+  "terms": [
+   "market_open",
+   "opening_range",
+   "momentum"
+  ],
+  "aliases": [],
+  "numbers": {},
+  "evidence_level": "claimed",
+  "card_version": 1,
+  "citation": {
+   "content_id": "youtube:evaldedup01",
+   "segment_seq": 0,
+   "quote": "placeholder quote text",
+   "speaker": {
+    "person_id": "p2",
+    "role": "owner",
+    "confidence": 0.9
+   }
+  }
+ },
+ "candidates": [
+  {
+   "id": 18,
+   "kind": "rule",
+   "domain": "trading_strategy",
+   "category": "entry_and_execution",
+   "subject": "stay out of the first 15 minutes",
+   "claim": "IF market_open within the first 15 minutes THEN AVOID new entries",
+   "conditions": [
+    "within the first 15 minutes after the open"
+   ],
+   "action": "AVOID",
+   "horizon": "intraday",
+   "instruments": [
+    "equities"
+   ],
+   "terms": [
+    "market_open",
+    "opening_range"
+   ],
+   "aliases": [],
+   "numbers": {},
+   "evidence_level": "claimed",
+   "status": "active"
+  }
+ ],
+ "expected_decision": "contradicts",
+ "expected_target": null,
+ "note": "avoid vs enter in the same window"
+}

@@ -1,0 +1,88 @@
+[
+ {
+  "card_version": 1,
+  "domain": "trading_strategy",
+  "horizon": "intraday",
+  "instruments": [
+   "equities"
+  ],
+  "regime": [],
+  "aliases": [
+   "buy the reclaim",
+   "reclaims it and holds above"
+  ],
+  "entities": [],
+  "numbers": {},
+  "evidence_level": "claimed",
+  "invalidation": null,
+  "notes": null,
+  "conditions": [
+   "stock lost vwap in the morning",
+   "reclaims vwap and holds above it on the 5 minute chart"
+  ],
+  "kind": "setup",
+  "category": "entry_and_execution",
+  "subject": "long on a VWAP reclaim that holds on the 5 minute chart",
+  "claim": "IF stock loses vwap in the morning AND reclaims it and holds above on tf_5m THEN LONG on the reclaim",
+  "action": "LONG",
+  "terms": [
+   "vwap_reclaim",
+   "vwap",
+   "tf_5m"
+  ],
+  "citation": {
+   "content_id": "youtube:evalvid0011",
+   "segment_seq": 1,
+   "quote": "if a stock loses VWAP in the morning and then reclaims it and holds above on the five minute chart, that is my long, I buy the reclaim",
+   "speaker": {
+    "person_id": "example-owner",
+    "handle": null,
+    "role": "owner",
+    "confidence": 0.95
+   }
+  }
+ },
+ {
+  "card_version": 1,
+  "domain": "trading_strategy",
+  "horizon": "intraday",
+  "instruments": [
+   "equities"
+  ],
+  "regime": [],
+  "aliases": [
+   "stop just under the VWAP",
+   "do not re-enter"
+  ],
+  "entities": [],
+  "numbers": {},
+  "evidence_level": "claimed",
+  "invalidation": null,
+  "notes": null,
+  "conditions": [
+   "long entered on a vwap reclaim",
+   "price loses vwap again"
+  ],
+  "kind": "rule",
+  "category": "trade_management",
+  "subject": "exit when vwap is lost again after a reclaim entry",
+  "claim": "IF long entered on a vwap reclaim AND price loses vwap again THEN EXIT AND AVOID re-entering",
+  "action": "EXIT",
+  "terms": [
+   "vwap",
+   "stop_loss",
+   "vwap_reclaim"
+  ],
+  "citation": {
+   "content_id": "youtube:evalvid0011",
+   "segment_seq": 2,
+   "quote": "stop goes just under the VWAP, if it loses it again I am out and I do not re-enter",
+   "speaker": {
+    "person_id": "example-owner",
+    "handle": null,
+    "role": "owner",
+    "confidence": 0.95
+   }
+  }
+ }
+]

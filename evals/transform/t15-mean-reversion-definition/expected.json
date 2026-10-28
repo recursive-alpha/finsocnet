@@ -1,0 +1,18 @@
+{
+ "cards": [
+  {
+   "kind": "definition",
+   "category": [
+    "concept"
+   ],
+   "action": [
+    "NONE",
+    null
+   ],
+   "terms": [
+    "mean_reversion"
+   ],
+   "segment_seq": 0
+  }
+ ]
+}

@@ -1,0 +1,64 @@
+{
+ "new_card": {
+  "kind": "metric",
+  "domain": "trading_strategy",
+  "category": "concept",
+  "subject": "days to cover measures squeeze fuel",
+  "claim": "days_to_cover IS short_interest divided by average daily volume",
+  "conditions": [],
+  "action": "NONE",
+  "horizon": "n/a",
+  "instruments": [
+   "equities"
+  ],
+  "terms": [
+   "days_to_cover",
+   "short_interest",
+   "average_volume"
+  ],
+  "aliases": [],
+  "numbers": {},
+  "evidence_level": "claimed",
+  "card_version": 1,
+  "citation": {
+   "content_id": "youtube:evaldedup01",
+   "segment_seq": 0,
+   "quote": "placeholder quote text",
+   "speaker": {
+    "person_id": "p2",
+    "role": "owner",
+    "confidence": 0.9
+   }
+  }
+ },
+ "candidates": [
+  {
+   "id": 14,
+   "kind": "mechanism",
+   "domain": "trading_strategy",
+   "category": "market_dynamics",
+   "subject": "short squeeze feedback loop",
+   "claim": "short_interest high AND price rises CAUSES shorts to cover, which pushes price higher",
+   "conditions": [
+    "high short interest",
+    "price rising"
+   ],
+   "action": "NONE",
+   "horizon": "n/a",
+   "instruments": [
+    "equities"
+   ],
+   "terms": [
+    "short_squeeze",
+    "short_interest"
+   ],
+   "aliases": [],
+   "numbers": {},
+   "evidence_level": "claimed",
+   "status": "active"
+  }
+ ],
+ "expected_decision": "related",
+ "expected_target": null,
+ "note": "a definition feeding the mechanism, a different kind"
+}

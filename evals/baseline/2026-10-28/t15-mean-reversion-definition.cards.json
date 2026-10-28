@@ -1,0 +1,39 @@
+[
+ {
+  "card_version": 1,
+  "domain": "trading_strategy",
+  "horizon": "n/a",
+  "instruments": [
+   "equities"
+  ],
+  "regime": [],
+  "aliases": [
+   "move back toward its long run average"
+  ],
+  "entities": [],
+  "numbers": {},
+  "evidence_level": "claimed",
+  "invalidation": null,
+  "notes": null,
+  "conditions": [],
+  "kind": "definition",
+  "category": "concept",
+  "subject": "what mean reversion is",
+  "claim": "mean_reversion IS the tendency of a price or spread to move back toward its long run average after an extreme move",
+  "action": "NONE",
+  "terms": [
+   "mean_reversion"
+  ],
+  "citation": {
+   "content_id": "book:eval00000000000000000000000000015",
+   "segment_seq": 0,
+   "quote": "Mean reversion is the tendency of a price or a spread to move back toward its long run average after an extreme move away from it",
+   "speaker": {
+    "person_id": "example-author",
+    "handle": null,
+    "role": "author",
+    "confidence": 1.0
+   }
+  }
+ }
+]

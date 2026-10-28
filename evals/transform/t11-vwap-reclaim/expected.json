@@ -1,0 +1,30 @@
+{
+ "cards": [
+  {
+   "kind": "setup",
+   "category": [
+    "entry_and_execution",
+    "setup_and_screening"
+   ],
+   "action": "LONG",
+   "terms": [
+    "vwap_reclaim",
+    "vwap"
+   ],
+   "segment_seq": 1
+  },
+  {
+   "kind": "rule",
+   "category": [
+    "trade_management",
+    "risk_and_sizing"
+   ],
+   "action": "EXIT",
+   "terms": [
+    "vwap",
+    "stop_loss"
+   ],
+   "segment_seq": 2
+  }
+ ]
+}

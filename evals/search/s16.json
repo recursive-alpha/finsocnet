@@ -1,0 +1,12 @@
+{
+ "question": "what is the best way to size a position",
+ "expected_card_refs": [
+  "risk_1pct",
+  "position_size_a_plus",
+  "kelly_caution",
+  "r_multiple_thinking"
+ ],
+ "must_not": [
+  "short_squeeze"
+ ]
+}

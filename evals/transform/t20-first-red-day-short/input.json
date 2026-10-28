@@ -1,0 +1,13 @@
+{
+ "content_id": "youtube:evalvid0020",
+ "platform": "youtube",
+ "chunk_view": "CONTENT youtube:evalvid0020 | video | \"Shorting parabolics\" | 2026-09-02\nSEGMENTS 0-1 of 0-1\n[#0 | 00:00-00:20 | speaker ?] after a stock runs for several days in a row the first red day is where I start looking to short, I want to see it fail at the high of day and lose VWAP,\n[#1 | 00:20-00:40 | speaker ?] I cover half into the first flush and trail the rest.",
+ "cast": [
+  {
+   "person_id": "example-owner",
+   "role": "owner",
+   "name": "Example Owner"
+  }
+ ],
+ "note": ""
+}

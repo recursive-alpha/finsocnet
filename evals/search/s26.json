@@ -1,0 +1,10 @@
+{
+ "question": "how do earnings gaps behave",
+ "expected_card_refs": [
+  "ep_setup",
+  "earnings_gap_fade"
+ ],
+ "must_not": [
+  "round_number_stops"
+ ]
+}

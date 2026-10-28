@@ -1,0 +1,46 @@
+[
+ {
+  "card_version": 1,
+  "domain": "trading_strategy",
+  "horizon": "n/a",
+  "instruments": [
+   "equities"
+  ],
+  "regime": [],
+  "aliases": [
+   "tối đa 20% tài khoản",
+   "không all-in"
+  ],
+  "entities": [],
+  "numbers": {
+   "max_position_pct": 20
+  },
+  "evidence_level": "anecdotal",
+  "invalidation": null,
+  "notes": null,
+  "conditions": [
+   "buying a single stock"
+  ],
+  "kind": "rule",
+  "category": "risk_and_sizing",
+  "subject": "cap a single stock at 20% of the account",
+  "claim": "IF buying a single stock THEN SIZE at most 20% of the account AND AVOID going all-in",
+  "action": "SIZE",
+  "terms": [
+   "position_weight",
+   "concentration_risk",
+   "position_sizing"
+  ],
+  "citation": {
+   "content_id": "forum:f319.com:evalthread27",
+   "segment_seq": 0,
+   "quote": "Mình chỉ vào tối đa 20% tài khoản cho một mã, không bao giờ all-in",
+   "speaker": {
+    "person_id": null,
+    "handle": "nhadautu_eval",
+    "role": "member",
+    "confidence": 1.0
+   }
+  }
+ }
+]

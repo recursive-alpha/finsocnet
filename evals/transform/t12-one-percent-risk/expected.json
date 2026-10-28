@@ -1,0 +1,19 @@
+{
+ "cards": [
+  {
+   "kind": "rule",
+   "category": [
+    "risk_and_sizing"
+   ],
+   "action": [
+    "SIZE",
+    "AVOID"
+   ],
+   "terms": [
+    "risk_per_trade",
+    "position_sizing"
+   ],
+   "segment_seq": 0
+  }
+ ]
+}

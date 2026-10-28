@@ -1,0 +1,11 @@
+{
+ "question": "what is a good momentum strategy result in a backtest",
+ "expected_card_refs": [
+  "sharpe_momentum",
+  "costs_matter",
+  "relative_strength"
+ ],
+ "must_not": [
+  "daily_plan"
+ ]
+}

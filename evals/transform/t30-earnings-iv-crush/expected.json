@@ -1,0 +1,21 @@
+{
+ "cards": [
+  {
+   "kind": "mechanism",
+   "category": [
+    "market_dynamics"
+   ],
+   "action": [
+    "NONE",
+    "AVOID",
+    null
+   ],
+   "terms": [
+    "implied_volatility",
+    "earnings",
+    "options"
+   ],
+   "segment_seq": 0
+  }
+ ]
+}

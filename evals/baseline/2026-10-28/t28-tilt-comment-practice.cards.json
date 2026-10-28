@@ -1,0 +1,47 @@
+[
+ {
+  "card_version": 1,
+  "domain": "trading_strategy",
+  "horizon": "intraday",
+  "instruments": [
+   "equities"
+  ],
+  "regime": [],
+  "aliases": [
+   "timer after two losses",
+   "cool off"
+  ],
+  "entities": [],
+  "numbers": {
+   "timer_minutes": 30,
+   "losses_in_row": 2
+  },
+  "evidence_level": "anecdotal",
+  "invalidation": null,
+  "notes": null,
+  "conditions": [
+   "two losses in a row"
+  ],
+  "kind": "practice",
+  "category": "psychology_and_review",
+  "subject": "30 minute timer after two losses in a row",
+  "claim": "setting a 30 minute timer after two consecutive losses IMPROVES emotional_control FOR traders prone to tilt",
+  "action": "NONE",
+  "terms": [
+   "tilt",
+   "losing_streak",
+   "emotional_control"
+  ],
+  "citation": {
+   "content_id": "reddit:evalpost28",
+   "segment_seq": 0,
+   "quote": "I set a timer for 30 minutes after any two losses in a row. Cooled me off every time.",
+   "speaker": {
+    "person_id": null,
+    "handle": "u/example_0",
+    "role": "commenter",
+    "confidence": 1.0
+   }
+  }
+ }
+]

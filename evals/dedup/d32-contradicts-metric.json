@@ -1,0 +1,68 @@
+{
+ "new_card": {
+  "kind": "metric",
+  "domain": "trading_strategy",
+  "category": "research_method",
+  "subject": "momentum sharpe of 1.4 gross",
+  "claim": "momentum strategy on sp500 HAD sharpe_ratio 1.4 BEFORE transaction_costs in the 2005-2020 backtest",
+  "conditions": [],
+  "action": "NONE",
+  "horizon": "n/a",
+  "instruments": [
+   "equities"
+  ],
+  "terms": [
+   "momentum",
+   "sharpe_ratio",
+   "backtest",
+   "transaction_costs"
+  ],
+  "aliases": [],
+  "numbers": {
+   "sharpe": 1.4
+  },
+  "evidence_level": "claimed",
+  "card_version": 1,
+  "citation": {
+   "content_id": "youtube:evaldedup01",
+   "segment_seq": 0,
+   "quote": "placeholder quote text",
+   "speaker": {
+    "person_id": "p2",
+    "role": "owner",
+    "confidence": 0.9
+   }
+  }
+ },
+ "candidates": [
+  {
+   "id": 15,
+   "kind": "metric",
+   "domain": "trading_strategy",
+   "category": "research_method",
+   "subject": "momentum sharpe 0.6 before costs",
+   "claim": "momentum strategy on sp500 HAD sharpe_ratio 0.6 BEFORE transaction_costs in the 2005-2020 backtest",
+   "conditions": [],
+   "action": "NONE",
+   "horizon": "n/a",
+   "instruments": [
+    "equities"
+   ],
+   "terms": [
+    "momentum",
+    "sharpe_ratio",
+    "backtest",
+    "transaction_costs"
+   ],
+   "aliases": [],
+   "numbers": {
+    "sharpe": 0.6
+   },
+   "evidence_level": "backtested",
+   "status": "active"
+  }
+ ],
+ "expected_decision": "contradicts",
+ "expected_target": null,
+ "note": "same setup and window, a materially different measured result"
+}

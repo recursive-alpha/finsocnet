@@ -1,0 +1,20 @@
+{
+ "cards": [
+  {
+   "kind": "mechanism",
+   "category": [
+    "market_dynamics"
+   ],
+   "action": [
+    "NONE",
+    null
+   ],
+   "terms": [
+    "interest_rate",
+    "growth_stocks",
+    "discount_rate"
+   ],
+   "segment_seq": 0
+  }
+ ]
+}

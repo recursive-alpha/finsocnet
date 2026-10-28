@@ -1,0 +1,43 @@
+[
+ {
+  "card_version": 1,
+  "domain": "trading_strategy",
+  "horizon": "n/a",
+  "instruments": [
+   "equities"
+  ],
+  "regime": [],
+  "aliases": [
+   "rate cuts help growth stocks"
+  ],
+  "entities": [],
+  "numbers": {},
+  "evidence_level": "claimed",
+  "invalidation": null,
+  "notes": null,
+  "conditions": [
+   "central bank cuts rates"
+  ],
+  "kind": "mechanism",
+  "category": "market_dynamics",
+  "subject": "rate cuts lift growth stocks more than value stocks",
+  "claim": "falling interest_rate CAUSES higher valuations of growth_stocks BECAUSE the present value of future earnings rises under a lower discount_rate",
+  "action": "NONE",
+  "terms": [
+   "interest_rate",
+   "growth_stocks",
+   "discount_rate"
+  ],
+  "citation": {
+   "content_id": "web:eval0000000018",
+   "segment_seq": 0,
+   "quote": "When the central bank cuts rates, borrowing becomes cheaper and the present value of future earnings rises, which usually lifts growth stocks more than value stocks",
+   "speaker": {
+    "person_id": "example-writer",
+    "handle": null,
+    "role": "author",
+    "confidence": 1.0
+   }
+  }
+ }
+]

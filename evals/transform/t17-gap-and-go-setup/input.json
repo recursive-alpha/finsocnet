@@ -1,0 +1,18 @@
+{
+ "content_id": "podcast:bbbbbbbbbbbb:evalep17",
+ "platform": "podcast",
+ "chunk_view": "CONTENT podcast:bbbbbbbbbbbb:evalep17 | video | \"Small caps with Example Guest\" | 2026-09-02\nSEGMENTS 0-1 of 0-1\n[#0 | 00:00-00:20 | speaker ?] What do you look for in the premarket?\n[#1 | 00:20-00:40 | speaker ?] A stock gapping up on real news with a float under twenty million and relative volume above five. If it holds the premarket high at the open I go long, that is the gap and go.",
+ "cast": [
+  {
+   "person_id": "example-host",
+   "role": "host",
+   "name": "Example Host"
+  },
+  {
+   "person_id": "example-guest",
+   "role": "guest",
+   "name": "Example Guest"
+  }
+ ],
+ "note": ""
+}

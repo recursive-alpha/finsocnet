@@ -1,0 +1,51 @@
+[
+ {
+  "card_version": 1,
+  "domain": "trading_strategy",
+  "horizon": "intraday",
+  "instruments": [
+   "equities"
+  ],
+  "regime": [],
+  "aliases": [
+   "gap and go",
+   "holds the premarket high"
+  ],
+  "entities": [],
+  "numbers": {
+   "float_max": 20000000,
+   "rvol_min": 5
+  },
+  "evidence_level": "anecdotal",
+  "invalidation": null,
+  "notes": null,
+  "conditions": [
+   "gaps up on real news",
+   "float under 20 million",
+   "relative volume above 5",
+   "holds the premarket high at the open"
+  ],
+  "kind": "setup",
+  "category": "setup_and_screening",
+  "subject": "gap and go on news with low float and high relative volume",
+  "claim": "IF stock gaps up on news AND float_shares under 20 million AND rvol above 5 AND holds premarket_high at the open THEN LONG at the open",
+  "action": "LONG",
+  "terms": [
+   "gap_and_go",
+   "premarket_high",
+   "float_shares",
+   "rvol"
+  ],
+  "citation": {
+   "content_id": "podcast:bbbbbbbbbbbb:evalep17",
+   "segment_seq": 1,
+   "quote": "A stock gapping up on real news with a float under twenty million and relative volume above five. If it holds the premarket high at the open I go long, that is the gap and go.",
+   "speaker": {
+    "person_id": "example-guest",
+    "handle": null,
+    "role": "guest",
+    "confidence": 0.9
+   }
+  }
+ }
+]

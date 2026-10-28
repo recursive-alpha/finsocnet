@@ -1,0 +1,44 @@
+[
+ {
+  "card_version": 1,
+  "domain": "trading_strategy",
+  "horizon": "swing_days",
+  "instruments": [
+   "equities"
+  ],
+  "regime": [],
+  "aliases": [
+   "shorts forced to cover",
+   "forces more shorts to cover"
+  ],
+  "entities": [],
+  "numbers": {},
+  "evidence_level": "claimed",
+  "invalidation": null,
+  "notes": null,
+  "conditions": [
+   "high short interest",
+   "price starts to rise"
+  ],
+  "kind": "mechanism",
+  "category": "market_dynamics",
+  "subject": "rising price in a heavily shorted stock feeds a short squeeze",
+  "claim": "rising price in stocks with high short_interest CAUSES further price increases BECAUSE shorts are forced to buy shares to cover",
+  "action": "NONE",
+  "terms": [
+   "short_squeeze",
+   "short_interest"
+  ],
+  "citation": {
+   "content_id": "book:eval00000000000000000000000000001",
+   "segment_seq": 0,
+   "quote": "shorts are forced to buy shares to close their positions, which pushes the price up further and forces more shorts to cover",
+   "speaker": {
+    "person_id": "example-author",
+    "handle": null,
+    "role": "author",
+    "confidence": 1.0
+   }
+  }
+ }
+]

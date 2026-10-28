@@ -1,0 +1,21 @@
+{
+ "cards": [
+  {
+   "kind": "metric",
+   "category": [
+    "research_method",
+    "psychology_and_review"
+   ],
+   "action": [
+    "NONE",
+    null
+   ],
+   "terms": [
+    "win_rate",
+    "expectancy",
+    "r_multiple"
+   ],
+   "segment_seq": 0
+  }
+ ]
+}

@@ -1,0 +1,13 @@
+{
+ "content_id": "stackexchange:quant:eval24",
+ "platform": "stackexchange",
+ "chunk_view": "CONTENT stackexchange:quant:eval24 | video | \"Why is my backtest too good?\" | 2026-09-02\nSEGMENTS 0-0 of 0-0\n[#0 | comment t3_p0 | member_0] If you optimise the parameters on the same data you test on, the result is overfitted. Use walk forward analysis or hold out an out of sample period before trusting any Sharpe ratio.",
+ "cast": [
+  {
+   "person_id": null,
+   "handle": "member_0",
+   "role": "member"
+  }
+ ],
+ "note": ""
+}

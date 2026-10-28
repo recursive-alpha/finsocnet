@@ -1,0 +1,11 @@
+{
+ "question": "what is the edge or expectancy of a strategy",
+ "expected_card_refs": [
+  "expectancy_def",
+  "r_multiple_thinking",
+  "sharpe_momentum"
+ ],
+ "must_not": [
+  "gap_and_go"
+ ]
+}

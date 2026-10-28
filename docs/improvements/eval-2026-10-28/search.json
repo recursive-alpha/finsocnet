@@ -1,0 +1,32 @@
+{
+ "set": "search",
+ "n": 30,
+ "metrics": {
+  "recall@10": 0.956,
+  "mrr": 1.0
+ },
+ "failures": [
+  {
+   "case": "s19",
+   "reason": "missing ['costs_matter'] in top 10"
+  },
+  {
+   "case": "s22",
+   "reason": "missing ['tape_signature'] in top 10"
+  },
+  {
+   "case": "s27",
+   "reason": "missing ['consolidation_tension'] in top 10"
+  },
+  {
+   "case": "s30",
+   "reason": "missing ['flag_stop'] in top 10"
+  }
+ ],
+ "targets": {
+  "recall@10": {
+   "target": ">= 0.8",
+   "met": true
+  }
+ }
+}

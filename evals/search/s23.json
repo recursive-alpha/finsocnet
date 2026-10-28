@@ -1,0 +1,10 @@
+{
+ "question": "why do options lose value",
+ "expected_card_refs": [
+  "options_theta",
+  "zero_dte_cycles"
+ ],
+ "must_not": [
+  "flag_stop"
+ ]
+}

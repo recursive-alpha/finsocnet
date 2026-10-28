@@ -1,0 +1,19 @@
+{
+ "cards": [
+  {
+   "kind": "setup",
+   "category": [
+    "setup_and_screening",
+    "entry_and_execution"
+   ],
+   "action": "LONG",
+   "terms": [
+    "gap_and_go",
+    "premarket_high",
+    "float_shares",
+    "rvol"
+   ],
+   "segment_seq": 1
+  }
+ ]
+}

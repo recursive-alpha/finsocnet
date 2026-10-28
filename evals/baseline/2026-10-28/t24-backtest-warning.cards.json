@@ -1,0 +1,45 @@
+[
+ {
+  "card_version": 1,
+  "domain": "trading_strategy",
+  "horizon": "n/a",
+  "instruments": [
+   "equities"
+  ],
+  "regime": [],
+  "aliases": [
+   "overfitted backtest",
+   "hold out sample"
+  ],
+  "entities": [],
+  "numbers": {},
+  "evidence_level": "claimed",
+  "invalidation": null,
+  "notes": null,
+  "conditions": [
+   "parameters optimised on the same data as the test"
+  ],
+  "kind": "rule",
+  "category": "research_method",
+  "subject": "do not trust a Sharpe ratio optimised and tested on the same data",
+  "claim": "IF parameters are optimised on the same data used to test THEN AVOID trusting the sharpe_ratio UNTIL walk_forward or an out_of_sample period confirms it",
+  "action": "AVOID",
+  "terms": [
+   "overfitting",
+   "walk_forward",
+   "out_of_sample",
+   "sharpe_ratio"
+  ],
+  "citation": {
+   "content_id": "stackexchange:quant:eval24",
+   "segment_seq": 0,
+   "quote": "If you optimise the parameters on the same data you test on, the result is overfitted. Use walk forward analysis or hold out an out of sample period before trusting any Sharpe ratio.",
+   "speaker": {
+    "person_id": null,
+    "handle": "member_0",
+    "role": "member",
+    "confidence": 1.0
+   }
+  }
+ }
+]

@@ -1,0 +1,47 @@
+[
+ {
+  "card_version": 1,
+  "domain": "trading_strategy",
+  "horizon": "intraday",
+  "instruments": [
+   "equities"
+  ],
+  "regime": [],
+  "aliases": [
+   "ORB 15m",
+   "opening range high"
+  ],
+  "entities": [],
+  "numbers": {
+   "range_bars": 3,
+   "range_timeframe_min": 15
+  },
+  "evidence_level": "claimed",
+  "invalidation": null,
+  "notes": null,
+  "conditions": [
+   "close above the opening range high",
+   "during the regular session"
+  ],
+  "kind": "setup",
+  "category": "entry_and_execution",
+  "subject": "long when price closes above the 15 minute opening range high",
+  "claim": "IF close is above the opening_range high of the first three 15 minute bars during market hours THEN LONG the breakout",
+  "action": "LONG",
+  "terms": [
+   "opening_range_breakout",
+   "opening_range"
+  ],
+  "citation": {
+   "content_id": "tradingview:script:evalpine25",
+   "segment_seq": 0,
+   "quote": "orHigh = request.security(syminfo.tickerid, \"15\", ta.highest(high, 3))",
+   "speaker": {
+    "person_id": "example-pine",
+    "handle": null,
+    "role": "author",
+    "confidence": 1.0
+   }
+  }
+ }
+]

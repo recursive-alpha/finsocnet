@@ -1,0 +1,13 @@
+{
+ "content_id": "youtube:evalvid0011",
+ "platform": "youtube",
+ "chunk_view": "CONTENT youtube:evalvid0011 | video | \"VWAP reclaim long\" | 2026-09-02\nSEGMENTS 0-2 of 0-2\n[#0 | 00:00-00:20 | speaker ?] okay so here is the one I keep coming back to,\n[#1 | 00:20-00:40 | speaker ?] if a stock loses VWAP in the morning and then reclaims it and holds above on the five minute chart, that is my long, I buy the reclaim,\n[#2 | 00:40-01:00 | speaker ?] stop goes just under the VWAP, if it loses it again I am out and I do not re-enter.",
+ "cast": [
+  {
+   "person_id": "example-owner",
+   "role": "owner",
+   "name": "Example Owner"
+  }
+ ],
+ "note": ""
+}

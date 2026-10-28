@@ -1,0 +1,11 @@
+{
+ "question": "how do I read the order book and tape",
+ "expected_card_refs": [
+  "level2_reading",
+  "tape_signature",
+  "stop_hunt"
+ ],
+ "must_not": [
+  "survivorship"
+ ]
+}

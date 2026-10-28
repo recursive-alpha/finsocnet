@@ -1,0 +1,13 @@
+{
+ "content_id": "reddit:evalpost28",
+ "platform": "reddit",
+ "chunk_view": "CONTENT reddit:evalpost28 | video | \"How do you stop tilting?\" | 2026-09-02\nSEGMENTS 0-1 of 0-1\n[#0 | comment t1_k0 | u/example_0 | score 12] I set a timer for 30 minutes after any two losses in a row. Cooled me off every time.\n[#1 | comment t1_k1 | u/example_1 | score 12] Same, plus I only trade a fixed number of setups per day.",
+ "cast": [
+  {
+   "person_id": null,
+   "handle": "u/example_0",
+   "role": "commenter"
+  }
+ ],
+ "note": ""
+}

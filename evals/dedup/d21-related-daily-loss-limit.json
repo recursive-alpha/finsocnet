@@ -1,0 +1,68 @@
+{
+ "new_card": {
+  "kind": "rule",
+  "domain": "trading_strategy",
+  "category": "risk_and_sizing",
+  "subject": "stop trading after a 2% daily loss",
+  "claim": "IF daily loss reaches 2% of account THEN EXIT all positions AND AVOID new trades until next session",
+  "conditions": [
+   "daily loss reaches 2% of account"
+  ],
+  "action": "EXIT",
+  "horizon": "intraday",
+  "instruments": [
+   "equities"
+  ],
+  "terms": [
+   "daily_loss_limit",
+   "risk_per_trade"
+  ],
+  "aliases": [],
+  "numbers": {
+   "daily_loss_pct": 2
+  },
+  "evidence_level": "claimed",
+  "card_version": 1,
+  "citation": {
+   "content_id": "youtube:evaldedup01",
+   "segment_seq": 0,
+   "quote": "placeholder quote text",
+   "speaker": {
+    "person_id": "p2",
+    "role": "owner",
+    "confidence": 0.9
+   }
+  }
+ },
+ "candidates": [
+  {
+   "id": 12,
+   "kind": "rule",
+   "domain": "trading_strategy",
+   "category": "risk_and_sizing",
+   "subject": "risk one percent per trade",
+   "claim": "IF opening a trade THEN SIZE so the stop risks at most 1% of the account",
+   "conditions": [
+    "opening a trade"
+   ],
+   "action": "SIZE",
+   "horizon": "n/a",
+   "instruments": [
+    "equities"
+   ],
+   "terms": [
+    "risk_per_trade",
+    "position_sizing"
+   ],
+   "aliases": [],
+   "numbers": {
+    "risk_pct": 1
+   },
+   "evidence_level": "claimed",
+   "status": "active"
+  }
+ ],
+ "expected_decision": "related",
+ "expected_target": null,
+ "note": "both are account level risk but a different control"
+}

@@ -1,0 +1,45 @@
+[
+ {
+  "card_version": 1,
+  "domain": "trading_strategy",
+  "horizon": "n/a",
+  "instruments": [
+   "equities"
+  ],
+  "regime": [],
+  "aliases": [
+   "never risk more than one percent",
+   "non negotiable"
+  ],
+  "entities": [],
+  "numbers": {
+   "risk_pct": 1
+  },
+  "evidence_level": "anecdotal",
+  "invalidation": null,
+  "notes": null,
+  "conditions": [
+   "opening a trade"
+  ],
+  "kind": "rule",
+  "category": "risk_and_sizing",
+  "subject": "risk at most 1% of the account per trade",
+  "claim": "IF opening any trade THEN SIZE so the risk is at most 1% of the account",
+  "action": "SIZE",
+  "terms": [
+   "risk_per_trade",
+   "position_sizing"
+  ],
+  "citation": {
+   "content_id": "youtube:evalvid0012",
+   "segment_seq": 0,
+   "quote": "I never risk more than one percent of my account on a single trade, that is non negotiable",
+   "speaker": {
+    "person_id": "example-owner",
+    "handle": null,
+    "role": "owner",
+    "confidence": 0.95
+   }
+  }
+ }
+]

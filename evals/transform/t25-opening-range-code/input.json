@@ -1,0 +1,13 @@
+{
+ "content_id": "tradingview:script:evalpine25",
+ "platform": "tradingview",
+ "chunk_view": "CONTENT tradingview:script:evalpine25 | video | \"ORB 15m\" | 2026-09-02\nSEGMENTS 0-0 of 0-0\n[#0 | code strategy.pine:1-9] orHigh = request.security(syminfo.tickerid, \"15\", ta.highest(high, 3))\nif close > orHigh and session.ismarket\n    strategy.entry(\"ORB\", strategy.long)",
+ "cast": [
+  {
+   "person_id": "example-pine",
+   "role": "author",
+   "name": "Example Pine Author"
+  }
+ ],
+ "note": ""
+}

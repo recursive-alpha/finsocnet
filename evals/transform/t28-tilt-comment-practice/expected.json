@@ -1,0 +1,21 @@
+{
+ "cards": [
+  {
+   "kind": "practice",
+   "category": [
+    "psychology_and_review",
+    "risk_and_sizing"
+   ],
+   "action": [
+    "NONE",
+    "AVOID",
+    null
+   ],
+   "terms": [
+    "tilt",
+    "losing_streak"
+   ],
+   "segment_seq": 0
+  }
+ ]
+}

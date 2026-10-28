@@ -1,0 +1,70 @@
+{
+ "new_card": {
+  "kind": "rule",
+  "domain": "trading_strategy",
+  "category": "entry_and_execution",
+  "subject": "add on the first 20 ema pullback only on light volume",
+  "claim": "IF breakout holds ema_20 on a pullback AND volume_dry_up THEN ADD to the position",
+  "conditions": [
+   "breakout",
+   "pullback holds the 20 ema",
+   "volume dries up"
+  ],
+  "action": "ADD",
+  "horizon": "swing_weeks",
+  "instruments": [
+   "equities"
+  ],
+  "terms": [
+   "ema_20",
+   "pullback",
+   "breakout",
+   "volume_dry_up"
+  ],
+  "aliases": [],
+  "numbers": {},
+  "evidence_level": "claimed",
+  "card_version": 1,
+  "citation": {
+   "content_id": "youtube:evaldedup01",
+   "segment_seq": 0,
+   "quote": "placeholder quote text",
+   "speaker": {
+    "person_id": "p2",
+    "role": "owner",
+    "confidence": 0.9
+   }
+  }
+ },
+ "candidates": [
+  {
+   "id": 13,
+   "kind": "rule",
+   "domain": "trading_strategy",
+   "category": "entry_and_execution",
+   "subject": "add on the first pullback to the 20 ema",
+   "claim": "IF breakout holds ema_20 on a pullback THEN ADD to the position",
+   "conditions": [
+    "breakout",
+    "pullback holds the 20 ema"
+   ],
+   "action": "ADD",
+   "horizon": "swing_weeks",
+   "instruments": [
+    "equities"
+   ],
+   "terms": [
+    "ema_20",
+    "pullback",
+    "breakout"
+   ],
+   "aliases": [],
+   "numbers": {},
+   "evidence_level": "claimed",
+   "status": "active"
+  }
+ ],
+ "expected_decision": "refines",
+ "expected_target": 13,
+ "note": "adds the light volume condition"
+}

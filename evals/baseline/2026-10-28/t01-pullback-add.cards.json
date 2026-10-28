@@ -1,0 +1,86 @@
+[
+ {
+  "card_version": 1,
+  "domain": "trading_strategy",
+  "horizon": "swing_days",
+  "instruments": [
+   "equities"
+  ],
+  "regime": [],
+  "aliases": [
+   "first pullback to the 20 EMA",
+   "holds the 20"
+  ],
+  "entities": [],
+  "numbers": {},
+  "evidence_level": "claimed",
+  "invalidation": null,
+  "notes": null,
+  "conditions": [
+   "first pullback after the breakout reaches ema_20",
+   "pullback holds ema_20 on lighter volume"
+  ],
+  "kind": "rule",
+  "category": "entry_and_execution",
+  "subject": "add to a breakout position on the first pullback that holds the 20 EMA",
+  "claim": "IF breakout position pulls back to ema_20 AND the pullback holds on lighter volume THEN ADD to the position",
+  "action": "ADD",
+  "terms": [
+   "breakout",
+   "pullback",
+   "ema_20",
+   "volume_dry_up"
+  ],
+  "citation": {
+   "content_id": "youtube:evalvid0001",
+   "segment_seq": 1,
+   "quote": "If it holds the 20 on lighter volume I add to the position",
+   "speaker": {
+    "person_id": "example-owner",
+    "handle": null,
+    "role": "owner",
+    "confidence": 0.95
+   }
+  }
+ },
+ {
+  "card_version": 1,
+  "domain": "trading_strategy",
+  "horizon": "swing_days",
+  "instruments": [
+   "equities"
+  ],
+  "regime": [],
+  "aliases": [
+   "stop under the pullback low"
+  ],
+  "entities": [],
+  "numbers": {},
+  "evidence_level": "claimed",
+  "invalidation": null,
+  "notes": null,
+  "conditions": [
+   "position added on a pullback"
+  ],
+  "kind": "rule",
+  "category": "trade_management",
+  "subject": "stop under the pullback low after adding",
+  "claim": "IF position added on a pullback THEN EXIT full position WHEN price breaks the pullback low",
+  "action": "EXIT",
+  "terms": [
+   "pullback",
+   "stop_loss"
+  ],
+  "citation": {
+   "content_id": "youtube:evalvid0001",
+   "segment_seq": 2,
+   "quote": "my stop sits right under the low of that pullback, if it breaks that low I am out",
+   "speaker": {
+    "person_id": "example-owner",
+    "handle": null,
+    "role": "owner",
+    "confidence": 0.95
+   }
+  }
+ }
+]

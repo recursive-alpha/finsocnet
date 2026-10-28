@@ -1,0 +1,13 @@
+{
+ "content_id": "youtube:evalvid0012",
+ "platform": "youtube",
+ "chunk_view": "CONTENT youtube:evalvid0012 | video | \"How I size every trade\" | 2026-09-02\nSEGMENTS 0-1 of 0-1\n[#0 | 00:00-00:20 | speaker ?] I never risk more than one percent of my account on a single trade, that is non negotiable,\n[#1 | 00:20-00:40 | speaker ?] so if my stop is fifty cents away and the account is fifty thousand, I can take one thousand shares at most.",
+ "cast": [
+  {
+   "person_id": "example-owner",
+   "role": "owner",
+   "name": "Example Owner"
+  }
+ ],
+ "note": ""
+}

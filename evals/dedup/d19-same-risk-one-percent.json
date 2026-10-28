@@ -1,0 +1,69 @@
+{
+ "new_card": {
+  "kind": "rule",
+  "domain": "trading_strategy",
+  "category": "risk_and_sizing",
+  "subject": "never risk more than 1% of the account",
+  "claim": "IF opening a trade THEN SIZE so the loss at the stop is at most 1% of account",
+  "conditions": [
+   "opening a trade"
+  ],
+  "action": "SIZE",
+  "horizon": "n/a",
+  "instruments": [
+   "equities"
+  ],
+  "terms": [
+   "risk_per_trade",
+   "position_sizing",
+   "stop_loss"
+  ],
+  "aliases": [],
+  "numbers": {
+   "risk_pct": 1
+  },
+  "evidence_level": "claimed",
+  "card_version": 1,
+  "citation": {
+   "content_id": "youtube:evaldedup01",
+   "segment_seq": 0,
+   "quote": "placeholder quote text",
+   "speaker": {
+    "person_id": "p2",
+    "role": "owner",
+    "confidence": 0.9
+   }
+  }
+ },
+ "candidates": [
+  {
+   "id": 12,
+   "kind": "rule",
+   "domain": "trading_strategy",
+   "category": "risk_and_sizing",
+   "subject": "risk one percent per trade",
+   "claim": "IF opening a trade THEN SIZE so the stop risks at most 1% of the account",
+   "conditions": [
+    "opening a trade"
+   ],
+   "action": "SIZE",
+   "horizon": "n/a",
+   "instruments": [
+    "equities"
+   ],
+   "terms": [
+    "risk_per_trade",
+    "position_sizing"
+   ],
+   "aliases": [],
+   "numbers": {
+    "risk_pct": 1
+   },
+   "evidence_level": "claimed",
+   "status": "active"
+  }
+ ],
+ "expected_decision": "same",
+ "expected_target": 12,
+ "note": ""
+}

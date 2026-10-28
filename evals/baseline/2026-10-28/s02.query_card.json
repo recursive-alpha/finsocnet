@@ -1,0 +1,1 @@
+{"subject": "risk per trade as a percent of the account", "terms": ["risk_per_trade", "position_sizing"], "aliases": ["risk at most 1% of equity", "small risk per trade"], "intent": "find_rules"}

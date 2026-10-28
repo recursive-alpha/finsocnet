@@ -1,0 +1,19 @@
+{
+ "set": "dedup",
+ "n": 40,
+ "metrics": {
+  "accuracy": 1.0,
+  "wrong_merge_rate": 0.0
+ },
+ "failures": [],
+ "targets": {
+  "accuracy": {
+   "target": ">= 0.85",
+   "met": true
+  },
+  "wrong_merge_rate": {
+   "target": "<= 0.03",
+   "met": true
+  }
+ }
+}

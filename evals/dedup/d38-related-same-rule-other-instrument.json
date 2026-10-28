@@ -1,0 +1,66 @@
+{
+ "new_card": {
+  "kind": "rule",
+  "domain": "trading_strategy",
+  "category": "risk_and_sizing",
+  "subject": "size forex trades small",
+  "claim": "IF trading forex THEN SIZE at most 1% risk per trade",
+  "conditions": [
+   "trading forex"
+  ],
+  "action": "SIZE",
+  "horizon": "n/a",
+  "instruments": [
+   "forex"
+  ],
+  "terms": [
+   "position_sizing",
+   "risk_per_trade",
+   "forex_pairs"
+  ],
+  "aliases": [],
+  "numbers": {},
+  "evidence_level": "claimed",
+  "card_version": 1,
+  "citation": {
+   "content_id": "youtube:evaldedup01",
+   "segment_seq": 0,
+   "quote": "placeholder quote text",
+   "speaker": {
+    "person_id": "p2",
+    "role": "owner",
+    "confidence": 0.9
+   }
+  }
+ },
+ "candidates": [
+  {
+   "id": 17,
+   "kind": "rule",
+   "domain": "trading_strategy",
+   "category": "risk_and_sizing",
+   "subject": "size crypto trades small",
+   "claim": "IF trading crypto THEN SIZE at most 1% risk per trade",
+   "conditions": [
+    "trading crypto"
+   ],
+   "action": "SIZE",
+   "horizon": "n/a",
+   "instruments": [
+    "crypto"
+   ],
+   "terms": [
+    "position_sizing",
+    "risk_per_trade",
+    "cryptocurrency"
+   ],
+   "aliases": [],
+   "numbers": {},
+   "evidence_level": "claimed",
+   "status": "active"
+  }
+ ],
+ "expected_decision": "related",
+ "expected_target": null,
+ "note": "same rule, a different instrument: not the same card"
+}
