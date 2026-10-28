@@ -18,6 +18,7 @@ import {
   Users,
   Video,
 } from "lucide-react";
+import { Avatar } from "@/components/Avatar";
 import { Badge, CategoryBadge, PlatformBadge } from "@/components/Badge";
 import { CardModal } from "@/components/CardModal";
 import { PersonModal } from "@/components/PersonModal";
@@ -286,17 +287,17 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-bold text-zinc-100">
-              Canonical Trading Practitioners
+              People in Markets &amp; Economics
             </h2>
             <p className="text-xs text-zinc-500 font-mono">
-              Empirical methodologies synthesized into full strategy rulebooks
+              Traders, portfolio managers, executives, economists and professors, with their rulebooks
             </p>
           </div>
           <Link
             href="/persons"
             className="text-xs font-mono text-emerald-400 hover:text-emerald-300 flex items-center gap-1"
           >
-            <span>view all traders</span>
+            <span>view all people</span>
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
@@ -310,9 +311,7 @@ export default function DashboardPage() {
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-300 font-bold font-mono group-hover:border-emerald-500/50 transition-colors">
-                    {p.canonical_name.slice(0, 2).toUpperCase()}
-                  </div>
+                  <Avatar name={p.canonical_name} path={p.avatar_path} size={48} className="rounded-2xl group-hover:border-emerald-500/60 transition-colors" />
                   <div>
                     <h4 className="text-sm font-bold text-zinc-100 group-hover:text-emerald-400 transition-colors">
                       {p.canonical_name}
@@ -328,11 +327,11 @@ export default function DashboardPage() {
               </div>
 
               <p className="text-xs text-zinc-400 font-mono line-clamp-2 leading-relaxed">
-                {p.trading_style || p.bio || "Quantitative & discretionary framework"}
+                {p.trading_style || p.domains || p.bio || "Market knowledge"}
               </p>
 
               <div className="flex items-center justify-between text-[11px] font-mono text-zinc-500 pt-2 border-t border-zinc-800/60">
-                <span>{p.primary_markets || "Equities, Futures"}</span>
+                <span>{[p.profession?.replace(/_/g, " "), p.affiliation || p.primary_markets].filter(Boolean).join(" · ") || "—"}</span>
                 <span className="text-emerald-400 group-hover:translate-x-0.5 transition-transform">
                   rulebook →
                 </span>

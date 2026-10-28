@@ -149,6 +149,7 @@ export interface Person {
   homepage?: string | null;
   relevance?: string | null;
   external_ids?: Record<string, string>;
+  links?: Array<{ id: number; url: string; kind: string; platform: string; handle: string | null; label: string | null; confidence: number; match_status: string; evidence: string | null }>;
   visibility: string;
   status: string;
   merged_into: string | null;

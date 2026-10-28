@@ -257,6 +257,52 @@ export function PersonModal({ personId, onClose, onSelectCard }: PersonModalProp
                     </div>
                   </div>
 
+                  {/* Facts */}
+                  {(person.profession || person.affiliation || person.domains || person.homepage || person.relevance) && (
+                    <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 space-y-1.5 text-xs font-mono text-zinc-300">
+                      {person.profession && <p><span className="text-zinc-500">Profession </span>{person.profession.replace(/_/g, " ")}</p>}
+                      {person.affiliation && <p><span className="text-zinc-500">Affiliation </span>{person.affiliation}</p>}
+                      {person.domains && <p><span className="text-zinc-500">Fields </span>{person.domains}</p>}
+                      {person.relevance && <p><span className="text-zinc-500">Why in scope </span>{person.relevance}</p>}
+                      {person.homepage && (
+                        <p>
+                          <span className="text-zinc-500">Website </span>
+                          <a href={person.homepage} target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:underline">{person.homepage}</a>
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Links and social networks */}
+                  {person.links && person.links.length > 0 && (
+                    <div className="space-y-2">
+                      <span className="text-xs font-mono uppercase tracking-wider text-zinc-500">
+                        Links &amp; social networks ({person.links.length})
+                      </span>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {person.links.map((l) => (
+                          <a
+                            key={l.id}
+                            href={l.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={l.evidence || ""}
+                            className="group flex items-center justify-between gap-2 rounded-lg border border-zinc-800 bg-zinc-900/50 px-3 py-2 hover:border-emerald-500/50 transition-colors"
+                          >
+                            <span className="min-w-0">
+                              <span className="block truncate text-xs font-mono text-zinc-200">{l.label || l.handle || l.url.replace(/^https?:\/\//, "")}</span>
+                              <span className="block truncate text-[10px] font-mono text-zinc-500">{[l.kind, l.platform].filter(Boolean).join(" · ")}</span>
+                            </span>
+                            <span className="flex shrink-0 items-center gap-1.5">
+                              {l.match_status !== "confirmed" && <Badge variant="amber">to review</Badge>}
+                              <ExternalLink className="h-3.5 w-3.5 text-zinc-500 group-hover:text-emerald-400" />
+                            </span>
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Bio */}
                   {person.bio && (
                     <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 space-y-2">

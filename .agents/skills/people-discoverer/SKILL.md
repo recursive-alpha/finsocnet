@@ -48,7 +48,7 @@ A person is **in scope** only with evidence you can state in one sentence (`rele
     "aliases": [{"alias": "@janeprof", "platform": "x"}, {"alias": "Jane Professor", "platform": ""}]}
    ```
    `trading_style` / `primary_markets` only for people who trade. Never invent ids: leave `external_ids` empty rather than guessing.
-6. **Find their places** on every platform (this is what makes the person useful):
+6. **Find their places** on every platform (this is what makes the person useful) with the skill `person-profiler` (it owns the matching rules and stores links with evidence). In short:
    - `research.py profile "<name>"` for academics and researchers (keeps the OpenAlex id for `external_ids`);
    - each platform skill's `search "<name>" --type channel|user` and `profile <handle> --ingest --run R`, only when the match is certain (name **and** a second signal such as the homepage link in the bio, the same photo, a verified badge, the employer);
    - the person's own site: `web.py fetch <homepage>` → links to channels, newsletter, podcast, papers; `rss.py discover <site>`.

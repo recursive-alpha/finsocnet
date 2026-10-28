@@ -511,6 +511,18 @@ def cmd_person_alias_add(ctx: Ctx) -> Result:
     return Result(persons_mod.alias_add(ctx.conn(), a.person, a.alias, a.platform or ""))
 
 
+def cmd_person_link_add(ctx: Ctx) -> Result:
+    run = ctx.run_id()
+    payload = read_json(ctx.args.file)
+    items = payload if isinstance(payload, list) else [payload]
+    res = [persons_mod.link_add(ctx.conn(), {**l, "person_id": l.get("person_id") or ctx.args.person}, run) for l in items]
+    return Result({"links": res})
+
+
+def cmd_person_link_list(ctx: Ctx) -> Result:
+    return Result({"person_id": ctx.args.person, "links": persons_mod.link_list(ctx.conn(), ctx.args.person, ctx.args.all)})
+
+
 def cmd_person_appearance_add(ctx: Ctx) -> Result:
     run = ctx.run_id()
     payload = read_json(ctx.args.file)
@@ -940,6 +952,15 @@ def build_parser() -> _Parser:
             p.add_argument("--platform")
         else:
             p.add_argument("--file", required=True)
+    lg = g.add_parser("link", help="websites, social accounts, newsletters, papers of a person (specs/16)").add_subparsers(dest="sub", required=True, parser_class=_Parser)
+    handlers[("person", "link", "add")] = cmd_person_link_add
+    p = lg.add_parser("add", parents=[common])
+    p.add_argument("--file", required=True, help="JSON: one link or a list; each {person_id?, url, kind, platform?, handle?, label?, confidence?, match_status?, evidence}")
+    p.add_argument("--person", help="default person_id for links in the file that have none")
+    handlers[("person", "link", "list")] = cmd_person_link_list
+    p = lg.add_parser("list", parents=[common])
+    p.add_argument("--person", required=True)
+    p.add_argument("--all", action="store_true", help="include rejected links")
     p = leaf(g, ("person", "get"), "get", cmd_person_get)
     p.add_argument("id")
     p = leaf(g, ("person", "list"), "list", cmd_person_list)

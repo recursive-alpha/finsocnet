@@ -18,6 +18,7 @@ Every capability is a skill in [`.agents/skills/`](../.agents/skills/) (the open
 | Skill | What it does | Login |
 |---|---|---|
 | [`people-discoverer`](../.agents/skills/people-discoverer/SKILL.md) | Discover and create the people who publish markets and economics knowledge (traders, PMs, investors, CEOs, economists, professors, authors, regulators) before crawling their content, then find and queue their channels, accounts, sites and papers | — |
+| [`person-profiler`](../.agents/skills/person-profiler/SKILL.md) | Build the full profile of one person: find and verify website, social accounts, newsletters, podcasts, courses, books, code, papers and scholar/Wikipedia pages, match each with evidence and confidence, store them as links, aliases and sources | — |
 | [`person-matcher`](../.agents/skills/person-matcher/SKILL.md) | Resolve who is speaking or writing — match channel owners, podcast hosts and guests, authors, commenters and handles across YouTube, X, Reddit, Discord, Substack, forums, books and papers to | — |
 | [`person-skill-synthesizer`](../.agents/skills/person-skill-synthesizer/SKILL.md) | Build or rebuild a person's trading rulebook (overview, setup and screening, entry and execution, trade management, risk and sizing, psychology and review, checklists) from the Knowledge Car | — |
 | [`person-skills-explorer`](../.agents/skills/person-skills-explorer/SKILL.md) | Read, list and compare people's rulebooks stored in the FinSocNet database | — |

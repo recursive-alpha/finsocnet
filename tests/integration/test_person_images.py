@@ -110,3 +110,24 @@ def test_persons_carry_profession_affiliation_and_external_ids(conn, run_id):
         persons.upsert(conn, {"id": "bad-one", "canonical_name": "Bad One", "profession": "wizard"}, run_id)
     persons.upsert(conn, {"id": "jane-professor", "affiliation": "Other University", "canonical_name": "Jane Professor"}, run_id)  # update keeps the rest
     assert persons.get(conn, "jane-professor")["profession"] == "academic"
+
+
+def test_person_links_need_evidence_dedupe_by_url_and_feed_aliases(conn, run_id):
+    from finsocnet.core import persons
+    persons.upsert(conn, {"id": "ann-analyst", "canonical_name": "Ann Analyst"}, run_id)
+    persons.upsert(conn, {"id": "bob-other", "canonical_name": "Bob Other", "aliases": [{"alias": "@taken", "platform": "x"}]}, run_id)
+    with pytest.raises(CliError) as e:
+        persons.link_add(conn, {"person_id": "ann-analyst", "url": "https://x.com/ann", "kind": "social", "platform": "x", "handle": "@ann"}, run_id)
+    assert any(d["path"] == "/evidence" for d in e.value.details)
+    with pytest.raises(CliError):
+        persons.link_add(conn, {"person_id": "ann-analyst", "url": "ann.example", "kind": "social", "evidence": "x"}, run_id)
+    ok = persons.link_add(conn, {"person_id": "ann-analyst", "url": "https://x.com/ann/", "kind": "social", "platform": "x", "handle": "@ann", "evidence": "linked from her site"}, run_id)
+    assert ok["status"] == "created" and ok["alias_added"] is True
+    again = persons.link_add(conn, {"person_id": "ann-analyst", "url": "https://x.com/ann", "kind": "social", "platform": "x", "handle": "@ann", "evidence": "linked from her site", "label": "X"}, run_id)
+    assert again["status"] == "updated" and again["link_id"] == ok["link_id"]
+    clash = persons.link_add(conn, {"person_id": "ann-analyst", "url": "https://x.com/taken", "kind": "social", "platform": "x", "handle": "@taken", "evidence": "guess", "confidence": 0.5}, run_id)
+    assert "alias_conflict" not in clash  # needs_review links do not create aliases at all
+    low = persons.get(conn, "ann-analyst")["links"]
+    assert [l["match_status"] for l in low] == ["confirmed", "needs_review"] or {l["match_status"] for l in low} == {"confirmed", "needs_review"}
+    persons.merge(conn, "ann-analyst", "bob-other", run_id)
+    assert len(persons.link_list(conn, "bob-other")) == 2

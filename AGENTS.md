@@ -22,7 +22,7 @@ FinSocNet is an agent-operated knowledge network. **You are the only model in it
 | Group | Skills |
 |---|---|
 | Knowledge core | `knowledge-db` (the `kb` CLI), `knowledge-transformer`, `knowledge-dedup`, `knowledge-search`, `market-idea-miner`, `translator` |
-| People | `people-discoverer` (people first: traders, PMs, executives, economists, professors, authors), `person-matcher`, `person-skill-synthesizer`, `person-skills-explorer` |
+| People | `people-discoverer` (people first: traders, PMs, executives, economists, professors, authors), `person-profiler` (website, social accounts, newsletters, papers with evidence), `person-matcher`, `person-skill-synthesizer`, `person-skills-explorer` |
 | Access | `session-bridge`, `agent-browser` |
 | Loop | `source-explorer`, `self-improver`, `skill-installer`, `platform-skill-builder`, `finsocnet` |
 | Video and audio | `youtube-extractor`, `audio-transcriber`, `podcast-explorer`, `tiktok-explorer` |

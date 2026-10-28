@@ -15,6 +15,7 @@ from finsocnet.core.records import schema_errors
 
 ROLES = ("owner", "guest", "host", "co_host", "author", "co_author", "commenter", "member", "archive", "mentioned")
 MATCH_STATUSES = ("confirmed", "needs_review", "rejected")
+LINK_KINDS = ("website", "social", "video", "audio", "newsletter", "code", "paper", "scholar", "wiki", "course", "book", "store", "other")
 
 
 def resolve_id(conn: sqlite3.Connection, person_id: str) -> str:
@@ -119,6 +120,66 @@ def add_alias(conn: sqlite3.Connection, person_id: str, alias: str, platform: st
     return True
 
 
+def _norm_url(url: str) -> str:
+    return url.strip().rstrip("/")
+
+
+def link_add(conn: sqlite3.Connection, link: dict[str, Any], run_id: int) -> dict[str, Any]:
+    """One place of a person (specs/16 §3): website, social account, newsletter, channel, paper page... with confidence and evidence.
+    A link with platform and handle also becomes an alias (unless it belongs to someone else)."""
+    details = []
+    url = _norm_url(link.get("url") or "")
+    if not url.startswith(("http://", "https://")):
+        details.append({"path": "/url", "problem": "must be an http(s) URL"})
+    if link.get("kind") not in LINK_KINDS:
+        details.append({"path": "/kind", "problem": f"kind must be one of {', '.join(LINK_KINDS)}"})
+    conf = link.get("confidence", 1.0)
+    if not isinstance(conf, (int, float)) or not 0 <= conf <= 1:
+        details.append({"path": "/confidence", "problem": "must be between 0 and 1"})
+    status = link.get("match_status") or ("confirmed" if conf >= 0.7 else "needs_review")
+    if status not in MATCH_STATUSES:
+        details.append({"path": "/match_status", "problem": f"must be one of {', '.join(MATCH_STATUSES)}"})
+    if status != "rejected" and not (link.get("evidence") or "").strip():
+        details.append({"path": "/evidence", "problem": "one sentence of evidence that this is the person's (e.g. 'the bio of their X account links here')"})
+    if details:
+        raise CliError("VALIDATION_ERROR", "link failed validation", details=details)
+    pid = resolve_id(conn, link["person_id"])
+    if conn.execute("SELECT 1 FROM persons WHERE id = ?", (pid,)).fetchone() is None:
+        raise CliError("NOT_FOUND", f"person {link['person_id']} not found")
+    if link.get("source_id") and conn.execute("SELECT 1 FROM sources WHERE id = ?", (link["source_id"],)).fetchone() is None:
+        raise CliError("NOT_FOUND", f"source {link['source_id']} not found")
+    platform = link.get("platform") or ""
+    handle = (link.get("handle") or "").strip() or None
+    alias_added = None
+    with transaction(conn):
+        row = conn.execute("SELECT id FROM person_links WHERE person_id = ? AND url = ?", (pid, url)).fetchone()
+        vals = (link["kind"], platform, handle, link.get("label"), conf, status, link.get("evidence"), link.get("source_id"), run_id, utc_now())
+        if row:
+            conn.execute("UPDATE person_links SET kind = ?, platform = ?, handle = COALESCE(?, handle), label = COALESCE(?, label), confidence = ?, match_status = ?, "
+                         "evidence = COALESCE(?, evidence), source_id = COALESCE(?, source_id), run_id = ?, updated_at = ? WHERE id = ?", (*vals, row["id"]))
+            res = {"link_id": row["id"], "status": "updated"}
+        else:
+            cur = conn.execute("INSERT INTO person_links (person_id, url, kind, platform, handle, label, confidence, match_status, evidence, source_id, run_id, updated_at) "
+                               "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (pid, url, *vals))
+            res = {"link_id": cur.lastrowid, "status": "created"}
+        if handle and platform and status == "confirmed":
+            try:
+                alias_added = add_alias(conn, pid, handle, platform)
+            except CliError as e:  # the handle belongs to another person: the link stays, the conflict is reported
+                res["alias_conflict"] = e.message
+    if alias_added is not None:
+        res["alias_added"] = alias_added
+    return res
+
+
+def link_list(conn: sqlite3.Connection, person_id: str, include_rejected: bool = False) -> list[dict[str, Any]]:
+    pid = resolve_id(conn, person_id)
+    sql = "SELECT id, url, kind, platform, handle, label, confidence, match_status, evidence, source_id FROM person_links WHERE person_id = ?"
+    if not include_rejected:
+        sql += " AND match_status != 'rejected'"
+    return [dict(r) for r in conn.execute(sql + " ORDER BY kind, platform, id", (pid,))]
+
+
 def alias_add(conn: sqlite3.Connection, person_id: str, alias: str, platform: str = "") -> dict[str, Any]:
     with transaction(conn):
         return {"person_id": person_id, "alias": alias, "platform": platform, "added": add_alias(conn, person_id, alias, platform)}
@@ -167,6 +228,7 @@ def get(conn: sqlite3.Connection, person_id: str) -> dict[str, Any]:
     d["aliases"] = [dict(x) for x in conn.execute("SELECT alias, platform FROM person_aliases WHERE person_id = ? ORDER BY platform, alias", (person_id,))]
     s = conn.execute("SELECT cards, appearances, sources FROM person_stats WHERE person_id = ?", (person_id,)).fetchone()
     d["stats"] = dict(s) if s else {}
+    d["links"] = link_list(conn, person_id)
     d["images"] = [dict(x) for x in conn.execute("SELECT id, kind, platform, source_url, path, sha256, mime, width, height FROM person_images WHERE person_id = ? ORDER BY kind, id", (person_id,))]
     d["sources"] = [dict(x) for x in conn.execute("SELECT id, title, status FROM sources WHERE person_id = ?", (person_id,))]
     d["appearances"] = [dict(x) for x in conn.execute(
@@ -236,6 +298,7 @@ def merge(conn: sqlite3.Connection, src: str, dst: str, run_id: int) -> dict[str
             else:
                 conn.execute("UPDATE person_skills SET person_id = ? WHERE id = ?", (dst, sk["id"]))
         moved["person_skills_skipped"] = skipped
+        moved["links"] = conn.execute("UPDATE OR IGNORE person_links SET person_id = ? WHERE person_id = ?", (dst, src)).rowcount
         moved["images"] = conn.execute("UPDATE OR IGNORE person_images SET person_id = ? WHERE person_id = ?", (dst, src)).rowcount
         if not conn.execute("SELECT avatar_path FROM persons WHERE id = ?", (dst,)).fetchone()[0]:
             conn.execute("UPDATE persons SET avatar_path = (SELECT avatar_path FROM persons WHERE id = ?), avatar_sha256 = (SELECT avatar_sha256 FROM persons WHERE id = ?), "
