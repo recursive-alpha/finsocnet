@@ -24,7 +24,7 @@ def v1(repo):
 def test_fixture_migrates_and_maps_rows(repo, v1):
     conn = connect(v1)
     res = migrations.migrate(conn)
-    assert res["applied"] == ["003_v2_schema"]
+    assert res["applied"][0] == "003_v2_schema"
     assert res["backups"] and all(sys.modules["pathlib"].Path(b).exists() for b in res["backups"])  # pre-migration backup
 
     legacy = conn.execute("SELECT COUNT(*) FROM legacy_contents").fetchone()[0]

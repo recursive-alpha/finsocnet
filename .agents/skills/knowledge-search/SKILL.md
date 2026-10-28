@@ -14,13 +14,13 @@ metadata:
 
 # Knowledge Search
 
-Search is lexical over canonical cards (ADR-001): you turn the question into the same vocabulary the cards use, the script retrieves, and you judge relevance and write the answer.
+Search is hybrid over canonical cards, BM25 plus embeddings of the English Query Card (ADR-001, ADR-009): you turn the question into the same vocabulary the cards use, the script retrieves, and you judge relevance and write the answer.
 
 ## Procedure
 
 1. `kb run start --skill knowledge-search --goal "<question>" --harness <h> --model <m>` → `R`.
-2. Write a Query Card (see `knowledge-transformer/references/query_examples.md`) to `data/work/<R>/q.json`. If the question names a person, resolve them first: `kb person candidates --name "<name>"`.
-3. `uv run finsocnet kb card search --query-card data/work/<R>/q.json --limit 30`.
+2. **Not English?** Use `translator` §3 first: restate the question in English. Then write a Query Card (see `knowledge-transformer/references/query_examples.md`) to `data/work/<R>/q.json`. If the question names a person, resolve them first: `kb person candidates --name "<name>"`.
+3. `uv run finsocnet kb card search --query-card data/work/<R>/q.json --limit 30 [--mode auto|lexical|semantic|hybrid]`. `auto` (default) fuses BM25 over the canonical form with the cosine ranking of the embedded Query Card when card embeddings exist (`kb embed status`; run `kb embed sync` if cards are pending). The flow is: question → translate → Query Card → embed → hybrid search.
 4. Read every result. Drop irrelevant ones. Group cards that answer the same sub-question. For cards with `stats.contradictions > 0`, run `kb card get <id> --links` and read the other side.
 5. Fewer than 3 relevant cards → rewrite the Query Card once (broader terms, more aliases, fewer filters) and search again.
 6. Need more context for a claim → `kb content view <content_id> --from-seq <seq-2> --to-seq <seq+3>` around the citation.

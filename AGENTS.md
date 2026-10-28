@@ -5,7 +5,7 @@ FinSocNet is an agent-operated knowledge network. **You are the only model in it
 ## What it does
 
 1. **Discover** people and sources on every platform where finance knowledge is published.
-2. **Capture** everything into one SQLite file, `data/knowledge.db` (relational tables + FTS5; no vector store, no embeddings).
+2. **Capture** everything into one SQLite file, `data/knowledge.db` (relational tables + FTS5 + English embeddings stored as BLOBs; no separate vector store, ADR-009).
 3. **Transform** content into **Knowledge Cards** (fixed schema, claim grammar, controlled vocabulary).
 4. **Deduplicate** with your judgment (`same / refines / related / contradicts / new`), logged with a rationale.
 5. **Serve** answers with citations, per-person rulebooks, consensus and contradictions.
@@ -13,7 +13,7 @@ FinSocNet is an agent-operated knowledge network. **You are the only model in it
 
 ## Rules you must follow
 
-**Never:** add a vector database or embedding code (ADR-001) · call an LLM API from a script (ADR-002) · call `chromium.launch()` / `new_context()` (use the agent browser, ADR-006) · print, log or store cookie values or tokens · add username/password login (ADR-005) · create per-person folders under `.agents/skills/` · delete contents, segments, citations or decisions · write to `knowledge.db` with raw SQL · change the schema without a numbered migration and a backup · install, update or remove a skill without `skill-installer`'s review and the user's yes · edit an installed third-party skill in place · commit to `main` from the self-improver.
+**Never:** add a separate vector database or a torch stack (ADR-001/009); detect languages or translate in a script (the agent does, skill `translator`) · call an LLM API from a script (ADR-002) · call `chromium.launch()` / `new_context()` (use the agent browser, ADR-006) · print, log or store cookie values or tokens · add username/password login (ADR-005) · create per-person folders under `.agents/skills/` · delete contents, segments, citations or decisions · write to `knowledge.db` with raw SQL · change the schema without a numbered migration and a backup · install, update or remove a skill without `skill-installer`'s review and the user's yes · edit an installed third-party skill in place · commit to `main` from the self-improver.
 
 **Always:** start a workflow with `kb run start` and pass `--run <id>` to every write · validate agent-written JSON with `kb card validate` before committing · read `error.hint` before retrying · keep SKILL.md in step with the CLI.
 

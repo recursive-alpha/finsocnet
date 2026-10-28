@@ -46,7 +46,7 @@
 | # | Principle | Meaning in practice |
 |---|---|---|
 | P1 | **Harness-native intelligence** | All reading, judging and writing of knowledge is done by the harness agent (Claude Code, Codex, Hermes, Pi, OMP, OpenClaw) following SKILL.md instructions and few-shot examples. Scripts are deterministic: fetch, transcribe, store, validate, search, score. |
-| P2 | **SQLite only** | One file, `data/knowledge.db`: relational tables + FTS5. No vector database, no embeddings (see ADR-001). |
+| P2 | **SQLite only** | One file, `data/knowledge.db`: relational tables + FTS5 + a vectors table. No separate vector database (ADR-001, ADR-009). |
 | P3 | **Canonical knowledge form** | Knowledge is stored as Knowledge Cards with a fixed schema, a claim grammar and a controlled vocabulary. Queries are transformed into the same form before searching. |
 | P4 | **Nothing ignored** | Every fetched item is stored. Items without knowledge are kept as `processed` with zero cards. Session import takes all cookie domains. Every platform where finance knowledge is published is in scope (§5). |
 | P5 | **Agent-judged dedup** | Scripts only retrieve candidates. The agent decides `same / refines / related / contradicts / new`, with a stored rationale. |
@@ -62,7 +62,9 @@
 
 These decisions are final for v2. Implementing agents must not reverse them. Each ADR says what would justify revisiting it.
 
-### ADR-001 — SQLite only. No Chroma, no vector database, no embedding model.
+### ADR-001 — SQLite only. No Chroma, no vector database. *(embedding part superseded by ADR-009)*
+
+> **Update:** the single-store decision stands. The "no embedding model" part was reversed on request by ADR-009: vectors are stored in the same SQLite file and fused with BM25. `chromadb`, `faiss`, `lancedb`, `qdrant-client` and torch stacks stay out.
 
 **Context.** v1 stored relational data in SQLite and vectors in Chroma (`data/chroma_db`), using `sentence-transformers/all-MiniLM-L6-v2` embeddings for search and for deduplication at cosine ≥ 0.75.
 
@@ -79,6 +81,19 @@ These decisions are final for v2. Implementing agents must not reverse them. Eac
 **Consequences.** Search recall depends on vocabulary quality. Therefore the vocabulary is curated (`vocabulary` table), measured (search eval recall@10, see `06`), and improved by the self-improver. Agent token cost is higher than a vector lookup; this is accepted.
 
 **Revisit only if** search eval recall@10 stays below 0.80 after two rounds of vocabulary improvement. Even then the only allowed option is an extension *inside* `knowledge.db` (e.g. `sqlite-vec`), approved by a new ADR. A separate vector database service is never allowed.
+
+### ADR-009 — Hybrid semantic search: local English embeddings in SQLite, translation by the agent.
+
+**Context.** ADR-001 removed embeddings because the v1 model (MiniLM) was English-only and was used for dedup thresholds. The user asked for semantic search (query → translate to knowledge → embed → search) and a better default model chosen from the MTEB leaderboard.
+
+**Decision.**
+1. **English only.** Cards are English by contract. Segments and persons in other languages are embedded through an English translation that the agent writes (skill `translator`); the agent also decides the language of every content (no detection library, no heuristic). Content with no language yet is not embedded.
+2. **Model.** `snowflake/snowflake-arctic-embed-m` via fastembed (ONNX, CPU, 0.43 GB, Apache-2.0), chosen from MTEB English retrieval results; configurable in `config/embedding.yaml`. Vectors are stored per model, so changing the model re-embeds lazily.
+3. **Store.** float32 BLOBs in table `embeddings` in `data/knowledge.db`, scored by brute-force cosine with numpy (corpus: < 200k cards). No second database, no extension, no torch.
+4. **Search.** `kb card search` is hybrid by default: RRF of the BM25 sub-queries and the cosine ranking of the embedded Query Card (the vector ranking counts double). Without vectors it is exactly the lexical search of ADR-001. Dedup candidate retrieval uses the same fusion; the **decision stays with the agent** (a similarity score never merges cards).
+5. **Scripts still never call an LLM** (ADR-002): the encoder is a local model, language detection and translation are agent work.
+
+**Revisit** if the embeddings table exceeds ~1M rows (move to an ANN index) or the English-only rule hurts recall on non-English quotes.
 
 ### ADR-002 — No LLM SDK calls from scripts.
 
@@ -121,7 +136,7 @@ These decisions are final for v2. Implementing agents must not reverse them. Eac
 ## 4. Hard Rules for Implementing Agents
 
 ### Never do
-- Add or import `chromadb`, `sentence-transformers`, `torch`, `faiss`, `sqlite-vec`, `numpy`-based vector search, or any embedding code (ADR-001).
+- Add or import a second store or a heavyweight stack for vectors: `chromadb`, `sentence-transformers`, `torch`, `faiss`, `sqlite-vec`, `lancedb`, `qdrant-client` (ADR-001). Embeddings are allowed only as ADR-009 describes: a local ONNX encoder, float32 BLOBs in `embeddings`, English text only.
 - Call an LLM API or SDK from any script (ADR-002).
 - Call `chromium.launch()`, `launch_persistent_context()` or `browser.new_context()` in any platform script (ADR-006).
 - Print, log, store in the DB, or commit cookie values, tokens, or localStorage values. Only counts, names of domains and expiry dates may be shown.

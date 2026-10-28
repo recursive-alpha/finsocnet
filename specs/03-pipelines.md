@@ -59,7 +59,7 @@ SEGMENTS 40-61 of 0-212
 
 ## 2. Candidate Retrieval Algorithm (`finsocnet.core.cards.candidates`, `fts.py`)
 
-Deterministic, lexical, no embeddings (ADR-001). Used by both `kb card candidates` (dedup) and `kb card search` (search).
+Deterministic for a given database and model: BM25 sub-queries plus, when card embeddings exist, the cosine ranking (ADR-009), fused with RRF. Used by both `kb card candidates` (dedup) and `kb card search` (search).
 
 ### 2.1 Input normalization
 

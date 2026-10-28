@@ -27,6 +27,7 @@ dependencies = [
     "pyrage>=1.2.0",
     "textual>=8.2.8",
     "prompt-toolkit>=3.0.53",
+    "fastembed>=0.9.1",
 ]
 
 [project.scripts]

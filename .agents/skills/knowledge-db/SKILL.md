@@ -14,7 +14,7 @@ metadata:
 
 # Knowledge DB (`finsocnet kb`)
 
-One SQLite file, `data/knowledge.db`, holds everything: relational tables plus FTS5 full-text indices. There is no Chroma, no vector table and no embedding model. Semantic judgment is done by you, the agent, using the knowledge skills.
+One SQLite file, `data/knowledge.db`, holds everything: relational tables plus FTS5 full-text indices. Embeddings of English text live in the `embeddings` table (no Chroma, no second store, ADR-009). Semantic judgment (same / refines / related) is still yours, never a similarity threshold.
 
 ## When to use
 
@@ -41,7 +41,9 @@ All commands: `uv run finsocnet kb <group> <command> …` (same as `uv run .agen
 | source | `source upsert --file F` W; `source get\|list`; `source cursor ID --set C` W |
 | content | `content add --file F` W; `get ID`; `view ID [--from-seq A --to-seq B]`; `chunks ID [--max-chars 12000] [--overlap 2]`; `list [--status] [--platform]`; `claim ID` W; `done ID --upto-seq N --cards N` W; `fail ID --error T` W; `link-duplicate ID --of OTHER` W; `search "<text>" [--content ID] [--person P]` |
 | vocab | `vocab lookup "<phrase>"`; `vocab add --file F` W; `vocab update\|merge` W; `vocab list\|export` |
-| card | `card validate --file F`; `card candidates --file F [--limit 10]`; `card commit --file F` W; `card search --query-card F \| --text Q`; `card get ID [--citations --links --history]`; `card list`; `card update\|merge\|retire\|undo` W; `card link\|unlink --from A --to B [--relation related] --reason R` W (add or remove one link after the fact; snapshots card A first); `citation attribute ID --person P --role R --confidence C` W |
+| embed | `embed status`; `embed sync [--kinds card,person,skill,segment] [--limit N]`; `embed query --text T [--kinds card]` (English text; nearest rows) |
+| translate | `translate detect-pending`; `translate set-language --file F` W; `translate pending [--content C]`; `translate put --file F` W; `translate get C [--seq N]` (the agent detects and translates, see skill `translator`) |
+| card | `card validate --file F`; `card candidates --file F [--limit 10]`; `card commit --file F` W; `card search --query-card F \| --text Q [--mode auto\|lexical\|semantic\|hybrid]`; `card get ID [--citations --links --history]`; `card list`; `card update\|merge\|retire\|undo` W; `card link\|unlink --from A --to B [--relation related] --reason R` W (add or remove one link after the fact; snapshots card A first); `citation attribute ID --person P --role R --confidence C` W |
 | decision | `decision list [--reviewed none]`; `decision review ID --verdict agreed\|overturned` W |
 | person / skill | `person candidates\|upsert\|alias add\|appearance add\|get\|list\|cards\|merge`; `skill upsert\|get\|list` |
 | queue / gap / history | `queue add\|next\|update\|list`; `gap add\|list\|update`; `history pending\|mark` |
@@ -71,4 +73,4 @@ Full reference with outputs: `specs/01-database.md` §6.
 
 ## Why SQLite only
 
-See `specs/README.md` ADR-001: one transaction for card + citations + links + index + decision, no second store to drift, the vocabulary-based card format makes lexical search work, and the agent makes the semantic decisions. Do not add Chroma, embeddings or a vector extension.
+See `specs/README.md` ADR-001 and ADR-009: one transaction for card + citations + links + index + decision, no second store to drift, the vocabulary-based card format makes lexical search work, and the agent makes the semantic decisions. Do not add Chroma, faiss, a vector extension or torch.

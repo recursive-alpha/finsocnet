@@ -14,7 +14,7 @@ metadata:
 
 # Knowledge Dedup
 
-`kb card candidates` finds up to 10 similar existing cards with SQLite FTS5 over the canonical card fields (no embeddings, ADR-001). **You** decide what each candidate is to the new card. `kb card commit` applies your decision in one transaction and stores your rationale.
+`kb card candidates` finds up to 10 similar existing cards with SQLite FTS5 over the canonical card fields fused with the cosine ranking of the card embeddings when they exist (ADR-009). **You** decide what each candidate is to the new card. `kb card commit` applies your decision in one transaction and stores your rationale.
 
 ## When to use
 

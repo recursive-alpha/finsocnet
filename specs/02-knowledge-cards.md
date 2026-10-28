@@ -121,7 +121,7 @@ Writing rules:
 
 ## 4. Vocabulary
 
-The vocabulary is what makes lexical search work without embeddings (ADR-001). Treat it as a product.
+The vocabulary is what makes lexical search work, and the embeddings (ADR-009) catch what it misses. Treat it as a product.
 
 ### 4.1 Term key rules
 

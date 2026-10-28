@@ -1,0 +1,15 @@
+# Semantic search (specs/10-semantic-search.md). Everything is embedded as English text: cards are English by contract,
+# segments and persons in other languages are embedded through their translation (skill `translator`).
+#
+# Default model chosen from the MTEB leaderboard (https://huggingface.co/spaces/mteb/leaderboard): among the models that run on
+# CPU through ONNX (fastembed) in under 0.5 GB, snowflake-arctic-embed-m has the best English retrieval score
+# (mean nDCG@10 55.8 over 14 MTEB retrieval tasks vs bge-base 54.1, nomic-v1.5 53.8, bge-small 52.5; Apache-2.0, 768 dims).
+# Bigger options once you have the disk/RAM: Qwen/Qwen3-Embedding-0.6B (+ query_prefix "Instruct: Given a web search query, retrieve relevant passages\nQuery:"),
+# mixedbread-ai/mxbai-embed-large-v1. Changing the model re-embeds lazily: vectors are stored per model.
+provider: fastembed            # fastembed | hashing (offline bag-of-words, for tests and machines without the model)
+model: snowflake/snowflake-arctic-embed-m
+query_prefix: "Represent this sentence for searching relevant passages: "
+doc_prefix: ""
+batch_size: 32
+max_chars: 2000
+cache_dir: data/models

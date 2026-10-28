@@ -11,7 +11,7 @@ import sqlite3
 from pathlib import Path
 from typing import Any
 
-from finsocnet.core import config, fts, vocab
+from finsocnet.core import config, embed, fts, vocab
 from finsocnet.core.db import dumps, loads, savepoint, transaction
 from finsocnet.core.ids import parse_since, utc_now
 from finsocnet.core.normalize import quote_in, quote_key
@@ -305,12 +305,32 @@ def _passes(card: dict[str, Any], stats: dict[str, int], conn: sqlite3.Connectio
     return True
 
 
+VEC_WEIGHT = 2.0
+
+
+def resolve_mode(conn: sqlite3.Connection, mode: str, vector_text: str | None, warnings: list[str]) -> str:
+    """`auto` = hybrid when card vectors exist for the configured model, else lexical. An explicit semantic/hybrid without vectors degrades with a warning."""
+    have = bool(vector_text) and embed.has_vectors(conn, "card")
+    if mode == "auto":
+        return "hybrid" if have else "lexical"
+    if mode in ("semantic", "hybrid") and not have:
+        warnings.append(f"no card embeddings for model {embed.model_id()}: run `finsocnet kb embed sync`; using lexical search")
+        return "lexical"
+    return mode
+
+
 def retrieve(conn: sqlite3.Connection, spec: Spec, limit: int = 10, filters: dict[str, Any] | None = None,
-             same_citation: tuple[str, int] | None = None, run_id: int | None = None) -> dict[str, Any]:
-    """Run the sub-queries, fuse with RRF, filter, return `{candidates, siblings, warnings}` (deterministic)."""
+             same_citation: tuple[str, int] | None = None, run_id: int | None = None, vector_text: str | None = None,
+             mode: str = "lexical") -> dict[str, Any]:
+    """Run the sub-queries (BM25 over the canonical form) and the vector query (cosine over card embeddings), fuse with RRF,
+    filter, return `{candidates, siblings, warnings}` (deterministic for a given database and model)."""
     ranks: dict[int, dict[str, int]] = {}
     warnings: list[str] = []
-    queries = _sub_queries(spec) + [(f"q_agent_{i}", e) for i, e in enumerate(spec.fts_queries)]
+    mode = resolve_mode(conn, mode, vector_text, warnings)
+    if mode in ("semantic", "hybrid"):
+        for cid, rk in embed.card_vector_ranks(conn, vector_text or "", 100).items():
+            ranks.setdefault(cid, {})["vec"] = rk
+    queries = (_sub_queries(spec) + [(f"q_agent_{i}", e) for i, e in enumerate(spec.fts_queries)]) if mode != "semantic" else []
     for name, expr in queries:
         try:
             rows = conn.execute(ISSUE_SQL, (expr,)).fetchall()
@@ -319,7 +339,8 @@ def retrieve(conn: sqlite3.Connection, spec: Spec, limit: int = 10, filters: dic
             continue
         for rank, r in enumerate(rows, 1):
             ranks.setdefault(r["rowid"], {})[name] = rank
-    scored = sorted(((-sum(1.0 / (60 + rk) for rk in rs.values()), cid) for cid, rs in ranks.items()))
+    # the vector ranking sees the whole query at once, so it counts double against each BM25 sub-query
+    scored = sorted(((-sum((VEC_WEIGHT if n == "vec" else 1.0) / (60 + rk) for n, rk in rs.items()), cid) for cid, rs in ranks.items()))
     out, siblings = [], []
     for neg, cid in scored:
         card = card_row(conn, cid)
@@ -346,25 +367,32 @@ def candidates(conn: sqlite3.Connection, cards: list[dict[str, Any]], index: int
         if index is not None and i != index:
             continue
         cit = card.get("citation", {})
-        r = retrieve(conn, spec_from_card(conn, card), limit, None, (cit.get("content_id"), cit.get("segment_seq")), run_id)
+        r = retrieve(conn, spec_from_card(conn, card), limit, None, (cit.get("content_id"), cit.get("segment_seq")), run_id,
+                     vector_text=embed.card_text(card), mode="auto")
         res.append({"index": i, "candidates": r["candidates"], "siblings": r["siblings"]})
         warns.extend(r["warnings"])
     return res, warns
 
 
 def search_cards(conn: sqlite3.Connection, query_card: dict[str, Any] | None = None, text: str | None = None,
-                 limit: int = 30) -> dict[str, Any]:
+                 limit: int = 30, mode: str = "auto", extra_filters: dict[str, Any] | None = None) -> dict[str, Any]:
+    """`mode`: lexical (BM25 only) | semantic (vectors only) | hybrid (RRF of both) | auto (hybrid when vectors exist).
+    The query must already be English: a Query Card is, free `--text` is the agent's responsibility (skill `translator`)."""
+    if mode not in ("auto", "lexical", "semantic", "hybrid"):
+        raise CliError("USAGE", f"unknown mode {mode!r}", "auto | lexical | semantic | hybrid")
     if query_card is not None:
         errs = schema_errors("query_card", query_card)
         if errs:
             raise CliError("VALIDATION_ERROR", "query card failed validation", details=[_problem(e["path"], "VALIDATION_ERROR", e["problem"]) for e in errs])
-        spec, filters = spec_from_query(conn, query_card), query_card.get("filters")
+        spec, filters, vtext = spec_from_query(conn, query_card), query_card.get("filters"), embed.query_text(query_card)
     elif text:
-        spec, filters = spec_from_text(conn, text), None
+        spec, filters, vtext = spec_from_text(conn, text), None, text
     else:
         raise CliError("USAGE", "give --query-card or --text")
-    r = retrieve(conn, spec, limit, filters)
-    return {"results": r["candidates"], "terms_used": spec.terms, "warnings": r["warnings"]}
+    if extra_filters:
+        filters = {**(filters or {}), **extra_filters}
+    r = retrieve(conn, spec, limit, filters, vector_text=vtext, mode=mode)
+    return {"results": r["candidates"], "terms_used": spec.terms, "warnings": r["warnings"], "mode": mode if mode != "auto" else ("hybrid" if embed.has_vectors(conn) else "lexical")}
 
 
 # --- commit ---------------------------------------------------------------------------------------------

@@ -225,7 +225,7 @@ def score_attribution(outputs: Path) -> dict[str, Any]:
     return {"set": "attribution", "n": len(cases), "metrics": {"accuracy": round(ok / total, 3) if total else None}, "failures": failures}
 
 
-def score_search(outputs: Path) -> dict[str, Any]:
+def score_search(outputs: Path, mode: str = "lexical") -> dict[str, Any]:
     fixture = evals_dir() / "search" / "fixture_db.sql"
     if not fixture.exists():
         raise CliError("NOT_FOUND", "evals/search/fixture_db.sql does not exist")
@@ -234,6 +234,9 @@ def score_search(outputs: Path) -> dict[str, Any]:
     with tempfile.TemporaryDirectory() as tmp:
         conn = scratch_db(Path(tmp))
         conn.executescript(fixture.read_text(encoding="utf-8"))
+        if mode in ("semantic", "hybrid"):
+            from finsocnet.core import embed
+            embed.sync(conn, ["card"])
         keys = {r["id"]: (re.search(r"fixture_key:\s*(\S+)", r["notes"] or "") or [None, None])[1] for r in conn.execute("SELECT id, notes FROM knowledge_cards")}
         for name, path in case_files("search"):
             case = read(path)
@@ -244,7 +247,7 @@ def score_search(outputs: Path) -> dict[str, Any]:
                 exp_total += len(case["expected_card_refs"])
                 continue
             try:
-                res = cards_mod.search_cards(conn, read(out_file), None, 10)["results"]
+                res = cards_mod.search_cards(conn, read(out_file), None, 10, mode)["results"]
             except CliError as e:
                 failures.append({"case": name, "reason": f"invalid query card: {e.message}"})
                 exp_total += len(case["expected_card_refs"])
@@ -261,7 +264,7 @@ def score_search(outputs: Path) -> dict[str, Any]:
             if set(case.get("must_not", [])) & set(ranked):
                 failures.append({"case": name, "reason": f"returned forbidden {sorted(set(case['must_not']) & set(ranked))}"})
         conn.close()
-    return {"set": "search", "n": n, "metrics": {"recall@10": round(hits / exp_total, 3) if exp_total else None,
+    return {"set": "search", "mode": mode, "n": n, "metrics": {"recall@10": round(hits / exp_total, 3) if exp_total else None,
             "mrr": round(mrr_sum / n, 3) if n else None}, "failures": failures}
 
 
@@ -292,6 +295,7 @@ def main(argv: list[str] | None = None) -> None:
     b.add_argument("set", choices=SETS)
     b.add_argument("--outputs", required=True)
     b.add_argument("--out")
+    b.add_argument("--search-mode", default="lexical", choices=["lexical", "semantic", "hybrid"], help="search set only; semantic/hybrid embed the fixture with the configured model")
     c = sub.add_parser("run")
     c.add_argument("--all", action="store_true")
     c.add_argument("--out")
@@ -305,7 +309,8 @@ def main(argv: list[str] | None = None) -> None:
         if args.cmd == "prepare":
             return Result(prepare(args.set, config.resolve_path(args.out)))
         if args.cmd == "score":
-            rep = with_targets(SCORERS[args.set](config.resolve_path(args.outputs)))
+            outputs = config.resolve_path(args.outputs)
+            rep = with_targets(score_search(outputs, args.search_mode) if args.set == "search" else SCORERS[args.set](outputs))
             if args.out:
                 Path(config.resolve_path(args.out)).write_text(json.dumps(rep, indent=1) + "\n", encoding="utf-8")
             return Result(rep)

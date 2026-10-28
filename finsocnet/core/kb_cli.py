@@ -10,7 +10,7 @@ import time
 from pathlib import Path
 from typing import Any, Callable
 
-from finsocnet.core import cards as cards_mod, config, content as content_mod, migrations, persons as persons_mod, runs, vocab as vocab_mod
+from finsocnet.core import cards as cards_mod, config, content as content_mod, embed as embed_mod, migrations, translate as translate_mod, persons as persons_mod, runs, vocab as vocab_mod
 from finsocnet.core import person_skills as skills_mod
 from finsocnet.core import queue as queue_mod
 from finsocnet.core import output
@@ -431,8 +431,8 @@ def cmd_card_commit(ctx: Ctx) -> Result:
 def cmd_card_search(ctx: Ctx) -> Result:
     a = ctx.args
     qc = read_json(a.query_card) if a.query_card else None
-    res = cards_mod.search_cards(ctx.conn(), qc, a.text, a.limit)
-    return Result({"results": res["results"], "terms_used": res["terms_used"]}, res["warnings"])
+    res = cards_mod.search_cards(ctx.conn(), qc, a.text, a.limit, a.mode)
+    return Result({"results": res["results"], "terms_used": res["terms_used"], "mode": res["mode"]}, res["warnings"])
 
 
 def cmd_card_get(ctx: Ctx) -> Result:
@@ -618,6 +618,49 @@ def _common() -> argparse.ArgumentParser:
     return p
 
 
+def cmd_embed_status(ctx: Ctx) -> Result:
+    return Result(embed_mod.status(ctx.conn()))
+
+
+def cmd_embed_sync(ctx: Ctx) -> Result:
+    a = ctx.args
+    return Result(embed_mod.sync(ctx.conn(), [k.strip() for k in a.kinds.split(",") if k.strip()], a.limit))
+
+
+def cmd_embed_query(ctx: Ctx) -> Result:
+    a = ctx.args
+    kinds = [k.strip() for k in a.kinds.split(",") if k.strip()]
+    return Result({"model": embed_mod.model_id(), "hits": embed_mod.vector_search(ctx.conn(), a.text, kinds, a.limit)})
+
+
+def cmd_translate_pending(ctx: Ctx) -> Result:
+    a = ctx.args
+    items = translate_mod.pending(ctx.conn(), content_id=a.content, limit=a.limit)
+    return Result({"count": len(items), "items": items})
+
+
+def cmd_translate_detect_pending(ctx: Ctx) -> Result:
+    items = translate_mod.detect_pending(ctx.conn(), ctx.args.limit)
+    return Result({"count": len(items), "items": items})
+
+
+def cmd_translate_set_language(ctx: Ctx) -> Result:
+    run = ctx.run_id()
+    payload = read_json(ctx.args.file)
+    return Result(translate_mod.set_language(ctx.conn(), payload if isinstance(payload, list) else [payload], run))
+
+
+def cmd_translate_put(ctx: Ctx) -> Result:
+    run = ctx.run_id()
+    payload = read_json(ctx.args.file)
+    return Result(translate_mod.put(ctx.conn(), payload if isinstance(payload, list) else [payload], run))
+
+
+def cmd_translate_get(ctx: Ctx) -> Result:
+    a = ctx.args
+    return Result({"translations": translate_mod.get(ctx.conn(), a.content, a.seq)})
+
+
 def build_parser() -> _Parser:
     root = _Parser(prog="finsocnet kb", description="FinSocNet database CLI (SQLite + FTS5)")
     groups = root.add_subparsers(dest="group", required=True, parser_class=_Parser)
@@ -781,6 +824,8 @@ def build_parser() -> _Parser:
     p.add_argument("--query-card")
     p.add_argument("--text")
     p.add_argument("--limit", type=int, default=30)
+    p.add_argument("--mode", default="auto", choices=["auto", "lexical", "semantic", "hybrid"],
+                   help="auto = hybrid (BM25 + vectors, RRF) when card embeddings exist, else lexical")
     p = leaf(g, ("card", "get"), "get", cmd_card_get)
     p.add_argument("id", type=int)
     p.add_argument("--citations", action="store_true")
@@ -893,6 +938,30 @@ def build_parser() -> _Parser:
     p = leaf(g, ("queue", "list"), "list", cmd_queue_list)
     p.add_argument("--status", choices=queue_mod.STATUSES)
     p.add_argument("--limit", type=int, default=100)
+
+    g = group("embed", "semantic search index (specs/10-semantic-search.md)")
+    leaf(g, ("embed", "status"), "status", cmd_embed_status)
+    p = leaf(g, ("embed", "sync"), "sync", cmd_embed_sync, "embed every row without an up-to-date vector")
+    p.add_argument("--kinds", default="card,person,skill", help="card,person,skill,segment")
+    p.add_argument("--limit", type=int)
+    p = leaf(g, ("embed", "query"), "query", cmd_embed_query, "nearest rows to an English text")
+    p.add_argument("--text", required=True)
+    p.add_argument("--kinds", default="card")
+    p.add_argument("--limit", type=int, default=10)
+
+    g = group("translate", "English translations of segments (done by the agent)")
+    p = leaf(g, ("translate", "pending"), "pending", cmd_translate_pending)
+    p.add_argument("--content")
+    p.add_argument("--limit", type=int, default=50)
+    p = leaf(g, ("translate", "detect-pending"), "detect-pending", cmd_translate_detect_pending, "contents whose language the agent has not set")
+    p.add_argument("--limit", type=int, default=20)
+    p = leaf(g, ("translate", "set-language"), "set-language", cmd_translate_set_language, "store the agent's language verdicts")
+    p.add_argument("--file", required=True)
+    p = leaf(g, ("translate", "put"), "put", cmd_translate_put)
+    p.add_argument("--file", required=True)
+    p = leaf(g, ("translate", "get"), "get", cmd_translate_get)
+    p.add_argument("content")
+    p.add_argument("--seq", type=int)
 
     g = group("gap", "knowledge gaps")
     p = leaf(g, ("gap", "add"), "add", cmd_gap_add)

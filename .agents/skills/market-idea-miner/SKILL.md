@@ -21,6 +21,7 @@ Orchestrates other skills for one content item. It has no script of its own; eve
 1. `kb run start --skill market-idea-miner --goal "mine <content_id>" --harness <h> --model <m>` → `R`.
 2. `kb content claim <content_id> --run R` — on `CONFLICT` another run is mining it: stop.
 3. `kb content get <content_id> --meta-only` — title, platform, source, author, duration, status. Status `metadata_only` → the text is not fetched yet: fetch it with the platform skill first, or stop.
+3b. **Language** (`translator` §1): if `contents.language` is empty, read the sample and `kb translate set-language`. A non-English content still yields English cards with source-language quotes; translate its segments afterwards (`translator` §2) so they become searchable.
 4. **People first** (`person-matcher`): find owner/host/guests/author from title, description, source owner and the first segments. Confirm or create persons and appearances. You need the cast before attributing quotes.
 5. `kb content chunks <content_id>` (default 12000 chars; books 8000; code 6000 via `--max-chars`). Chunks start after `processed_upto_seq`, so a resumed or extended content continues where it stopped.
 6. For each chunk `NNN`:
@@ -29,6 +30,7 @@ Orchestrates other skills for one content item. It has no script of its own; eve
    c. `knowledge-dedup` → `chunk_NNN.decisions.json` → `kb card commit --run R`.
    d. `kb content done <content_id> --upto-seq B --cards <running total> --transformer kt-1.0 --run R` (checkpoint).
 7. **Mentions**: collect people, books, papers, tools, channels and URLs worth exploring. For each: `kb queue add --target … --target-kind url|handle|person|book|paper|query --origin mention --origin-ref <content_id> --reason "<one line>" --priority <0..1> --run R`.
+7b. `kb embed sync` (cards written in this run become semantically searchable; cheap and incremental).
 8. If any person gained ≥ 5 citations in this run, list them for `person-skill-synthesizer` (run it now if the user asked for rulebooks).
 9. `kb run end --run R --outcome success --stats '{"chunks": N, "cards_new": N, "cards_merged": N, "skipped_chunks": N}'`.
 
