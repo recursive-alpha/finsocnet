@@ -1,6 +1,6 @@
 ---
 name: person-skills-explorer
-description: Read, list and compare traders' rulebooks stored in the FinSocNet database — a person's full strategy, one category (setup, entry, trade management, risk, psychology, checklists), or a side-by-side comparison of several traders on a topic, each rule linked to its source cards. Use for "show me <trader>'s strategy", "how does <trader> manage trades", "compare <A> and <B> on stops", "which traders do we have", or /finsocnet:strategy and /finsocnet:compare.
+description: Read, list and compare people's (traders, portfolio managers, economists, professors) rulebooks stored in the FinSocNet database — a person's full strategy, one category (setup, entry, trade management, risk, psychology, checklists), or a side-by-side comparison of several traders on a topic, each rule linked to its source cards. Use for "show me <trader>'s strategy", "how does <trader> manage trades", "compare <A> and <B> on stops", "which traders do we have", or /finsocnet:strategy and /finsocnet:compare.
 license: MIT
 compatibility: Requires the FinSocNet repository (finsocnet kb CLI).
 metadata:

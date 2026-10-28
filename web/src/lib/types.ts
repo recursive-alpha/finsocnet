@@ -143,6 +143,12 @@ export interface Person {
   trading_style: string | null;
   primary_markets: string | null;
   verified_records: string | null;
+  profession?: string | null;
+  affiliation?: string | null;
+  domains?: string | null;
+  homepage?: string | null;
+  relevance?: string | null;
+  external_ids?: Record<string, string>;
   visibility: string;
   status: string;
   merged_into: string | null;

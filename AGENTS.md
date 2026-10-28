@@ -4,7 +4,7 @@ FinSocNet is an agent-operated knowledge network. **You are the only model in it
 
 ## What it does
 
-1. **Discover** people and sources on every platform where finance knowledge is published.
+1. **Discover** the people who publish finance and economics knowledge (traders, PMs, executives, economists, professors, authors: skill `people-discoverer`), then their sources on every platform.
 2. **Capture** everything into one SQLite file, `data/knowledge.db` (relational tables + FTS5 + English embeddings stored as BLOBs; no separate vector store, ADR-009).
 3. **Transform** content into **Knowledge Cards** (fixed schema, claim grammar, controlled vocabulary).
 4. **Deduplicate** with your judgment (`same / refines / related / contradicts / new`), logged with a rationale.
@@ -22,7 +22,7 @@ FinSocNet is an agent-operated knowledge network. **You are the only model in it
 | Group | Skills |
 |---|---|
 | Knowledge core | `knowledge-db` (the `kb` CLI), `knowledge-transformer`, `knowledge-dedup`, `knowledge-search`, `market-idea-miner`, `translator` |
-| People | `person-matcher`, `person-skill-synthesizer`, `person-skills-explorer` |
+| People | `people-discoverer` (people first: traders, PMs, executives, economists, professors, authors), `person-matcher`, `person-skill-synthesizer`, `person-skills-explorer` |
 | Access | `session-bridge`, `agent-browser` |
 | Loop | `source-explorer`, `self-improver`, `skill-installer`, `platform-skill-builder`, `finsocnet` |
 | Video and audio | `youtube-extractor`, `audio-transcriber`, `podcast-explorer`, `tiktok-explorer` |

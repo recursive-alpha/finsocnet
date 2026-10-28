@@ -93,3 +93,20 @@ def test_merge_moves_images_and_the_avatar(conn, run_id, person, web):
     p = persons.get(conn, person)
     assert len(p["images"]) == 1 and p["avatar_path"]
     assert persons.image_list(conn, "example-dup")[0]["person_id"] == person  # resolve_id follows the merge
+
+
+def test_persons_carry_profession_affiliation_and_external_ids(conn, run_id):
+    from finsocnet.core import persons
+    persons.upsert(conn, {"id": "jane-professor", "canonical_name": "Jane Professor", "profession": "academic", "affiliation": "Example University", "domains": "asset pricing, macro",
+                          "relevance": "publishes on the equity premium", "external_ids": {"orcid": "0000-0000-0000-0001", "openalex": "A1"}}, run_id)
+    persons.upsert(conn, {"id": "pat-pm", "canonical_name": "Pat PM", "profession": "portfolio_manager"}, run_id)
+    got = persons.get(conn, "jane-professor")
+    assert got["profession"] == "academic" and got["external_ids"] == {"orcid": "0000-0000-0000-0001", "openalex": "A1"} and got["affiliation"] == "Example University"
+    assert [p["id"] for p in persons.list_persons(conn, profession="academic")] == ["jane-professor"]
+    assert {p["id"] for p in persons.list_persons(conn)} == {"jane-professor", "pat-pm"}
+    from finsocnet.core.output import CliError
+    import pytest
+    with pytest.raises(CliError):
+        persons.upsert(conn, {"id": "bad-one", "canonical_name": "Bad One", "profession": "wizard"}, run_id)
+    persons.upsert(conn, {"id": "jane-professor", "affiliation": "Other University", "canonical_name": "Jane Professor"}, run_id)  # update keeps the rest
+    assert persons.get(conn, "jane-professor")["profession"] == "academic"

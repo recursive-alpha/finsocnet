@@ -80,7 +80,7 @@ export function PersonModal({ personId, onClose, onSelectCard }: PersonModalProp
                 <Badge variant="emerald">{person?.status || "active"}</Badge>
               </div>
               <p className="text-xs text-zinc-400 font-mono line-clamp-1">
-                {person?.trading_style || "Empirical Trading Practitioner"}
+                {person?.trading_style || [person?.profession?.replace(/_/g, " "), person?.affiliation].filter(Boolean).join(" · ") || "Market practitioner"}
               </p>
             </div>
           </div>

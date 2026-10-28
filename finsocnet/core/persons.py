@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import sqlite3
 from typing import Any
 
@@ -79,7 +80,11 @@ def upsert(conn: sqlite3.Connection, person: dict[str, Any], run_id: int) -> dic
     if errs:
         raise CliError("VALIDATION_ERROR", f"person failed validation ({len(errs)} problem(s))", details=errs)
     pid = person["id"]
-    cols = ("canonical_name", "moniker", "bio", "avatar_url", "trading_style", "primary_markets", "verified_records", "visibility")
+    cols = ("canonical_name", "moniker", "bio", "avatar_url", "trading_style", "primary_markets", "verified_records", "visibility",
+            "profession", "affiliation", "domains", "homepage", "relevance")
+    if "external_ids" in person:
+        person = {**person, "external_ids": json.dumps(person["external_ids"], ensure_ascii=False, sort_keys=True)}
+        cols += ("external_ids",)
     with transaction(conn):
         existing = conn.execute("SELECT * FROM persons WHERE id = ?", (pid,)).fetchone()
         if existing is None:
@@ -158,6 +163,7 @@ def get(conn: sqlite3.Connection, person_id: str) -> dict[str, Any]:
     if r is None:
         raise CliError("NOT_FOUND", f"person {person_id} not found")
     d = dict(r)
+    d["external_ids"] = loads(d.get("external_ids"), {}) if d.get("external_ids") else {}
     d["aliases"] = [dict(x) for x in conn.execute("SELECT alias, platform FROM person_aliases WHERE person_id = ? ORDER BY platform, alias", (person_id,))]
     s = conn.execute("SELECT cards, appearances, sources FROM person_stats WHERE person_id = ?", (person_id,)).fetchone()
     d["stats"] = dict(s) if s else {}
@@ -169,14 +175,16 @@ def get(conn: sqlite3.Connection, person_id: str) -> dict[str, Any]:
     return d
 
 
-def list_persons(conn: sqlite3.Connection, needs_review: bool = False, limit: int = 100) -> list[dict[str, Any]]:
+def list_persons(conn: sqlite3.Connection, needs_review: bool = False, limit: int = 100, profession: str | None = None) -> list[dict[str, Any]]:
     if needs_review:
         return [dict(r) for r in conn.execute(
             "SELECT a.id AS appearance_id, a.person_id, p.canonical_name, a.content_id, a.source_id, a.role, a.match_confidence, a.evidence "
             "FROM person_appearances a JOIN persons p ON p.id = a.person_id WHERE a.match_status = 'needs_review' ORDER BY a.id LIMIT ?", (limit,))]
     return [dict(r) for r in conn.execute(
-        "SELECT p.id, p.canonical_name, p.moniker, p.visibility, p.status, p.trading_style, p.primary_markets, p.verified_records, p.avatar_path, s.cards, s.appearances, s.sources, "
-        "s.cards AS cards_count FROM persons p JOIN person_stats s ON s.person_id = p.id ORDER BY s.cards DESC, p.id LIMIT ?", (limit,))]
+        "SELECT p.id, p.canonical_name, p.moniker, p.visibility, p.status, p.trading_style, p.primary_markets, p.verified_records, p.avatar_path, "
+        "p.profession, p.affiliation, p.domains, p.homepage, p.relevance, s.cards, s.appearances, s.sources, "
+        "s.cards AS cards_count FROM persons p JOIN person_stats s ON s.person_id = p.id WHERE (? IS NULL OR p.profession = ?) "
+        "ORDER BY s.cards DESC, p.id LIMIT ?", (profession, profession, limit))]
 
 
 def person_cards(conn: sqlite3.Connection, person_id: str, category: str | None = None) -> dict[str, Any]:

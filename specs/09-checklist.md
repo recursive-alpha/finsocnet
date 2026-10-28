@@ -175,6 +175,13 @@ Notes: `session_bridge.py keygen` was run once while testing and created `~/.con
 | Skill installs: every folder is core or locked (hashes match or `locally_modified`) | [x] test + installer tests |
 | Docs describe v2 only | [x] test |
 
+### 2.9c People first (specs/16)
+
+- [x] Migration 006: `persons.profession`, `affiliation`, `domains`, `homepage`, `relevance`, `external_ids`; `person.schema.json`, `kb person upsert|get|list --profession`; web persons page shows and filters by profession; test.
+- [x] Skill `people-discoverer`; `person-matcher` and `source-explorer` updated (people first; any profession, not only traders).
+- [x] `list --catalog` (whole source discovered as metadata-only contents); YouTube long videos, shorts and streams.
+- [ ] Next step: scholar databases (Google Scholar, SSRN authors, RePEc, ORCID) as author-centred access (`kb person works`, `scholar` platform skill); see specs/16 §5.
+
 ---
 
 ## 3. Waiting on you

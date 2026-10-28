@@ -524,7 +524,7 @@ def cmd_person_get(ctx: Ctx) -> Result:
 
 def cmd_person_list(ctx: Ctx) -> Result:
     key = "needs_review" if ctx.args.needs_review else "persons"
-    return Result({key: persons_mod.list_persons(ctx.conn(), ctx.args.needs_review, ctx.args.limit)})
+    return Result({key: persons_mod.list_persons(ctx.conn(), ctx.args.needs_review, ctx.args.limit, getattr(ctx.args, "profession", None))})
 
 
 def cmd_person_cards(ctx: Ctx) -> Result:
@@ -944,6 +944,7 @@ def build_parser() -> _Parser:
     p.add_argument("id")
     p = leaf(g, ("person", "list"), "list", cmd_person_list)
     p.add_argument("--needs-review", action="store_true")
+    p.add_argument("--profession", help="only this profession (trader, portfolio_manager, economist, academic, ...)")
     p.add_argument("--limit", type=int, default=100)
     p = leaf(g, ("person", "cards"), "cards", cmd_person_cards)
     p.add_argument("id")

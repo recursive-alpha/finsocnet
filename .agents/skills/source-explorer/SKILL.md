@@ -32,6 +32,10 @@ metadata:
 5. Gaps touched in this step: re-run the gap's Query Card (`kb card search`). Good answer → `kb gap update <id> --status filled --filled-by <card ids>`.
 6. `kb run end --run R --outcome success --stats '{"items": N, "fetched": N, "mined": N, "enqueued": N}'`.
 
+## People first
+
+Content is explored because of who publishes it. When a seed is (or reveals) a person, a field or a profession ("famous portfolio managers", "professors of asset pricing", "<name>"), run `people-discoverer` before the platform skills: it finds the people in scope (traders, PMs, investors, executives, economists, professors, authors, journalists, regulators), creates them with `profession`/`affiliation`/`relevance`, links their channels, accounts, sites and papers as sources, and queues them with `origin=person_crosslink` (`origin_ref=person:<id>`). A channel, account or blog found by search that has no person yet gets one through `person-matcher` after its `profile --ingest` when the owner is identifiable and in scope; never leave a crawled source without trying to attach it to a person. `list --catalog` discovers everything a source published; fetch and mine only what the person is known for first.
+
 ## Seeding the queue
 
 | Source | How |
@@ -39,6 +43,7 @@ metadata:
 | user | `finsocnet explore add <url\|handle\|query\|person> [--priority 0.95]` |
 | gaps | `kb gap list --status open` → write 1–3 search queries per gap → `kb queue add --target-kind query --origin gap --origin-ref gap:<id>`; `kb gap update <id> --status exploring` |
 | history | `kb history pending --limit 200` → triage: creator pages, communities, articles → `kb queue add --origin history`, `kb history mark … --triage queued`; others → `--triage not_relevant` |
+| people | `people-discoverer` for a field, profession or name → `--origin person_crosslink --origin-ref person:<id>` |
 | crosslinks | links in known persons' bios/descriptions → `--origin person_crosslink` |
 | refresh | `kb source list --status active` older than `refresh_hours` → platform `list --enqueue --save-cursor` |
 

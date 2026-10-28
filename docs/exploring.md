@@ -2,6 +2,10 @@
 
 FinSocNet finds people, communities, channels and threads on **any topic**. Finance is the miner's interest (it writes cards where there is finance knowledge), not a filter on what explorers may find, store or follow. Everything fetched is stored, searchable by text and, once translated and embedded, by meaning ([Search](search.md)).
 
+## People first
+
+Exploration starts from **who** publishes, not from what an algorithm shows. A seed that is a name, a field or a profession ("famous portfolio managers", "professors of asset pricing", "Jane Professor") goes through [`people-discoverer`](../.agents/skills/people-discoverer/SKILL.md): it finds the people in scope (traders, PMs, executives, economists, professors, authors, regulators), creates them with profession, affiliation and relevance, links their sources everywhere and queues them. A source found by search is attached to its owner with `person-matcher`. See [People](persons.md).
+
 ## The explore queue
 
 ```bash

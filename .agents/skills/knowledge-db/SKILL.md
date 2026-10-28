@@ -47,7 +47,7 @@ All commands: `uv run finsocnet kb <group> <command> …` (same as `uv run .agen
 | translate | `translate detect-pending`; `translate set-language --file F` W; `translate pending [--content C]`; `translate put --file F` W; `translate get C [--seq N]` (the agent detects and translates, see skill `translator`) |
 | card | `card validate --file F`; `card candidates --file F [--limit 10]`; `card commit --file F` W; `card search --query-card F \| --text Q [--mode auto\|lexical\|semantic\|hybrid]`; `card get ID [--citations --links --history]`; `card list`; `card update\|merge\|retire\|undo` W; `card link\|unlink --from A --to B [--relation related] --reason R` W (add or remove one link after the fact; snapshots card A first); `citation attribute ID --person P --role R --confidence C` W |
 | decision | `decision list [--reviewed none]`; `decision review ID --verdict agreed\|overturned` W |
-| person / skill | `person candidates\|upsert\|alias add\|appearance add\|get\|list\|cards\|merge`; `skill upsert\|get\|list` |
+| person / skill | `person candidates\|upsert\|alias add\|appearance add\|get\|list [--profession P]\|cards\|merge`; `skill upsert\|get\|list` (person fields: profession, affiliation, domains, homepage, relevance, external_ids) |
 | queue / gap / history | `queue add\|next\|update\|list`; `gap add\|list\|update`; `history pending\|mark` |
 
 Full reference with outputs: `specs/01-database.md` §6.

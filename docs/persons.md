@@ -2,6 +2,10 @@
 
 Knowledge belongs to **people**, not channels. A person has one canonical record; handles on many platforms are aliases; every citation says who said it and in which role.
 
+## Who counts, and discovering them first
+
+A person is anyone who publishes knowledge about markets or economics: **traders, portfolio managers, investors, CEOs and founders, economists, central bankers and regulators, professors and researchers, analysts, strategists, authors, journalists, educators**. Each person has a `profession`, an `affiliation`, `domains`, a `homepage`, a one-sentence `relevance` (the evidence they are in scope) and `external_ids` (OpenAlex, ORCID, Google Scholar, SSRN, Wikipedia). Skill [`people-discoverer`](../.agents/skills/people-discoverer/SKILL.md) finds and creates them *before* their content is crawled, links their channels, accounts, sites and papers, and queues them; `finsocnet kb person list --profession academic` filters. Design: [`specs/16`](../specs/16-people-first-discovery.md); scholar databases (Google Scholar, SSRN authors, RePEc, ORCID) are the next step.
+
 ## Matching
 
 Skill [`person-matcher`](../.agents/skills/person-matcher/SKILL.md): from the title, description, source owner and first segments of a content the agent finds the cast (owner, host, guest, author, commenter), searches candidates (`kb person candidates --name … --handle … --platform …`), and confirms or creates persons and appearances (`kb person upsert`, `alias add`, `appearance add`). Uncertain matches wait in a review queue (`finsocnet persons review`). Speakers in interviews are attributed segment by segment.

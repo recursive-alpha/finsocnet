@@ -19,6 +19,7 @@ import type { Person } from "@/lib/types";
 export default function PersonsPage() {
   const [persons, setPersons] = useState<Person[]>([]);
   const [search, setSearch] = useState("");
+  const [profession, setProfession] = useState("");
   const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -32,10 +33,14 @@ export default function PersonsPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  const professions = Array.from(new Set(persons.map((p) => p.profession).filter(Boolean))) as string[];
   const filtered = persons.filter((p) => {
+    if (profession && p.profession !== profession) return false;
     if (!search.trim()) return true;
     const q = search.toLowerCase();
     return (
+      (p.affiliation && p.affiliation.toLowerCase().includes(q)) ||
+      (p.domains && p.domains.toLowerCase().includes(q)) ||
       p.canonical_name.toLowerCase().includes(q) ||
       (p.moniker && p.moniker.toLowerCase().includes(q)) ||
       (p.trading_style && p.trading_style.toLowerCase().includes(q)) ||
@@ -51,15 +56,15 @@ export default function PersonsPage() {
           <div className="flex items-center gap-2">
             <UserCheck className="h-5 w-5 text-emerald-400" />
             <h1 className="text-xl font-bold tracking-tight text-zinc-100">
-              Canonical Trading Practitioners
+              People in Markets &amp; Economics
             </h1>
           </div>
           <p className="text-xs text-zinc-400 font-mono mt-1">
-            Empirical trading methodologies synthesized into executable strategy rulebooks
+            Traders, portfolio managers, executives, economists and professors, with what they published and their rulebooks
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant="emerald">{persons.length} verified traders</Badge>
+          <Badge variant="emerald">{persons.length} people</Badge>
         </div>
       </div>
 
@@ -68,21 +73,37 @@ export default function PersonsPage() {
         <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-500" />
         <input
           type="text"
-          placeholder="Filter by name, moniker, style, or market..."
+          placeholder="Filter by name, affiliation, field, style or market..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 pl-9 pr-4 py-2 text-xs font-mono text-zinc-200 placeholder:text-zinc-500 focus:border-emerald-500 focus:outline-hidden"
         />
       </div>
 
-      {/* Traders Grid */}
+      {professions.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {["", ...professions].map((pr) => (
+            <button
+              key={pr || "all"}
+              onClick={() => setProfession(pr)}
+              className={`rounded-full border px-3 py-1 text-[11px] font-mono transition-colors ${
+                profession === pr ? "border-emerald-500 text-emerald-300" : "border-zinc-800 text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              {pr ? pr.replace(/_/g, " ") : "all"}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* People grid */}
       {loading ? (
         <div className="flex h-64 items-center justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
         </div>
       ) : filtered.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-zinc-800 p-12 text-center text-xs font-mono text-zinc-500">
-          No practitioners match your search.
+          No people match your search.
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -114,10 +135,11 @@ export default function PersonsPage() {
                 {/* Trading Style */}
                 <div className="rounded-xl border border-zinc-800/60 bg-zinc-950/40 p-3 space-y-1">
                   <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500">
-                    Trading Style & Edge
+                    {person.profession ? person.profession.replace(/_/g, " ") : "Focus"}
+                    {person.affiliation ? ` · ${person.affiliation}` : ""}
                   </span>
                   <p className="text-xs text-zinc-300 font-mono line-clamp-2 leading-relaxed">
-                    {person.trading_style || "Quantitative / Discretionary framework"}
+                    {person.trading_style || person.domains || person.relevance || "Market knowledge"}
                   </p>
                 </div>
 

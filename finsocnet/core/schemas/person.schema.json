@@ -75,6 +75,57 @@
           }
         }
       }
+    },
+    "profession": {
+      "enum": [
+        "trader",
+        "portfolio_manager",
+        "investor",
+        "executive",
+        "founder",
+        "economist",
+        "academic",
+        "researcher",
+        "analyst",
+        "strategist",
+        "author",
+        "journalist",
+        "educator",
+        "regulator",
+        "central_banker",
+        "other",
+        null
+      ]
+    },
+    "affiliation": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "domains": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "homepage": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "relevance": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "external_ids": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
     }
   }
 }

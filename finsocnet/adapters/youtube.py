@@ -53,7 +53,7 @@ def video_record(info: dict[str, Any], entries: list[dict[str, Any]] | None, cap
     r = refs(desc)
     segs = transcript_windows(entries) if entries else []
     extra = {"caption_source": caption_source, "caption_lang": caption_lang, "chapters": [{"title": c.get("title"), "start_sec": c.get("start_time")} for c in info.get("chapters") or []],
-             "long_form": (info.get("duration") or 0) > LONG_FORM_SEC, "tags": info.get("tags") or []}
+             "long_form": (info.get("duration") or 0) > LONG_FORM_SEC, "tags": info.get("tags") or [], "caption_error": info.get("_caption_error")}
     cid = info.get("channel_id")
     return content_record(f"youtube:{vid}", "youtube", content_type(info), segs, url=info.get("webpage_url") or f"https://www.youtube.com/watch?v={vid}", title=info.get("title"), description=desc,
                           author={"handle": info.get("uploader_id") or info.get("channel"), "display_name": info.get("channel") or info.get("uploader"), "platform_user_id": cid,
@@ -150,6 +150,8 @@ class YouTube(PlatformAdapter):
         if metadata_only:
             return video_record(info, None, None, None, raw)
         entries, source, lang = self._captions(vid, info.get("language"))
+        if not entries and getattr(self, "caption_error", None):
+            info = {**info, "_caption_error": self.caption_error}
         if not entries and not no_whisper:
             res = transcribe.transcribe(f"https://www.youtube.com/watch?v={vid}", content_id=f"youtube:{vid}")
             entries, source, lang = transcribe.as_entries(res), "whisper", res.get("language")
@@ -157,9 +159,11 @@ class YouTube(PlatformAdapter):
 
     def _captions(self, vid: str, original: str | None) -> tuple[list[dict[str, Any]] | None, str | None, str | None]:
         from youtube_transcript_api import YouTubeTranscriptApi
+        self.caption_error = None
         try:
             tl = list(YouTubeTranscriptApi().list(vid))
-        except Exception:  # noqa: BLE001 - captions disabled, IP blocked, video private
+        except Exception as e:  # noqa: BLE001 - captions disabled, IP blocked, video private
+            self.caption_error = type(e).__name__  # kept in extra.caption_error: a block (RequestBlocked, IpBlocked) is retryable, TranscriptsDisabled is not
             return None, None, None
         idx = choose_caption([(t.language_code, t.is_generated) for t in tl], original)
         if idx is None:
@@ -167,6 +171,7 @@ class YouTube(PlatformAdapter):
         t = tl[idx]
         try:
             fetched = t.fetch()
-        except Exception:  # noqa: BLE001
+        except Exception as e:  # noqa: BLE001
+            self.caption_error = type(e).__name__
             return None, None, None
         return [{"start": s.start, "duration": s.duration, "text": s.text} for s in fetched], "auto" if t.is_generated else "manual", t.language_code

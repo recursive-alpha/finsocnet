@@ -31,6 +31,7 @@
 | [`13-reverse-anything.md`](13-reverse-anything.md) | REA bridge for binaries, apps, databases, captures; safety rules |
 | [`14-platform-skill-builder.md`](14-platform-skill-builder.md) | Probe a site, write a recipe, check it live, scaffold a skill; custom platforms |
 | [`15-cli-ui-and-web.md`](15-cli-ui-and-web.md) | `--ui` terminal view and the Next.js UI that calls the CLI |
+| [`16-people-first-discovery.md`](16-people-first-discovery.md) | people first: traders, PMs, executives, economists, professors, authors; profession fields; scholar databases as the next step |
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: person-matcher
-description: Resolve who is speaking or writing — match channel owners, podcast hosts and guests, authors, commenters and handles across YouTube, X, Reddit, Discord, Substack, forums, books and papers to one canonical person, with aliases, appearances, confidence and a review queue. Use before mining content, when a new creator or guest appears, when the user asks "who is this trader", "is this the same person as …", "merge these people", or to review uncertain matches.
+description: Resolve who is speaking or writing — match channel owners, podcast hosts and guests, authors, professors, executives, portfolio managers, commenters and handles across YouTube, X, Reddit, Discord, Substack, forums, books and papers to one canonical person, with aliases, appearances, confidence and a review queue. Use before mining content, when a new creator or guest appears, when the user asks "who is this trader", "is this the same person as …", "merge these people", or to review uncertain matches.
 license: MIT
 compatibility: Requires the FinSocNet repository (finsocnet kb CLI).
 metadata:
@@ -31,7 +31,7 @@ Knowledge belongs to people, not channels. One person can own a YouTube channel,
     "primary_markets": "US equities", "verified_records": null, "visibility": "public",
     "aliases": [{"alias": "@exampleg", "platform": "x"}, {"alias": "Example Guest", "platform": ""}]}
    ```
-   `id` = lowercase ASCII slug of the canonical name. `visibility: "private_source"` when the person only appears in closed groups/servers.
+   `id` = lowercase ASCII slug of the canonical name. Anyone who publishes knowledge about markets or economics is a person, not only traders: set `profession` (`trader`, `portfolio_manager`, `investor`, `executive`, `founder`, `economist`, `academic`, `researcher`, `analyst`, `strategist`, `author`, `journalist`, `educator`, `regulator`, `central_banker`, `other`), `affiliation`, `domains` and `relevance` (one sentence of evidence that they are about markets/economics); use `trading_style` / `primary_markets` only for people who trade. `external_ids` holds ids you saw on a page (`openalex`, `orcid`, `google_scholar`, `ssrn`, `wikipedia`); never guess one. To go looking for people (rather than identify those already in front of you) use `people-discoverer`. `visibility: "private_source"` when the person only appears in closed groups/servers.
 5. Every handle you saw → `kb person alias add --person <id> --alias "<handle>" --platform <p> --run R`.
 6. Appearance → `kb person appearance add --file appearance.json --run R` with `role` (`owner`, `guest`, `host`, `co_host`, `author`, `co_author`, `commenter`, `member`, `archive`, `mentioned`), `match_confidence`, and `evidence` (one sentence: why).
 7. `match_confidence < 0.7` → `match_status: "needs_review"`. Mining continues; the user reviews later with `finsocnet persons review`.
