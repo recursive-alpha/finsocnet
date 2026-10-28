@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P1"
-  status: planned
+  status: ready
   phase: "3"
   spec: docs/spec/04-sessions-browser.md
 ---
 
 # Agent Browser
-
-> **Status: planned — built in Phase 3.** v1 scripts launch their own Chromium; that is replaced by attaching to this browser (ADR-006).
 
 One Chrome per remote host, profile `data/browser-profile/`, DevTools on `127.0.0.1:9222`. Every platform script attaches with `connect_over_cdp` and opens its own page in the existing context. No script launches a browser or creates a new context — that would lose the imported sessions and look like a bot.
 

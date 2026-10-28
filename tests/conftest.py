@@ -19,6 +19,7 @@ def repo(tmp_path, monkeypatch) -> Path:
     root = tmp_path / "repo"
     (root / "data" / "transcripts").mkdir(parents=True)
     shutil.copytree(Path(__file__).resolve().parents[1] / "migrations", root / "migrations")
+    shutil.copytree(Path(__file__).resolve().parents[1] / "config", root / "config")
     for f in (FIXTURES / "transcripts").glob("*.json"):
         shutil.copy(f, root / "data" / "transcripts" / f.name)
     monkeypatch.setenv("FINSOCNET_ROOT", str(root))

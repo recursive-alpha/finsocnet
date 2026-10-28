@@ -7,14 +7,12 @@ metadata:
   author: finsocnet
   version: "2.0.0"
   priority: "P1"
-  status: planned
+  status: ready
   phase: "3"
   spec: docs/spec/04-sessions-browser.md
 ---
 
 # Session Bridge
-
-> **Status: planned — built in Phase 3.** The v1 `login_x.py`, `login_reddit.py`, `login_medium.py` credential modes are removed in Phase 3 (ADR-005). Do not ask the user for passwords or tokens.
 
 ## Secret rules (always)
 

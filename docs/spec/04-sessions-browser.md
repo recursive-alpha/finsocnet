@@ -289,12 +289,15 @@ FINSOCNET_PROXY=socks5://127.0.0.1:1080 agent_browser.py start
 
 ---
 
-## 9. Implementation Notes (to be filled during Phase 3)
+## 9. Implementation Notes (Phase 3 spike, 2026-10-28)
 
 | Item | Result |
 |---|---|
-| Method A on Linux (Chrome stable) | _pending_ |
-| Method A on macOS | _pending_ |
-| Method A on Windows (app-bound encryption) | _pending_ |
-| Verified cookie names per platform | _pending_ |
-| Discord / Telegram localStorage keys | _pending_ |
+| Method A on Linux (Chromium 156, `--password-store=basic`) | **Works.** A copy of `Default/Cookies` (+ `Local State`) opened by the same binary with a debugging port returns the decrypted cookie (tested with a cookie written by another Chrome run). With a desktop keyring (`Chrome Safe Storage`) it depends on D-Bus being reachable; not verified. |
+| Method A on macOS | _not verified_ (no machine available); expected to need the login keychain to be unlocked |
+| Method A on Windows (app-bound encryption, Chrome ≥ 127) | _not verified_; expected to fail for cookies written by recent Chrome, then method B (`rookiepy`) or method C (extension export) |
+| Verified cookie names per platform | _not verified live_ (needs the user's accounts); the names in `config/platforms.yaml` follow this spec and are marked "verify" |
+| Discord / Telegram localStorage keys | _not verified live_ |
+| Chrome without a keyring | **Hangs on the first cookie operation** (D-Bus lookup). `agent_browser.py start` therefore passes `--password-store=basic --use-mock-keychain` on Linux. |
+| Cookie persistence | Chrome writes cookies to disk about 30 s after they are set; session cookies never. `session_bridge.py reapply` (run on every `agent_browser.py start`) restores them from `data/sessions/store.age`. |
+| `Storage.setCookies` / `Storage.getCookies` / `Storage.clearCookies` | **Work** on the browser-target session (`browser.new_browser_cdp_session()`), once the keyring hang above is avoided; this is what `CdpSink` uses. |

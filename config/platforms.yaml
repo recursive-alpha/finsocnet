@@ -1,0 +1,90 @@
+# Per-platform domains, login probes and checkpoint patterns (docs/spec/04-sessions-browser.md §4.3).
+# Cookie names below follow the spec; items marked "verify" must be re-checked against the real site during the live
+# session test (see docs/spec/04 §9) and corrected here.
+# refresh_hours: how often an active source of the platform is re-crawled (default 24 for social, 168 for blogs/forums).
+x:
+  domains: [x.com, twitter.com]
+  session_cookies: [auth_token, ct0]          # verify
+  probe_url: https://x.com/home
+  logged_out_url_patterns: ["/i/flow/login", "/login"]
+  checkpoint_patterns: ["/account/access", "captcha", "unusual activity"]
+  refresh_hours: 24
+reddit:
+  domains: [reddit.com]
+  session_cookies: [reddit_session, token_v2]  # verify
+  probe_url: https://www.reddit.com/api/me.json
+  logged_in_json_path: data.name
+  refresh_hours: 24
+facebook:
+  domains: [facebook.com]
+  session_cookies: [c_user, xs]
+  probe_url: https://www.facebook.com/me
+  logged_out_url_patterns: ["/login"]
+  checkpoint_patterns: ["/checkpoint/", "confirm your identity"]
+  refresh_hours: 24
+google:
+  domains: [google.com, youtube.com]
+  session_cookies: [SID, __Secure-3PSID]
+  probe_url: https://myaccount.google.com/
+  logged_out_url_patterns: ["accounts.google.com/v3/signin", "ServiceLogin"]
+  checkpoint_patterns: ["/sorry/", "unusual traffic"]
+  refresh_hours: 168
+medium:
+  domains: [medium.com]
+  session_cookies: [sid, uid]
+  probe_url: https://medium.com/me/stats
+  logged_out_url_patterns: ["/m/signin"]
+  refresh_hours: 168
+substack:
+  domains: [substack.com]
+  session_cookies: [substack.sid]
+  probe_url: https://substack.com/api/v1/user/profile/self
+  refresh_hours: 168
+discord:
+  domains: [discord.com]
+  local_storage_keys: [token]
+  probe_url: https://discord.com/channels/@me
+  logged_out_url_patterns: ["/login"]
+  refresh_hours: 24
+telegram:
+  domains: [web.telegram.org]
+  local_storage_keys: [user_auth]
+  probe_url: https://web.telegram.org/k/
+  refresh_hours: 24
+linkedin:
+  domains: [linkedin.com]
+  session_cookies: [li_at]
+  probe_url: https://www.linkedin.com/feed/
+  logged_out_url_patterns: ["/login", "/authwall"]
+  checkpoint_patterns: ["/checkpoint/"]
+  refresh_hours: 168
+instagram:
+  domains: [instagram.com]
+  session_cookies: [sessionid]
+  probe_url: https://www.instagram.com/accounts/edit/
+  logged_out_url_patterns: ["/accounts/login"]
+  refresh_hours: 24
+tradingview:
+  domains: [tradingview.com]
+  session_cookies: [sessionid]
+  probe_url: https://www.tradingview.com/u/
+  refresh_hours: 168
+seekingalpha:
+  domains: [seekingalpha.com]
+  probe_url: https://seekingalpha.com/account/profile
+  checkpoint_patterns: ["px-captcha", "Press & Hold"]
+  refresh_hours: 168
+tiktok:
+  domains: [tiktok.com]
+  session_cookies: [sessionid]
+  probe_url: https://www.tiktok.com/setting
+  refresh_hours: 24
+threads:
+  domains: [threads.net, threads.com]
+  session_cookies: [sessionid]
+  probe_url: https://www.threads.net/
+  refresh_hours: 24
+stocktwits:
+  domains: [stocktwits.com]
+  probe_url: https://stocktwits.com/settings
+  refresh_hours: 24

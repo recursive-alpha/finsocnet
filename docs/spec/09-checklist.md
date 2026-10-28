@@ -11,7 +11,7 @@
 | 0 Foundation and cleanup | [x] | [x] knowledge-db | [x] | [~] 30 tests green; migration 003 run on a copy, real DB awaiting your approval |
 | 1 Knowledge core | [x] | [x] transformer, dedup, search, miner | [x] | [~] 69 tests green; agent acceptance runs happen with the legacy conversion (Phase 2) |
 | 2 Persons and legacy conversion | [x] | [x] matcher, synthesizer, explorer | [x] | [~] conversion done; deleting the legacy folders waits for your approval of `docs/improvements/legacy-conversion.md` |
-| 3 Agent browser and session bridge | [x] | [x] agent-browser, session-bridge | [ ] | [ ] |
+| 3 Agent browser and session bridge | [x] | [x] agent-browser, session-bridge | [x] | [~] 15 tests incl. a real headless Chromium; live check with your accounts pending |
 | 4 P1 platform skills (15) | [x] | [x] all 15 | [~] v1 scripts in 9 skills | [ ] |
 | 5 Explore, self-improve, eval, skill installer | [x] | [x] source-explorer, self-improver, skill-installer | [ ] | [ ] |
 | 6 P2 platform skills (11) | [x] | [x] all 11 | [ ] | [ ] |
@@ -97,12 +97,15 @@ Deviations to review: (a) the tag-stuffing check also looks at `subject` (spec e
 Deviation to review: the spec asks for a card for every legacy rule, "with a legacy citation if needed". Where the stored source text contradicts or does not contain the rule, I created no card, because a citation would attribute an unsupported claim to a real person. Details and the list of dropped rules are in the conversion document. The two arXiv stub cards (11, 12) use `--legacy` and are stored with `quote_verified = 0`.
 
 ### 2.4 Phase 3 — Agent browser and session bridge
-- [x] Skill docs (see 1.2).
-- [ ] `config/` (does not exist yet): `platforms.yaml`, `budgets.yaml`.
-- [ ] `finsocnet/core/browser.py`, `budgets.py`, `sessions/`.
-- [ ] `agent_browser.py`, `session_bridge.py`; local `finsocnet session init-local|export|push`.
-- [ ] Spike table 04 §9 filled (export method A on Linux/macOS/Windows; cookie names per platform).
-- [ ] Secret-leak test; reapply after restart; real export → push → import → `verify --all` with the user.
+- [x] `config/platforms.yaml`, `config/budgets.yaml`.
+- [x] `finsocnet/core/browser.py`, `browser_proc.py`, `budgets.py`, `sessions/{formats, bundle, import_remote, export_local, probes}.py`.
+- [x] `agent_browser.py start|stop|status|open|vnc`, `session_bridge.py keygen|import|status|verify|reapply|purge`, local `finsocnet session init-local|export|push`.
+- [x] Spike table (04 §9): method A verified on Linux; macOS, Windows, cookie names per platform and Discord/Telegram keys are **not verified** (need your machine and accounts).
+- [x] Acceptance in tests: fixture `cookies.txt` + Cookie-Editor JSON + storage_state + HAR + Firefox DB imported; cookies present in a real headless Chromium (count per domain via CDP); `stop && start` then `reapply` restores them; secret-leak test (stdout, stderr, logs, DB file, `data/work`, `store.age`) passes; logged-out/checkpoint pages raise exit 3; an exhausted budget raises exit 4 with `retry_after_sec`.
+- [ ] **Needs you:** real export on your machine -> `push` -> `verify --all` shows `logged_in` for your platforms; SPEC §9 Q1 (banking denylist) and Q4 (no UA spoofing; implemented as specified: no override).
+- [ ] Removal of `login_x.py`, `login_reddit.py`, `login_medium.py` happens in Phase 4 together with the adapters that replace them (they are still the only v1 login path).
+
+Notes: `session_bridge.py keygen` was run once while testing and created `~/.config/finsocnet/age_identity.txt` on this machine (chmod 600); reuse or delete it. Chrome hangs on the first cookie operation when no desktop keyring exists, so the agent browser passes `--password-store=basic --use-mock-keychain` on Linux.
 
 ### 2.5 Phase 4 — P1 platform skills
 - [ ] `finsocnet/core/platform.py`, `http.py`.

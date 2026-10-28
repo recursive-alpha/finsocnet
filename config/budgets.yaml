@@ -1,0 +1,13 @@
+# Per-platform rate budgets (docs/spec/04-sessions-browser.md §7). A "unit" is one page navigation or one API request.
+default:       {per_minute: 20,  per_hour: 300,   per_day: 3000,  min_delay_ms: 800,  max_delay_ms: 2500}
+google:        {per_minute: 3,   per_hour: 30,    per_day: 200,   min_delay_ms: 4000, max_delay_ms: 12000}
+x:             {per_minute: 6,   per_hour: 150,   per_day: 1200,  min_delay_ms: 2000, max_delay_ms: 6000}
+facebook:      {per_minute: 4,   per_hour: 60,    per_day: 400,   min_delay_ms: 3000, max_delay_ms: 9000}
+linkedin:      {per_minute: 2,   per_hour: 20,    per_day: 100,   min_delay_ms: 5000, max_delay_ms: 15000}
+instagram:     {per_minute: 3,   per_hour: 40,    per_day: 250,   min_delay_ms: 4000, max_delay_ms: 10000}
+discord:       {per_minute: 6,   per_hour: 120,   per_day: 1000,  min_delay_ms: 2000, max_delay_ms: 5000}
+reddit:        {per_minute: 10,  per_hour: 300,   per_day: 3000,  min_delay_ms: 1000, max_delay_ms: 3000}
+seekingalpha:  {per_minute: 2,   per_hour: 30,    per_day: 150,   min_delay_ms: 5000, max_delay_ms: 12000}
+tiktok:        {per_minute: 4,   per_hour: 60,    per_day: 400,   min_delay_ms: 3000, max_delay_ms: 8000}
+stackexchange: {per_minute: 25,  per_hour: 1000,  per_day: 9000,  min_delay_ms: 100,  max_delay_ms: 300}
+sec:           {per_minute: 300, per_hour: 10000, per_day: 50000, min_delay_ms: 110,  max_delay_ms: 200}
