@@ -12,6 +12,7 @@ Exploration starts from **who** publishes, not from what an algorithm shows. A s
 finsocnet explore add "pairs trading"                         # a query (any topic, any language)
 finsocnet explore add https://quant.stackexchange.com/questions/tagged/risk-management
 finsocnet explore add @qullamaggie
+finsocnet explore add https://www.youtube.com/@Qullamaggie --person    # a person's profile: the agent explores the whole person
 finsocnet explore add https://news.ycombinator.com/item?id=44180862 --priority 0.8 --reason "quant discussion"
 finsocnet kb queue list
 ```

@@ -181,6 +181,7 @@ Notes: `session_bridge.py keygen` was run once while testing and created `~/.con
 - [x] Skill `people-discoverer`; `person-matcher` and `source-explorer` updated (people first; any profession, not only traders).
 - [x] `list --catalog` (whole source discovered as metadata-only contents); YouTube long videos, shorts and streams.
 - [x] Migration 007 `person_links`; `kb person link add|list`; skill `person-profiler` (agent-driven matching with evidence, no scraper script); web profile tab shows facts and links; dashboard and persons list show avatars.
+- [x] Skill `person-explorer` + `explore add <url> --person` + `:explore-person`: start from one profile URL, the agent discovers and completes the person (test).
 - [ ] Next step: scholar databases (Google Scholar, SSRN authors, RePEc, ORCID) as author-centred access (`kb person works`, `scholar` platform skill); see specs/16 §5.
 
 ---

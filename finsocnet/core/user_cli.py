@@ -29,6 +29,7 @@ def explore_main(argv: list[str] | None = None) -> None:
     a.add_argument("--priority", type=float, default=0.95)
     a.add_argument("--platform")
     a.add_argument("--reason")
+    a.add_argument("--person", action="store_true", help="the target is a person's profile: the agent explores the whole person (skill person-explorer)")
     a.add_argument("--format", choices=["json", "text"], default="json")
     sub.add_parser("show").add_argument("--limit", type=int, default=20)
 
@@ -40,8 +41,9 @@ def explore_main(argv: list[str] | None = None) -> None:
             known = {r[0] for r in conn.execute("SELECT id FROM persons")}
             c = dispatch.classify(args.target, known)
             rid = _user_run(conn, "finsocnet-cli", f"explore add {args.target[:80]}")
-            res = queue.add(conn, {"target": args.target, "target_kind": c["target_kind"], "platform": args.platform or c["platform"], "action": c["action"], "origin": "user",
-                                   "priority": args.priority, "reason": args.reason or "added by the user"}, rid)
+            res = queue.add(conn, {"target": args.target, "target_kind": c["target_kind"], "platform": args.platform or c["platform"], "action": "profile" if args.person else c["action"], "origin": "user",
+                                   "origin_ref": "person-explore" if args.person else None,
+                                   "priority": args.priority, "reason": args.reason or ("explore this person" if args.person else "added by the user")}, rid)
             runs.end_run(conn, rid, "success", {"queued": res["id"]})
             return Result({**res, "classified_as": c})
         finally:

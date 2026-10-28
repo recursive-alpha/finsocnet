@@ -22,7 +22,7 @@ FinSocNet is an agent-operated knowledge network. **You are the only model in it
 | Group | Skills |
 |---|---|
 | Knowledge core | `knowledge-db` (the `kb` CLI), `knowledge-transformer`, `knowledge-dedup`, `knowledge-search`, `market-idea-miner`, `translator` |
-| People | `people-discoverer` (people first: traders, PMs, executives, economists, professors, authors), `person-profiler` (website, social accounts, newsletters, papers with evidence), `person-matcher`, `person-skill-synthesizer`, `person-skills-explorer` |
+| People | `people-discoverer` (people first: traders, PMs, executives, economists, professors, authors), `person-explorer` (start from one profile URL and complete everything), `person-profiler` (website, social accounts, newsletters, papers with evidence), `person-matcher`, `person-skill-synthesizer`, `person-skills-explorer` |
 | Access | `session-bridge`, `agent-browser` |
 | Loop | `source-explorer`, `self-improver`, `skill-installer`, `platform-skill-builder`, `finsocnet` |
 | Video and audio | `youtube-extractor`, `audio-transcriber`, `podcast-explorer`, `tiktok-explorer` |
@@ -53,7 +53,7 @@ $S content done <content_id> --upto-seq B --cards N --run R
 $S run end --run R --outcome success --stats '{...}'
 ```
 
-Exploration: `finsocnet explore add <url|@handle|person|query>` then the `source-explorer` skill (`kb queue next` → platform skill → miner). Improvement: `self-improver` (data fixes directly and reversibly; instruction changes only on a git branch with `finsocnet eval` results).
+Exploration: `finsocnet explore add <url|@handle|person|query> [--person]` (`--person`: the URL is a person's profile → skill `person-explorer`) then the `source-explorer` skill (`kb queue next` → platform skill → miner). Improvement: `self-improver` (data fixes directly and reversibly; instruction changes only on a git branch with `finsocnet eval` results).
 
 ## Sessions and browsing
 
@@ -75,7 +75,7 @@ Every script prints one JSON envelope `{"ok", "command", "data", "warnings", "me
 | `finsocnet install <claude\|omp\|pi\|hermes\|codex\|openclaw\|shared\|all> [--uninstall]` | where a harness runs |
 | `finsocnet stats`, `skills`, `strategy <person>`, `tui` | remote host |
 
-Slash commands (source in `commands/`): `/finsocnet`, `:search`, `:card`, `:person`, `:strategy`, `:compare`, `:explore`, `:explore-step`, `:mine`, `:gaps`, `:sessions`, `:improve`, `:feedback`, `:skills`, `:install-skill`.
+Slash commands (source in `commands/`): `/finsocnet`, `:search`, `:card`, `:person`, `:strategy`, `:compare`, `:explore`, `:explore-step`, `:explore-person`, `:mine`, `:gaps`, `:sessions`, `:improve`, `:feedback`, `:skills`, `:install-skill`.
 
 ## Development
 

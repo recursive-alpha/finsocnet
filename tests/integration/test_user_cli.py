@@ -45,6 +45,15 @@ def test_explore_add_queues_with_origin_user(conn, run_id, capsys):
     assert env["data"]["items"][0]["origin"] == "user" and env["data"]["items"][0]["priority"] == 0.9
 
 
+def test_explore_add_person_queues_a_profile_action_for_person_explorer(conn, run_id, capsys):
+    conn.close()
+    code, env = run(capsys, explore_main, "add", "https://www.youtube.com/@Qullamaggie", "--person")
+    assert code == 0 and env["data"]["status"] == "created"
+    code, env = run(capsys, explore_main, "show")
+    item = env["data"]["items"][0]
+    assert (item["action"], item["origin_ref"], item["origin"]) == ("profile", "person-explore", "user")
+
+
 def test_persons_review_confirm_reject_reassign(seeded, run_id, capsys):
     persons.upsert(seeded, {"id": "example-owner", "canonical_name": "Example Owner"}, run_id)
     commit(seeded, run_id, make_decision())

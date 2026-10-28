@@ -68,7 +68,7 @@ Use `finsocnet kb <group> --help` for flags. Files passed with `--file` may be `
 |---|---|---|
 | `finsocnet search "<english text>" [flags]` | server | alias of `kb search` |
 | `finsocnet eval prepare|score|run` | server | golden sets: `eval score search --search-mode lexical|semantic|hybrid` |
-| `finsocnet explore add <url|@handle|person|query>` | server | seed the exploration queue; the right skill is chosen by `core/dispatch.py` (including your own sites in `config/sites/`) |
+| `finsocnet explore add <url|@handle|person|query> [--person]` | server | seed the exploration queue (`--person`: the URL is a person's profile, skill `person-explorer` completes everything about them); the right skill is chosen by `core/dispatch.py` (including your own sites in `config/sites/`) |
 | `finsocnet persons review`, `finsocnet feedback` | server | resolve uncertain person matches; rate an answer or card |
 | `finsocnet session init-local|export|push` | **your machine** | session bridge ([Sessions](sessions.md)) |
 | `finsocnet install <harness|all> [--uninstall]` | where a harness runs | slash commands and skill links |

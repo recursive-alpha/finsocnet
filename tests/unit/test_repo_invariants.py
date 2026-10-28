@@ -89,7 +89,7 @@ def test_docs_describe_v2_only():
 
 def test_slash_command_sources_are_complete():
     names = {p.stem for p in (ROOT / "commands").glob("*.md")}
-    assert {"finsocnet", "search", "card", "person", "strategy", "compare", "explore", "explore-step", "mine", "gaps", "sessions", "improve", "feedback", "skills", "install-skill"} <= names
+    assert {"finsocnet", "search", "card", "person", "strategy", "compare", "explore", "explore-step", "explore-person", "mine", "gaps", "sessions", "improve", "feedback", "skills", "install-skill"} <= names
     for p in (ROOT / "commands").glob("*.md"):
         assert frontmatter(p).get("description"), p.name
 
