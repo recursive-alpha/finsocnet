@@ -230,10 +230,15 @@ def get(conn: sqlite3.Connection, person_id: str) -> dict[str, Any]:
     d["stats"] = dict(s) if s else {}
     d["links"] = link_list(conn, person_id)
     d["images"] = [dict(x) for x in conn.execute("SELECT id, kind, platform, source_url, path, sha256, mime, width, height FROM person_images WHERE person_id = ? ORDER BY kind, id", (person_id,))]
-    d["sources"] = [dict(x) for x in conn.execute("SELECT id, title, status FROM sources WHERE person_id = ?", (person_id,))]
+    d["sources"] = [dict(x) for x in conn.execute(
+        "SELECT s.id, s.title, s.status, s.platform, s.kind, s.url, "
+        "(SELECT COUNT(*) FROM contents c WHERE c.source_id = s.id) AS contents, "
+        "(SELECT COUNT(*) FROM contents c WHERE c.source_id = s.id AND c.fetch_method IS NOT NULL AND c.process_status != 'metadata_only') AS fetched, "
+        "(SELECT COUNT(*) FROM contents c WHERE c.source_id = s.id AND c.process_status = 'processed') AS mined "
+        "FROM sources s WHERE s.person_id = ? ORDER BY contents DESC", (person_id,))]
     d["appearances"] = [dict(x) for x in conn.execute(
-        "SELECT a.id, a.content_id, a.source_id, a.role, a.match_confidence, a.match_status, c.title FROM person_appearances a LEFT JOIN contents c ON c.id = a.content_id "
-        "WHERE a.person_id = ? ORDER BY a.id LIMIT 100", (person_id,))]
+        "SELECT a.id, a.content_id, a.source_id, a.role, a.match_confidence, a.match_status, c.title, c.url, c.platform FROM person_appearances a "
+        "LEFT JOIN contents c ON c.id = a.content_id WHERE a.person_id = ? ORDER BY a.id LIMIT 100", (person_id,))]
     return d
 
 

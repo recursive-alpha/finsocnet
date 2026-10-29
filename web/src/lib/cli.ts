@@ -40,6 +40,59 @@ export function getRepoRoot(): string {
   return process.cwd();
 }
 
+const SERVE_URL = process.env.FINSOCNET_SERVE_URL || "http://127.0.0.1:8787";
+
+/** Parse what the CLI printed: a JSON envelope, or plain text wrapped in a synthetic one. */
+function toEnvelope<T>(args: string[], stdout: string, stderr = ""): Envelope<T> {
+  const trimmed = stdout.trim();
+  if (!trimmed) {
+    throw new Error(`Empty response from CLI. stderr: ${stderr}`);
+  }
+  try {
+    return JSON.parse(trimmed) as Envelope<T>;
+  } catch {
+    return { ok: true, command: args.join(" "), data: trimmed as unknown as T };
+  }
+}
+
+// `finsocnet serve` keeps Python and the embedding model warm (about 50 ms per call instead of 1+ s with `uv run`).
+let serveDown = 0;
+async function viaServe(args: string[], timeoutMs: number): Promise<string | null> {
+  if (Date.now() < serveDown) return null;
+  try {
+    const res = await fetch(`${SERVE_URL}/run`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ args }),
+      signal: AbortSignal.timeout(timeoutMs),
+      cache: "no-store",
+    });
+    if (!res.ok) throw new Error(`serve ${res.status}`);
+    const body = (await res.json()) as { stdout: string };
+    return body.stdout;
+  } catch {
+    serveDown = Date.now() + 15000; // fall back to spawning the CLI for a while
+    return null;
+  }
+}
+
+// Read results are cached while the database file is unchanged (key: args + mtime of the db and its WAL), so repeated
+// page loads cost nothing and a write by an agent is visible on the next request.
+const cache = new Map<string, { at: number; value: Envelope<unknown> }>();
+const CACHE_MAX = 300;
+const READ_ONLY = /^(stats|doctor|audit|card (list|get|search)|person (list|get|cards|link list)|skill get|source (list|get)|content (list|get|view)|vocab (list|lookup)|run list|decision list|gap list|queue list|embed status|search)\b/;
+
+function dbStamp(): string {
+  const base = process.env.KNOWLEDGE_DB_PATH || path.join(getRepoRoot(), "data", "knowledge.db");
+  return ["", "-wal"].map((suffix) => {
+    try {
+      return String(fs.statSync(base + suffix).mtimeMs);
+    } catch {
+      return "0";
+    }
+  }).join(":");
+}
+
 /**
  * Execute a finsocnet CLI command and parse the JSON envelope
  */
@@ -48,37 +101,31 @@ export async function runCliCommand<T = unknown>(
   timeoutMs: number = 30000
 ): Promise<Envelope<T>> {
   const repoRoot = getRepoRoot();
+  const cacheable = args[0] === "kb" && READ_ONLY.test(args.slice(1).join(" "));
+  const key = cacheable ? `${dbStamp()}|${args.join("\u0000")}` : "";
+  if (cacheable) {
+    const hit = cache.get(key);
+    if (hit) return hit.value as Envelope<T>;
+  }
   try {
-    const { stdout, stderr } = await execFileAsync(
-      "uv",
-      ["run", "finsocnet", ...args],
-      {
+    let env: Envelope<T>;
+    const warm = await viaServe(args, timeoutMs);
+    if (warm !== null) {
+      env = toEnvelope<T>(args, warm);
+    } else {
+      const { stdout, stderr } = await execFileAsync("uv", ["run", "finsocnet", ...args], {
         cwd: repoRoot,
         timeout: timeoutMs,
         maxBuffer: 32 * 1024 * 1024,
-        env: {
-          ...process.env,
-          FINSOCNET_HOME: repoRoot,
-          PYTHONUNBUFFERED: "1",
-        },
-      }
-    );
-
-    const trimmed = stdout.trim();
-    if (!trimmed) {
-      throw new Error(`Empty response from CLI. stderr: ${stderr}`);
+        env: { ...process.env, FINSOCNET_HOME: repoRoot, PYTHONUNBUFFERED: "1" },
+      });
+      env = toEnvelope<T>(args, stdout, stderr);
     }
-
-    try {
-      return JSON.parse(trimmed) as Envelope<T>;
-    } catch {
-      // If output is not JSON (e.g., text command or markdown), wrap in synthetic envelope
-      return {
-        ok: true,
-        command: args.join(" "),
-        data: trimmed as unknown as T,
-      };
+    if (cacheable && env.ok) {
+      if (cache.size >= CACHE_MAX) cache.delete(cache.keys().next().value as string);
+      cache.set(key, { at: Date.now(), value: env });
     }
+    return env;
   } catch (error: unknown) {
     const err = error as { stdout?: string; stderr?: string; message?: string };
     if (err.stdout) {
@@ -136,6 +183,7 @@ export async function getCards(params?: {
   category?: string;
   status?: string;
   search?: string;
+  newest?: boolean;
 }): Promise<KnowledgeCard[]> {
   if (params?.search && params.search.trim().length > 0) {
     const res = await runKbCommand<{ results: Array<{ card: KnowledgeCard }> }>([
@@ -155,6 +203,7 @@ export async function getCards(params?: {
   if (params?.person) args.push("--person", params.person);
   if (params?.category) args.push("--category", params.category);
   if (params?.status) args.push("--status", params.status);
+  if (params?.newest) args.push("--newest");
 
   const res = await runKbCommand<{ cards: KnowledgeCard[] }>(args);
   if (!res.ok) {
@@ -179,7 +228,7 @@ export async function getCard(id: number | string): Promise<KnowledgeCard> {
 }
 
 export async function getPersons(): Promise<Person[]> {
-  const res = await runKbCommand<{ persons: Person[] }>(["person", "list"]);
+  const res = await runKbCommand<{ persons: Person[] }>(["person", "list", "--limit", "1000"]);
   if (!res.ok) {
     throw new Error(res.error?.message || "Failed to list persons");
   }
@@ -232,7 +281,7 @@ export async function getSources(params?: {
   person?: string;
   status?: string;
 }): Promise<Source[]> {
-  const args = ["source", "list"];
+  const args = ["source", "list", "--limit", "1000"];
   if (params?.platform) args.push("--platform", params.platform);
   if (params?.person) args.push("--person", params.person);
   if (params?.status) args.push("--status", params.status);

@@ -1,5 +1,6 @@
 "use client";
 
+import { Markdown } from "@/components/Markdown";
 import { useEffect, useState } from "react";
 import {
   BookOpen,
@@ -200,9 +201,7 @@ export default function SkillsPage() {
                       SKILL.md Specification
                     </span>
                     <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 max-h-[50vh] overflow-y-auto">
-                      <pre className="font-mono text-xs text-zinc-300 whitespace-pre-wrap leading-relaxed">
-                        {selectedSkill.markdown}
-                      </pre>
+                      <Markdown>{selectedSkill.markdown}</Markdown>
                     </div>
                   </div>
 
@@ -213,9 +212,7 @@ export default function SkillsPage() {
                         Platform Notes (references/platform_notes.md)
                       </span>
                       <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 max-h-[30vh] overflow-y-auto">
-                        <pre className="font-mono text-xs text-zinc-400 whitespace-pre-wrap leading-relaxed">
-                          {selectedSkill.platformNotes}
-                        </pre>
+                        <Markdown>{selectedSkill.platformNotes}</Markdown>
                       </div>
                     </div>
                   )}

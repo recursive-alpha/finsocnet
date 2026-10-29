@@ -1,5 +1,7 @@
 "use client";
 
+import { CardGridSkeleton, PersonGridSkeleton } from "@/components/Loading";
+import { PeopleStack } from "@/components/PeopleStack";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
@@ -39,7 +41,7 @@ export default function DashboardPage() {
   useEffect(() => {
     Promise.all([
       fetch("/api/stats").then((r) => r.json()),
-      fetch("/api/cards?limit=6").then((r) => r.json()),
+      fetch("/api/cards?limit=6&order=newest").then((r) => r.json()),
       fetch("/api/persons").then((r) => r.json()),
     ])
       .then(([statsRes, cardsRes, personsRes]) => {
@@ -131,9 +133,9 @@ export default function DashboardPage() {
           badge="FTS5"
         />
         <StatCard
-          title="Canonical Traders"
+          title="People"
           value={totalPersons}
-          subtitle="verified practitioners"
+          subtitle="traders, PMs, economists, executives…"
           icon={UserCheck}
         />
         <StatCard
@@ -379,6 +381,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {loading && persons.length === 0 && <div className="col-span-full"><PersonGridSkeleton count={6} /></div>}
           {persons.slice(0, 6).map((p) => (
             <div
               key={p.id}
@@ -399,7 +402,6 @@ export default function DashboardPage() {
                     )}
                   </div>
                 </div>
-                <Badge variant="emerald">{p.status || "active"}</Badge>
               </div>
 
               <p className="text-xs text-zinc-400 font-mono line-clamp-2 leading-relaxed">
@@ -409,7 +411,7 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between text-[11px] font-mono text-zinc-500 pt-2 border-t border-zinc-800/60">
                 <span>{[p.profession?.replace(/_/g, " "), p.affiliation || p.primary_markets].filter(Boolean).join(" · ") || "—"}</span>
                 <span className="text-emerald-400 group-hover:translate-x-0.5 transition-transform">
-                  rulebook →
+                  profile →
                 </span>
               </div>
             </div>
@@ -438,6 +440,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {loading && cards.length === 0 && <div className="col-span-full"><CardGridSkeleton count={3} /></div>}
           {cards.map((card) => (
             <div
               key={card.id}
@@ -459,14 +462,15 @@ export default function DashboardPage() {
                 </p>
               </div>
 
-              <div className="space-y-2 pt-2 border-t border-zinc-800/60">
+              <div className="space-y-2.5 pt-3 border-t border-zinc-800/60">
+                <PeopleStack people={card.people} />
                 {card.invalidation && (
                   <p className="text-[11px] text-amber-400/80 font-mono line-clamp-1">
                     Invalidation: {card.invalidation}
                   </p>
                 )}
                 <div className="flex items-center justify-between text-[11px] font-mono text-zinc-500">
-                  <span>Action: {card.action || "NONE"}</span>
+                  <span>{card.source?.platform || card.action || ""}</span>
                   <span className="text-emerald-400 group-hover:translate-x-0.5 transition-transform">
                     inspect →
                   </span>

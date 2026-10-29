@@ -11,7 +11,12 @@ import {
   Tag,
   X,
 } from "lucide-react";
-import { Badge, CategoryBadge } from "./Badge";
+import Link from "next/link";
+import { Avatar } from "./Avatar";
+import { Badge, CategoryBadge, PlatformBadge } from "./Badge";
+import { ListSkeleton } from "./Loading";
+import { citationLink, hostOf } from "@/lib/links";
+import { ExternalLink } from "lucide-react";
 import type { CardCitation, CardLink, KnowledgeCard } from "@/lib/types";
 
 interface CardModalProps {
@@ -20,19 +25,17 @@ interface CardModalProps {
   onSelectCard?: (id: number) => void;
 }
 
-export function CardModal({ cardId, onClose, onSelectCard }: CardModalProps) {
+export function CardModal(props: CardModalProps) {
+  if (!props.cardId) return null;
+  return <CardModalBody key={props.cardId} {...props} cardId={props.cardId} />;
+}
+
+function CardModalBody({ cardId, onClose, onSelectCard }: CardModalProps & { cardId: number }) {
   const [card, setCard] = useState<KnowledgeCard | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!cardId) {
-      setCard(null);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
     fetch(`/api/cards/${cardId}`)
       .then((res) => res.json())
       .then((res) => {
@@ -46,10 +49,14 @@ export function CardModal({ cardId, onClose, onSelectCard }: CardModalProps) {
       .finally(() => setLoading(false));
   }, [cardId]);
 
-  if (!cardId) return null;
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [cardId, onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4 sm:p-6 overflow-y-auto">
+    <div className="fixed inset-0 z-[55] flex items-center justify-center bg-black/70 backdrop-blur-xs p-4 sm:p-6 overflow-y-auto" onClick={onClose}>
       <div
         className="relative w-full max-w-4xl max-h-[90vh] flex flex-col rounded-2xl border border-zinc-800 bg-zinc-950 shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
@@ -82,11 +89,7 @@ export function CardModal({ cardId, onClose, onSelectCard }: CardModalProps) {
 
         {/* Content Body */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {loading && (
-            <div className="flex h-64 items-center justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
-            </div>
-          )}
+          {loading && <ListSkeleton rows={5} />}
 
           {error && (
             <div className="rounded-xl border border-rose-900/50 bg-rose-950/20 p-4 text-rose-400 text-sm">
@@ -218,28 +221,41 @@ export function CardModal({ cardId, onClose, onSelectCard }: CardModalProps) {
                     </div>
                   </div>
                   <div className="space-y-3">
-                    {card.citations.map((cite: CardCitation) => (
-                      <div
-                        key={cite.id}
-                        className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 space-y-2.5"
-                      >
-                        <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
-                          <div className="flex items-center gap-2">
-                            <span className="text-zinc-200 font-semibold">
-                              {cite.person_id ? `@${cite.person_id}` : cite.speaker_role}
-                            </span>
-                            <span className="text-zinc-600">|</span>
-                            <span className="text-emerald-400">stance: {cite.stance}</span>
+                    {card.citations.map((cite: CardCitation) => {
+                      const link = citationLink(cite);
+                      return (
+                        <div key={cite.id} className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 space-y-3">
+                          <div className="flex flex-wrap items-center justify-between gap-3">
+                            <div className="flex items-center gap-2.5">
+                              {cite.person_id ? (
+                                <Link href={`/persons?open=${encodeURIComponent(cite.person_id)}`} className="flex items-center gap-2 hover:text-emerald-400">
+                                  <Avatar name={cite.person_name || cite.person_id} path={cite.person_avatar} size={32} />
+                                  <span className="text-xs font-semibold text-zinc-100">{cite.person_name || cite.person_id}</span>
+                                </Link>
+                              ) : (
+                                <span className="text-xs font-mono text-zinc-500">author not identified</span>
+                              )}
+                              <Badge variant="zinc">{cite.speaker_role}</Badge>
+                              <Badge variant={cite.stance === "contradicts" ? "rose" : "emerald"}>{cite.stance}</Badge>
+                            </div>
+                            {cite.quote_verified ? <span className="flex items-center gap-1 text-[11px] font-mono text-emerald-400"><CheckCircle2 className="h-3.5 w-3.5" />quote verified</span> : <span className="text-[11px] font-mono text-amber-400">quote not verified</span>}
                           </div>
-                          <span className="text-zinc-500">
-                            content: {cite.content_id}
-                          </span>
+                          <blockquote className="border-l-2 border-emerald-500/70 pl-3 text-sm italic leading-relaxed text-zinc-200">
+                            &ldquo;{cite.quote}&rdquo;
+                          </blockquote>
+                          <div className="flex flex-wrap items-center gap-2 border-t border-zinc-800/60 pt-2.5 text-[11px] font-mono text-zinc-400">
+                            {cite.content_platform && <PlatformBadge platform={cite.content_platform} />}
+                            <span className="min-w-0 max-w-full truncate text-zinc-300">{cite.content_title || cite.content_id}</span>
+                            {link && (
+                              <a href={link.href} target="_blank" rel="noopener noreferrer" className="ml-auto flex items-center gap-1 rounded-md border border-emerald-800/60 bg-emerald-950/40 px-2 py-1 text-emerald-300 hover:border-emerald-500">
+                                <ExternalLink className="h-3 w-3" />
+                                {link.label} · {hostOf(link.href)}
+                              </a>
+                            )}
+                          </div>
                         </div>
-                        <blockquote className="border-l-2 border-emerald-500/70 pl-3 text-xs italic leading-relaxed text-zinc-200">
-                          &ldquo;{cite.quote}&rdquo;
-                        </blockquote>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}

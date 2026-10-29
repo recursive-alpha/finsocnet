@@ -1,195 +1,185 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import {
-  Award,
-  BookOpen,
-  Brain,
-  Search,
-  TrendingUp,
-  UserCheck,
-  Video,
-} from "lucide-react";
-import { Badge } from "@/components/Badge";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { Brain, Layers, Search, UserCheck, X } from "lucide-react";
 import { Avatar } from "@/components/Avatar";
+import { Badge } from "@/components/Badge";
 import { CardModal } from "@/components/CardModal";
+import { PersonGridSkeleton } from "@/components/Loading";
 import { PersonModal } from "@/components/PersonModal";
 import type { Person } from "@/lib/types";
 
-export default function PersonsPage() {
+type Sort = "cards" | "name" | "sources";
+
+function counts(p: Person) {
+  const x = p as unknown as { cards?: number; sources?: number; appearances?: number };
+  return { cards: x.cards ?? p.stats?.cards_count ?? 0, sources: x.sources ?? 0, appearances: x.appearances ?? 0 };
+}
+
+function PeopleContent() {
+  const params = useSearchParams();
   const [persons, setPersons] = useState<Person[]>([]);
   const [search, setSearch] = useState("");
   const [profession, setProfession] = useState("");
-  const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
+  const [sort, setSort] = useState<Sort>("cards");
+  const [onlyWithCards, setOnlyWithCards] = useState(false);
+  const [selectedPersonId, setSelectedPersonId] = useState<string | null>(params.get("open"));
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/persons")
       .then((r) => r.json())
-      .then((r) => {
-        if (r.ok) setPersons(r.persons || []);
-      })
+      .then((r) => (r.ok ? setPersons(r.persons || []) : setError(r.error || "Failed to load people")))
+      .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, []);
 
-  const professions = Array.from(new Set(persons.map((p) => p.profession).filter(Boolean))) as string[];
-  const filtered = persons.filter((p) => {
-    if (profession && p.profession !== profession) return false;
-    if (!search.trim()) return true;
-    const q = search.toLowerCase();
-    return (
-      (p.affiliation && p.affiliation.toLowerCase().includes(q)) ||
-      (p.domains && p.domains.toLowerCase().includes(q)) ||
-      p.canonical_name.toLowerCase().includes(q) ||
-      (p.moniker && p.moniker.toLowerCase().includes(q)) ||
-      (p.trading_style && p.trading_style.toLowerCase().includes(q)) ||
-      (p.primary_markets && p.primary_markets.toLowerCase().includes(q))
+  const professions = useMemo(() => {
+    const n: Record<string, number> = {};
+    persons.forEach((p) => p.profession && (n[p.profession] = (n[p.profession] || 0) + 1));
+    return Object.entries(n).sort((a, b) => b[1] - a[1]);
+  }, [persons]);
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const list = persons.filter((p) => {
+      if (profession && p.profession !== profession) return false;
+      if (onlyWithCards && counts(p).cards === 0) return false;
+      if (!q) return true;
+      return [p.canonical_name, p.moniker, p.affiliation, p.domains, p.relevance, p.profession].some((v) => v && String(v).toLowerCase().includes(q));
+    });
+    return list.sort((a, b) =>
+      sort === "name" ? a.canonical_name.localeCompare(b.canonical_name) : counts(b)[sort] - counts(a)[sort] || a.canonical_name.localeCompare(b.canonical_name)
     );
-  });
+  }, [persons, search, profession, sort, onlyWithCards]);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-5">
+    <div className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6">
+      <div className="flex flex-col justify-between gap-4 border-b border-zinc-800 pb-5 sm:flex-row sm:items-center">
         <div>
           <div className="flex items-center gap-2">
             <UserCheck className="h-5 w-5 text-emerald-400" />
-            <h1 className="text-xl font-bold tracking-tight text-zinc-100">
-              People in Markets &amp; Economics
-            </h1>
+            <h1 className="text-xl font-bold tracking-tight text-zinc-100">People</h1>
           </div>
-          <p className="text-xs text-zinc-400 font-mono mt-1">
-            Traders, portfolio managers, executives, economists and professors, with what they published and their rulebooks
+          <p className="mt-1 text-xs font-mono text-zinc-400">
+            Traders, portfolio managers, executives, economists, professors and authors — what they published and where to find them
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="emerald">{persons.length} people</Badge>
-        </div>
+        <Badge variant="emerald">
+          {filtered.length === persons.length ? `${persons.length} people` : `${filtered.length} of ${persons.length} people`}
+        </Badge>
       </div>
 
-      {/* Search Input */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-500" />
-        <input
-          type="text"
-          placeholder="Filter by name, affiliation, field, style or market..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 pl-9 pr-4 py-2 text-xs font-mono text-zinc-200 placeholder:text-zinc-500 focus:border-emerald-500 focus:outline-hidden"
-        />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative max-w-md flex-1">
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-500" />
+          <input
+            type="text"
+            placeholder="Name, affiliation, field…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded-xl border border-zinc-800 bg-zinc-900/60 py-2 pl-9 pr-8 text-xs font-mono text-zinc-200 placeholder:text-zinc-500 focus:border-emerald-500 focus:outline-hidden"
+          />
+          {search && (
+            <button onClick={() => setSearch("")} className="absolute right-2.5 top-2.5 text-zinc-500 hover:text-zinc-300" aria-label="Clear">
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+        <div className="flex items-center gap-2 text-[11px] font-mono text-zinc-400">
+          <span>Sort</span>
+          {(["cards", "sources", "name"] as Sort[]).map((s) => (
+            <button
+              key={s}
+              onClick={() => setSort(s)}
+              className={`rounded-md border px-2 py-1 transition-colors ${sort === s ? "border-emerald-500 text-emerald-300" : "border-zinc-800 hover:text-zinc-200"}`}
+            >
+              {s}
+            </button>
+          ))}
+          <label className="ml-2 flex cursor-pointer items-center gap-1.5">
+            <input type="checkbox" checked={onlyWithCards} onChange={(e) => setOnlyWithCards(e.target.checked)} className="accent-emerald-500" />
+            with cards
+          </label>
+        </div>
       </div>
 
       {professions.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          {["", ...professions].map((pr) => (
+          {[["", persons.length] as [string, number], ...professions].map(([pr, n]) => (
             <button
               key={pr || "all"}
               onClick={() => setProfession(pr)}
               className={`rounded-full border px-3 py-1 text-[11px] font-mono transition-colors ${
-                profession === pr ? "border-emerald-500 text-emerald-300" : "border-zinc-800 text-zinc-400 hover:text-zinc-200"
+                profession === pr ? "border-emerald-500 bg-emerald-500/10 text-emerald-300" : "border-zinc-800 text-zinc-400 hover:text-zinc-200"
               }`}
             >
-              {pr ? pr.replace(/_/g, " ") : "all"}
+              {pr ? pr.replace(/_/g, " ") : "all"} <span className="text-zinc-500">{n}</span>
             </button>
           ))}
         </div>
       )}
 
-      {/* People grid */}
+      {error && <div className="rounded-xl border border-rose-900/50 bg-rose-950/20 p-4 text-sm text-rose-400">{error}</div>}
+
       {loading ? (
-        <div className="flex h-64 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
-        </div>
+        <PersonGridSkeleton />
       ) : filtered.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-zinc-800 p-12 text-center text-xs font-mono text-zinc-500">
-          No people match your search.
-        </div>
+        <div className="rounded-2xl border border-dashed border-zinc-800 p-12 text-center text-xs font-mono text-zinc-500">No people match.</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filtered.map((person) => (
-            <div
-              key={person.id}
-              onClick={() => setSelectedPersonId(person.id)}
-              className="group rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-6 hover:border-zinc-700 hover:bg-zinc-900/70 transition-all cursor-pointer flex flex-col justify-between space-y-4"
-            >
-              <div className="space-y-3">
-                {/* Header */}
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <Avatar name={person.canonical_name} path={person.avatar_path} size={48} className="rounded-2xl group-hover:border-emerald-500/60 transition-colors" />
-                    <div>
-                      <h3 className="text-base font-bold text-zinc-100 group-hover:text-emerald-400 transition-colors">
-                        {person.canonical_name}
-                      </h3>
-                      {person.moniker && (
-                        <p className="text-xs text-zinc-400 font-mono">
-                          ({person.moniker})
-                        </p>
-                      )}
-                    </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {filtered.map((person) => {
+            const c = counts(person);
+            return (
+              <button
+                key={person.id}
+                onClick={() => setSelectedPersonId(person.id)}
+                className="group flex flex-col gap-3 rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4 text-left transition-all hover:border-zinc-700 hover:bg-zinc-900/70"
+              >
+                <div className="flex items-center gap-3">
+                  <Avatar name={person.canonical_name} path={person.avatar_path} size={56} className="rounded-2xl transition-colors group-hover:border-emerald-500/60" />
+                  <div className="min-w-0">
+                    <h3 className="truncate text-sm font-bold text-zinc-100 transition-colors group-hover:text-emerald-400">{person.canonical_name}</h3>
+                    {person.profession && <p className="truncate text-[11px] font-mono uppercase tracking-wide text-emerald-400/80">{person.profession.replace(/_/g, " ")}</p>}
+                    {person.affiliation && <p className="truncate text-[11px] font-mono text-zinc-500">{person.affiliation}</p>}
                   </div>
-                  <Badge variant="emerald">{person.status || "active"}</Badge>
                 </div>
-
-                {/* Trading Style */}
-                <div className="rounded-xl border border-zinc-800/60 bg-zinc-950/40 p-3 space-y-1">
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500">
-                    {person.profession ? person.profession.replace(/_/g, " ") : "Focus"}
-                    {person.affiliation ? ` · ${person.affiliation}` : ""}
+                <p className="line-clamp-2 min-h-[2.5em] text-xs leading-relaxed text-zinc-400">
+                  {person.domains || person.relevance || person.trading_style || ""}
+                </p>
+                <div className="mt-auto flex items-center gap-3 border-t border-zinc-800/70 pt-3 text-[11px] font-mono text-zinc-500">
+                  <span className={`flex items-center gap-1 ${c.cards ? "text-emerald-400" : ""}`}>
+                    <Brain className="h-3.5 w-3.5" />
+                    {c.cards} cards
                   </span>
-                  <p className="text-xs text-zinc-300 font-mono line-clamp-2 leading-relaxed">
-                    {person.trading_style || person.domains || person.relevance || "Market knowledge"}
-                  </p>
+                  <span className="flex items-center gap-1">
+                    <Layers className="h-3.5 w-3.5" />
+                    {c.sources} sources
+                  </span>
                 </div>
-
-                {/* Primary Markets */}
-                {person.primary_markets && (
-                  <div className="flex items-center gap-1.5 text-xs font-mono text-zinc-400">
-                    <TrendingUp className="h-3.5 w-3.5 text-zinc-500" />
-                    <span>Markets: {person.primary_markets}</span>
-                  </div>
-                )}
-
-                {/* Verified Records */}
-                {person.verified_records && (
-                  <div className="flex items-center gap-1.5 text-xs font-mono text-emerald-400/90">
-                    <Award className="h-3.5 w-3.5" />
-                    <span className="line-clamp-1">{person.verified_records}</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Action Footer */}
-              <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs font-mono">
-                <span className="text-zinc-500">
-                  {person.stats?.cards_count ?? (person as unknown as { cards_count?: number }).cards_count ?? 0} cards attributed
-                </span>
-                <span className="text-emerald-400 font-medium group-hover:translate-x-1 transition-transform flex items-center gap-1">
-                  <span>View Rulebook</span>
-                  <BookOpen className="h-3.5 w-3.5" />
-                </span>
-              </div>
-            </div>
-          ))}
+              </button>
+            );
+          })}
         </div>
       )}
 
-      {/* Person Rulebook Modal */}
       <PersonModal
         personId={selectedPersonId}
         onClose={() => setSelectedPersonId(null)}
-        onSelectCard={(id) => {
-          setSelectedPersonId(null);
-          setSelectedCardId(id);
-        }}
+        onSelectCard={(id) => setSelectedCardId(id)}
       />
-
-      {/* Card Modal */}
-      <CardModal
-        cardId={selectedCardId}
-        onClose={() => setSelectedCardId(null)}
-      />
+      <CardModal cardId={selectedCardId} onClose={() => setSelectedCardId(null)} onSelectCard={(id) => setSelectedCardId(id)} />
     </div>
+  );
+}
+
+export default function PersonsPage() {
+  return (
+    <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-8"><PersonGridSkeleton /></div>}>
+      <PeopleContent />
+    </Suspense>
   );
 }

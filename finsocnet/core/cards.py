@@ -207,7 +207,8 @@ def _card_dict(r: sqlite3.Row) -> dict[str, Any]:
 
 
 def _citations(conn: sqlite3.Connection, card_id: int, limit: int | None = None) -> list[dict[str, Any]]:
-    sql = ("SELECT c.*, p.canonical_name AS person_name, ct.title AS content_title, ct.url AS content_url "
+    sql = ("SELECT c.*, p.canonical_name AS person_name, p.avatar_path AS person_avatar, p.profession AS person_profession, "
+           "ct.title AS content_title, ct.url AS content_url, ct.platform AS content_platform "
            "FROM card_citations c LEFT JOIN persons p ON p.id = c.person_id LEFT JOIN contents ct ON ct.id = c.content_id "
            "WHERE c.card_id = ? ORDER BY c.attribution_confidence DESC, c.id")
     rows = conn.execute(sql + (f" LIMIT {int(limit)}" if limit else ""), (card_id,)).fetchall()
@@ -615,7 +616,7 @@ def get_card(conn: sqlite3.Connection, card_id: int, citations: bool = False, li
 
 
 def list_cards(conn: sqlite3.Connection, person: str | None = None, category: str | None = None, status: str | None = "active",
-               since: str | None = None, limit: int = 50) -> list[dict[str, Any]]:
+               since: str | None = None, limit: int = 50, newest: bool = False) -> list[dict[str, Any]]:
     sql, args = "SELECT k.id FROM knowledge_cards k WHERE 1=1", []
     if status:
         sql += " AND k.status = ?"
@@ -629,13 +630,35 @@ def list_cards(conn: sqlite3.Connection, person: str | None = None, category: st
     if person:
         sql += " AND EXISTS (SELECT 1 FROM card_citations c WHERE c.card_id = k.id AND c.person_id = ?)"
         args.append(person)
-    sql += " ORDER BY k.id LIMIT ?"
+    sql += " ORDER BY k.id DESC LIMIT ?" if newest else " ORDER BY k.id LIMIT ?"
     args.append(limit)
     out = []
     for r in conn.execute(sql, args):
         c = card_row(conn, r["id"])
         out.append({k: c[k] for k in ("id", "kind", "category", "subject", "claim", "terms", "evidence_level", "status")} | {"stats": _stats(conn, r["id"])})
+    attach_people(conn, out)
     return out
+
+
+def attach_people(conn: sqlite3.Connection, cards: list[dict[str, Any]]) -> None:
+    """Add `people` (who said it: id, name, avatar, profession) and `source` (first citation: title, url, platform) to card summaries, in two queries."""
+    if not cards:
+        return
+    ids = [c["id"] for c in cards]
+    marks = ",".join("?" * len(ids))
+    people: dict[int, list[dict[str, Any]]] = {}
+    for r in conn.execute(
+            f"SELECT DISTINCT c.card_id, p.id, p.canonical_name AS name, p.avatar_path AS avatar, p.profession FROM card_citations c "
+            f"JOIN persons p ON p.id = c.person_id WHERE c.card_id IN ({marks}) ORDER BY c.card_id, c.attribution_confidence DESC, p.id", ids):
+        people.setdefault(r["card_id"], []).append({"id": r["id"], "name": r["name"], "avatar": r["avatar"], "profession": r["profession"]})
+    first: dict[int, dict[str, Any]] = {}
+    for r in conn.execute(
+            f"SELECT c.card_id, c.content_id, c.segment_seq, ct.title, ct.url, ct.platform, ct.author_handle FROM card_citations c "
+            f"JOIN contents ct ON ct.id = c.content_id WHERE c.card_id IN ({marks}) ORDER BY c.id DESC", ids):
+        first[r["card_id"]] = {"content_id": r["content_id"], "segment_seq": r["segment_seq"], "title": r["title"], "url": r["url"], "platform": r["platform"], "author_handle": r["author_handle"]}
+    for c in cards:
+        c["people"] = people.get(c["id"], [])[:4]
+        c["source"] = first.get(c["id"])
 
 
 def _require_active(conn: sqlite3.Connection, card_id: int) -> dict[str, Any]:

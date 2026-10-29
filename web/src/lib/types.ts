@@ -77,13 +77,37 @@ export interface KnowledgeCard {
   entities: string[];
   numbers: Record<string, unknown>;
   stats?: {
-    citations_count: number;
-    links_count: number;
-    history_count: number;
+    citations?: number;
+    persons?: number;
+    contents?: number;
+    contradictions?: number;
+    citations_count?: number;
+    links_count?: number;
+    history_count?: number;
   };
+  /** Who said it (card list and search): up to four people with pictures. */
+  people?: CardPerson[];
+  /** First cited content: title, link and platform. */
+  source?: CardSource | null;
   citations?: CardCitation[];
   links?: CardLink[];
   history?: CardHistory[];
+}
+
+export interface CardPerson {
+  id: string;
+  name: string;
+  avatar: string | null;
+  profession: string | null;
+}
+
+export interface CardSource {
+  content_id: string;
+  segment_seq: number | null;
+  title: string | null;
+  url: string | null;
+  platform: string | null;
+  author_handle: string | null;
 }
 
 export interface CardCitation {
@@ -100,8 +124,14 @@ export interface CardCitation {
   quote_verified: number;
   created_at?: string;
   content_title?: string;
+  content_url?: string | null;
+  content_platform?: string | null;
   platform?: string;
   person_name?: string;
+  person_avatar?: string | null;
+  person_profession?: string | null;
+  locator?: Record<string, unknown>;
+  attribution_confidence?: number;
 }
 
 export interface CardLink {
@@ -131,7 +161,11 @@ export interface PersonAppearance {
   role: string;
   confidence?: number;
   content_title?: string;
+  title?: string | null;
+  url?: string | null;
   platform?: string;
+  match_status?: string;
+  match_confidence?: number;
 }
 
 export interface Person {
@@ -195,6 +229,9 @@ export interface Source {
   status: string;
   subscriber_count?: number | null;
   content_count?: number;
+  contents?: number;
+  fetched?: number;
+  mined?: number;
   created_at?: string;
   updated_at?: string;
 }

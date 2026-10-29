@@ -21,7 +21,7 @@ const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: Activity },
   { href: "/search", label: "Search", icon: Search },
   { href: "/cards", label: "Cards", icon: Brain },
-  { href: "/persons", label: "Traders", icon: UserCheck },
+  { href: "/persons", label: "People", icon: UserCheck },
   { href: "/content", label: "Content", icon: Video },
   { href: "/sources", label: "Sources", icon: Layers },
   { href: "/skills", label: "Skills", icon: Cpu },

@@ -43,3 +43,13 @@ The first semantic query after a restart loads the model (a few seconds); later 
 `GET /api/search?q=…&mode=…&types=…&kind=…&category=…&evidence_min=…&horizon=…&min_persons=…&person=…&platform=…&content_type=…&since=…&language=…&limit=…` · `GET /api/embed` · `GET /api/media/<path>` (only images under `data/media/`) · plus the page data routes (`/api/cards`, `/api/persons`, `/api/content`, `/api/stats`, …). Bad `mode`, `types` or an empty `q` return 400.
 
 Design and acceptance: [`specs/15-cli-ui-and-web.md`](../specs/15-cli-ui-and-web.md). The UI needs the Node version of your Next.js install; `web/AGENTS.md` notes that this Next.js differs from older versions, so read `web/node_modules/next/dist/docs/` before changing it.
+
+## Speed: the warm runner
+
+The web UI does not spawn `uv run finsocnet …` per request. The container starts `finsocnet serve` (127.0.0.1:8787, `kb`/`search`/`strategy` only) which keeps Python, the database code and the embedding model loaded, so a call costs tens of milliseconds instead of 1+ s, and the first semantic search no longer reloads the model. Read results are also cached while `data/knowledge.db` and its WAL are unchanged (an agent's write shows on the next request). If the runner is down the UI falls back to spawning the CLI. Run it yourself with `uv run finsocnet serve`; set `FINSOCNET_SERVE=0` to disable it in the container.
+
+## What the pages show
+
+- **Cards** show who said it (pictures and names) and a link to the source; the card detail lists every citation with the person, the verified quote and a link that opens the place (YouTube at the second, PDF at the page).
+- **People** (formerly "Traders") lists everyone in scope with profession, affiliation, card and source counts; the profile has Overview (bio, facts, links grouped by kind with evidence on hover, identifiers), Cards, Sources (listed / fetched / mined per source) and Rulebook. Markdown renders like GitHub (tables, task lists, code).
+- Every request shows a progress bar under the header; lists show skeletons while they load.

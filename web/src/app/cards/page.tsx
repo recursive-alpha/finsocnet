@@ -13,6 +13,10 @@ import {
 } from "lucide-react";
 import { Badge, CategoryBadge } from "@/components/Badge";
 import { CardModal } from "@/components/CardModal";
+import { CardGridSkeleton } from "@/components/Loading";
+import { PeopleStack } from "@/components/PeopleStack";
+import { ExternalLink } from "lucide-react";
+import { hostOf } from "@/lib/links";
 import type { KnowledgeCard } from "@/lib/types";
 
 const CATEGORIES = [
@@ -77,7 +81,7 @@ function CardsContent() {
             </h1>
           </div>
           <p className="text-xs text-zinc-400 font-mono mt-1">
-            Canonical trading claims, setup filters, and risk invariances stored in SQLite FTS5
+            Atomic claims from what people published, each with its author and a link to the source
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -145,9 +149,7 @@ function CardsContent() {
 
       {/* Cards Grid */}
       {loading ? (
-        <div className="flex h-64 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
-        </div>
+        <CardGridSkeleton />
       ) : cards.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-zinc-800 p-12 text-center space-y-2">
           <Brain className="mx-auto h-8 w-8 text-zinc-600" />
@@ -203,7 +205,23 @@ function CardsContent() {
                 )}
               </div>
 
-              <div className="space-y-2 pt-2 border-t border-zinc-800/60">
+              <div className="space-y-2.5 pt-3 border-t border-zinc-800/60">
+                <div className="flex items-center justify-between gap-2">
+                  <PeopleStack people={card.people} />
+                  {card.source?.url && (
+                    <a
+                      href={card.source.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      title={card.source.title || card.source.url}
+                      className="flex shrink-0 items-center gap-1 rounded-md border border-zinc-800 px-1.5 py-0.5 text-[10px] font-mono text-zinc-400 hover:border-emerald-500/50 hover:text-emerald-400"
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                      {card.source.platform || hostOf(card.source.url)}
+                    </a>
+                  )}
+                </div>
                 <div className="flex flex-wrap gap-1">
                   {card.terms?.slice(0, 3).map((t) => (
                     <span
@@ -221,7 +239,7 @@ function CardsContent() {
                 </div>
 
                 <div className="flex items-center justify-between text-[11px] font-mono text-zinc-500">
-                  <span>Action: {card.action || "NONE"}</span>
+                  <span>{card.stats?.citations ? `${card.stats.citations} citation${card.stats.citations > 1 ? "s" : ""}` : `Action: ${card.action || "NONE"}`}</span>
                   <span className="text-emerald-400 group-hover:translate-x-0.5 transition-transform">
                     inspect details →
                   </span>
@@ -244,13 +262,7 @@ function CardsContent() {
 
 export default function CardsPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex h-64 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
-        </div>
-      }
-    >
+    <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-8"><CardGridSkeleton /></div>}>
       <CardsContent />
     </Suspense>
   );

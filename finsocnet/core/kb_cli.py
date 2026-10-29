@@ -440,6 +440,7 @@ def cmd_card_search(ctx: Ctx) -> Result:
     a = ctx.args
     qc = read_json(a.query_card) if a.query_card else None
     res = cards_mod.search_cards(ctx.conn(), qc, a.text, a.limit, a.mode)
+    cards_mod.attach_people(ctx.conn(), [r["card"] for r in res["results"] if isinstance(r.get("card"), dict)])
     return Result({"results": res["results"], "terms_used": res["terms_used"], "mode": res["mode"]}, res["warnings"])
 
 
@@ -450,7 +451,7 @@ def cmd_card_get(ctx: Ctx) -> Result:
 
 def cmd_card_list(ctx: Ctx) -> Result:
     a = ctx.args
-    return Result({"cards": cards_mod.list_cards(ctx.conn(), a.person, a.category, None if a.status == "any" else a.status, a.since, a.limit)})
+    return Result({"cards": cards_mod.list_cards(ctx.conn(), a.person, a.category, None if a.status == "any" else a.status, a.since, a.limit, getattr(a, "newest", False))})
 
 
 def cmd_card_update(ctx: Ctx) -> Result:
@@ -906,6 +907,7 @@ def build_parser() -> _Parser:
     p.add_argument("--status", default="active", choices=["active", "merged", "retired", "any"])
     p.add_argument("--since")
     p.add_argument("--limit", type=int, default=50)
+    p.add_argument("--newest", action="store_true", help="newest cards first")
     p = leaf(g, ("card", "update"), "update", cmd_card_update)
     p.add_argument("id", type=int)
     p.add_argument("--file", required=True)
