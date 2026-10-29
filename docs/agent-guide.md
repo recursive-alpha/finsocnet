@@ -63,7 +63,7 @@ Give each helper: the goal, the list of ids it owns (no overlap), the budget, th
 | Who is missing something | `kb person list --missing avatar|bio|homepage|links|… --no-cards --no-sources --class X --search T` |
 | The static classifications | `kb taxonomy [--entity people\|cards\|content\|sources\|skills\|vocab]` (fixed lists with counts; `kb person classes` for people). Never invent a class: use a listed value or `other` |
 | Medium, not platform | Content and sources are classified by **medium** (`video`, `audio`, `article`, `social`, `paper`, `book`, `code`, `document`, `other`), derived from `content_type` (`video short stream episode article page post paper book repo file`). Platforms are free text and will grow: never put a platform in a list, and set `content_type` from the real thing (a podcast episode is `episode`, a newsletter post `article`, a tweet `post`) |
-| Contents by provenance | `kb content list --provenance fetched|missing|metadata_only --type article|book|paper|video|… --person ID --search T` |
+| Contents by provenance | `kb content list --provenance fetched|missing|metadata_only --medium video|audio|article|paper|book|… --type T --person ID --search T` |
 | Sources nobody owns | `kb source list --no-person` (also `--medium book`, `--kind channel`) |
 | Update | `kb person upsert`, `kb person link add`, `kb person alias add`, `kb person appearance add`, `kb source upsert`, `kb card update`, `kb card retire`, `kb queue update` |
 | Remove | `kb person link remove`, `kb person alias remove`, `kb person appearance remove`, `kb person remove` (refused when cited: `kb person merge`), `kb queue remove`; cards, contents, citations and decisions are never deleted (retire / `fail` / `merge`) |
