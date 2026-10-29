@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import {
   ExternalLink,
   Filter,
@@ -9,32 +10,39 @@ import {
   User,
 } from "lucide-react";
 import { Badge, PlatformBadge } from "@/components/Badge";
+import { FilterChips } from "@/components/FilterChips";
+import { useTaxonomy } from "@/lib/taxonomy";
 import type { Source } from "@/lib/types";
 
-export default function SourcesPage() {
+function SourcesPageInner() {
   const [sources, setSources] = useState<Source[]>([]);
-  const [platform, setPlatform] = useState("all");
+  const [medium, setMedium] = useState(useSearchParams().get("medium") || "all");
+  const [kind, setKind] = useState("all");
+  const [status, setStatus] = useState("all");
+  const tax = useTaxonomy();
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/sources")
+    const params = new URLSearchParams();
+    if (medium !== "all") params.set("medium", medium);
+    if (kind !== "all") params.set("kind", kind);
+    if (status !== "all") params.set("status", status);
+    fetch(`/api/sources?${params.toString()}`)
       .then((r) => r.json())
       .then((r) => {
         if (r.ok) setSources(r.sources || []);
       })
       .finally(() => setLoading(false));
-  }, []);
-
-  const platforms = ["all", ...new Set(sources.map((s) => s.platform))];
+  }, [medium, kind, status]);
 
   const filtered = sources.filter((s) => {
-    if (platform !== "all" && s.platform !== platform) return false;
     if (!search.trim()) return true;
     const q = search.toLowerCase();
     return (
       s.id.toLowerCase().includes(q) ||
-      s.handle_or_name.toLowerCase().includes(q) ||
+      s.handle_or_name?.toLowerCase().includes(q) ||
+      s.platform.toLowerCase().includes(q) ||
       (s.title && s.title.toLowerCase().includes(q))
     );
   });
@@ -72,25 +80,10 @@ export default function SourcesPage() {
           />
         </div>
 
-        {/* Platform Filter Buttons */}
-        <div className="flex flex-wrap items-center gap-1.5 pt-1">
-          <span className="text-xs font-mono text-zinc-500 mr-1 flex items-center gap-1">
-            <Filter className="h-3 w-3" />
-            <span>Platform:</span>
-          </span>
-          {platforms.map((p) => (
-            <button
-              key={p}
-              onClick={() => setPlatform(p)}
-              className={`rounded-md px-2.5 py-1 text-xs font-mono transition-colors cursor-pointer ${
-                platform === p
-                  ? "bg-zinc-100 text-zinc-950 font-bold"
-                  : "bg-zinc-800/80 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 border border-zinc-700/50"
-              }`}
-            >
-              {p}
-            </button>
-          ))}
+        <div className="space-y-2.5 pt-1">
+          <FilterChips label="Medium" items={tax?.["sources.medium"]?.items} value={medium} onChange={(v) => { setLoading(true); setMedium(v); }} grouped />
+          <FilterChips label="Kind" items={tax?.["sources.kind"]?.items} value={kind} onChange={(v) => { setLoading(true); setKind(v); }} hideEmpty catchAll="other" />
+          <FilterChips label="Status" items={tax?.["sources.status"]?.items} value={status} onChange={(v) => { setLoading(true); setStatus(v); }} />
         </div>
       </div>
 
@@ -172,5 +165,13 @@ export default function SourcesPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function SourcesPage() {
+  return (
+    <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-8 sm:px-6"><div className="h-64 animate-pulse rounded-2xl bg-zinc-900/60" /></div>}>
+      <SourcesPageInner />
+    </Suspense>
   );
 }

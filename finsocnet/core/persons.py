@@ -91,6 +91,7 @@ def upsert(conn: sqlite3.Connection, person: dict[str, Any], run_id: int) -> dic
         if existing is None:
             vals = {c: person.get(c) for c in cols}
             vals["visibility"] = vals["visibility"] or "public"
+            vals["profession"] = vals["profession"] or "other"  # static classification: unknown is `other` (core/classes.py)
             conn.execute(f"INSERT INTO persons (id, {', '.join(cols)}) VALUES (?, {', '.join('?' * len(cols))})", [pid, *vals.values()])
             status = "created"
         else:
@@ -242,16 +243,150 @@ def get(conn: sqlite3.Connection, person_id: str) -> dict[str, Any]:
     return d
 
 
-def list_persons(conn: sqlite3.Connection, needs_review: bool = False, limit: int = 100, profession: str | None = None) -> list[dict[str, Any]]:
+MISSING_FIELDS = {
+    "bio": "(p.bio IS NULL OR TRIM(p.bio) = '')", "affiliation": "(p.affiliation IS NULL OR TRIM(p.affiliation) = '')",
+    "domains": "(p.domains IS NULL OR TRIM(p.domains) = '')", "homepage": "(p.homepage IS NULL OR TRIM(p.homepage) = '')",
+    "relevance": "(p.relevance IS NULL OR TRIM(p.relevance) = '')", "moniker": "(p.moniker IS NULL OR TRIM(p.moniker) = '')",
+    "avatar": "p.avatar_path IS NULL", "profession": "p.profession IS NULL",
+    "links": "NOT EXISTS (SELECT 1 FROM person_links l WHERE l.person_id = p.id AND l.match_status = 'confirmed')",
+}
+
+
+def list_persons(conn: sqlite3.Connection, needs_review: bool = False, limit: int = 100, profession: str | None = None, search: str | None = None,
+                 no_cards: bool = False, no_sources: bool = False, missing: str | None = None, sort: str = "cards") -> list[dict[str, Any]]:
+    """People with counts. Filters: class (`profession`), text, no cards, no sources, or a missing field (bio, avatar, homepage, links, ...)."""
     if needs_review:
         return [dict(r) for r in conn.execute(
             "SELECT a.id AS appearance_id, a.person_id, p.canonical_name, a.content_id, a.source_id, a.role, a.match_confidence, a.evidence "
             "FROM person_appearances a JOIN persons p ON p.id = a.person_id WHERE a.match_status = 'needs_review' ORDER BY a.id LIMIT ?", (limit,))]
+    where, args = ["p.status = 'active'"], []
+    if profession:
+        where.append("COALESCE(p.profession, 'other') = ?")
+        args.append(profession)
+    if search:
+        where.append("(p.canonical_name LIKE ? OR p.moniker LIKE ? OR p.affiliation LIKE ? OR p.domains LIKE ? OR p.id LIKE ?)")
+        args += [f"%{search}%"] * 5
+    if no_cards:
+        where.append("s.cards = 0")
+    if no_sources:
+        where.append("s.sources = 0")
+    if missing:
+        if missing not in MISSING_FIELDS:
+            raise CliError("VALIDATION_ERROR", f"--missing must be one of {', '.join(MISSING_FIELDS)}")
+        where.append(MISSING_FIELDS[missing])
+    order = {"cards": "s.cards DESC, p.id", "name": "p.canonical_name", "sources": "s.sources DESC, p.id", "recent": "p.updated_at DESC"}.get(sort, "s.cards DESC, p.id")
     return [dict(r) for r in conn.execute(
         "SELECT p.id, p.canonical_name, p.moniker, p.visibility, p.status, p.trading_style, p.primary_markets, p.verified_records, p.avatar_path, "
-        "p.profession, p.affiliation, p.domains, p.homepage, p.relevance, s.cards, s.appearances, s.sources, "
-        "s.cards AS cards_count FROM persons p JOIN person_stats s ON s.person_id = p.id WHERE (? IS NULL OR p.profession = ?) "
-        "ORDER BY s.cards DESC, p.id LIMIT ?", (profession, profession, limit))]
+        "COALESCE(p.profession, 'other') AS profession, p.affiliation, p.domains, p.homepage, p.relevance, s.cards, s.appearances, s.sources, "
+        f"s.cards AS cards_count FROM persons p JOIN person_stats s ON s.person_id = p.id WHERE {' AND '.join(where)} ORDER BY {order} LIMIT ?", [*args, limit])]
+
+
+CONTENT_GROUPS = {"video": "video/talk", "short": "video/talk", "stream": "video/talk", "episode": "podcast", "article": "article/post", "page": "article/post",
+                  "post": "article/post", "paper": "paper", "book": "book", "repo": "code", "file": "document"}
+WANTED = ("article/post", "video/talk", "paper", "book", "podcast")
+
+
+def coverage(conn: sqlite3.Connection, person_id: str) -> dict[str, Any]:
+    """What we hold about a person and what is still missing: profile fields, links by kind, content by type (listed / fetched / mined), cards.
+    The `gaps` list is the agent's to-do for this person (docs/agent-guide.md)."""
+    pid = resolve_id(conn, person_id)
+    p = conn.execute("SELECT * FROM persons WHERE id = ?", (pid,)).fetchone()
+    if p is None:
+        raise CliError("NOT_FOUND", f"person {person_id} not found")
+    fields = {f: bool(conn.execute(f"SELECT 1 FROM persons p WHERE p.id = ? AND NOT {cond}", (pid,)).fetchone()) for f, cond in MISSING_FIELDS.items()}
+    links: dict[str, int] = {}
+    for r in conn.execute("SELECT kind, COUNT(*) FROM person_links WHERE person_id = ? AND match_status = 'confirmed' GROUP BY 1", (pid,)):
+        links[r[0]] = r[1]
+    review = conn.execute("SELECT COUNT(*) FROM person_links WHERE person_id = ? AND match_status = 'needs_review'", (pid,)).fetchone()[0]
+    by_type: dict[str, dict[str, int]] = {}
+    by_platform: dict[str, dict[str, int]] = {}
+    for r in conn.execute(
+            "SELECT c.platform, c.content_type, COUNT(*) AS listed, SUM(c.fetch_method IS NOT NULL AND c.process_status != 'metadata_only') AS fetched, "
+            "SUM(c.process_status = 'processed') AS mined FROM contents c LEFT JOIN sources s ON s.id = c.source_id "
+            "WHERE s.person_id = ? OR c.person_id = ? OR c.id IN (SELECT content_id FROM person_appearances WHERE person_id = ? AND content_id IS NOT NULL) "
+            "GROUP BY 1, 2", (pid, pid, pid)):
+        grp = CONTENT_GROUPS.get(r["content_type"], r["content_type"])
+        for d, k in ((by_type, grp), (by_platform, r["platform"])):
+            e = d.setdefault(k, {"listed": 0, "fetched": 0, "mined": 0})
+            e["listed"] += r["listed"]
+            e["fetched"] += r["fetched"] or 0
+            e["mined"] += r["mined"] or 0
+    cards = conn.execute("SELECT COUNT(DISTINCT cc.card_id) FROM card_citations cc JOIN knowledge_cards k ON k.id = cc.card_id WHERE cc.person_id = ? AND k.status = 'active'", (pid,)).fetchone()[0]
+    rulebook = conn.execute("SELECT COUNT(*) FROM person_skills WHERE person_id = ?", (pid,)).fetchone()[0]
+    sources = [dict(r) for r in conn.execute("SELECT id, platform, kind, title FROM sources WHERE person_id = ?", (pid,))]
+    gaps: list[str] = [f"profile field missing: {f}" for f, ok in fields.items() if not ok and f != "moniker"]
+    for kind in ("website", "social"):
+        if links.get(kind, 0) == 0:
+            gaps.append(f"no confirmed {kind} link")
+    if review:
+        gaps.append(f"{review} links wait for review")
+    for grp in WANTED:
+        e = by_type.get(grp)
+        if e is None:
+            gaps.append(f"no {grp} content known: search for it (books, papers, talks, articles, interviews, newspaper pieces)")
+        elif e["fetched"] == 0:
+            gaps.append(f"{grp}: {e['listed']} listed, none fetched")
+        elif e["mined"] == 0:
+            gaps.append(f"{grp}: fetched but not mined")
+        elif e["listed"] >= 10 and e["fetched"] < 10:
+            gaps.append(f"{grp}: only {e['fetched']} of {e['listed']} fetched: fetch the most important ones")
+    if cards == 0:
+        gaps.append("no active card")
+    if cards >= 5 and rulebook == 0:
+        gaps.append("no rulebook (person-skill-synthesizer)")
+    return {"person_id": pid, "name": p["canonical_name"], "class": p["profession"] or "other", "profile": fields, "links_confirmed": links, "links_needs_review": review,
+            "content_by_type": by_type, "content_by_platform": by_platform, "sources": sources, "cards": cards, "rulebooks": rulebook, "gaps": gaps,
+            "complete": not gaps}
+
+
+def link_remove(conn: sqlite3.Connection, person_id: str, url: str) -> dict[str, Any]:
+    pid = resolve_id(conn, person_id)
+    with transaction(conn):
+        n = conn.execute("DELETE FROM person_links WHERE person_id = ? AND url = ?", (pid, _norm_url(url))).rowcount
+    if not n:
+        raise CliError("NOT_FOUND", f"no link {url} for {pid}", "see `kb person link list --person ID --all`")
+    return {"person_id": pid, "url": url, "removed": n}
+
+
+def alias_remove(conn: sqlite3.Connection, person_id: str, alias: str, platform: str = "") -> dict[str, Any]:
+    pid = resolve_id(conn, person_id)
+    with transaction(conn):
+        n = conn.execute("DELETE FROM person_aliases WHERE person_id = ? AND alias = ? AND COALESCE(platform, '') = ?", (pid, alias, platform or "")).rowcount
+    if not n:
+        raise CliError("NOT_FOUND", f"alias {alias!r} ({platform or 'any platform'}) not found for {pid}")
+    return {"person_id": pid, "alias": alias, "platform": platform, "removed": n}
+
+
+def appearance_list(conn: sqlite3.Connection, person_id: str, limit: int = 200) -> list[dict[str, Any]]:
+    pid = resolve_id(conn, person_id)
+    return [dict(r) for r in conn.execute(
+        "SELECT a.id, a.content_id, a.source_id, a.role, a.match_confidence, a.match_status, a.evidence, c.title, c.url, c.platform "
+        "FROM person_appearances a LEFT JOIN contents c ON c.id = a.content_id WHERE a.person_id = ? ORDER BY a.id LIMIT ?", (pid, limit))]
+
+
+def appearance_remove(conn: sqlite3.Connection, appearance_id: int) -> dict[str, Any]:
+    with transaction(conn):
+        n = conn.execute("DELETE FROM person_appearances WHERE id = ?", (appearance_id,)).rowcount
+    if not n:
+        raise CliError("NOT_FOUND", f"appearance {appearance_id} not found")
+    return {"id": appearance_id, "removed": n}
+
+
+def remove(conn: sqlite3.Connection, person_id: str, reason: str) -> dict[str, Any]:
+    """Delete a person created by mistake. Refused when anything cites them (use `merge` into the right person instead)."""
+    pid = resolve_id(conn, person_id)
+    if conn.execute("SELECT 1 FROM persons WHERE id = ?", (pid,)).fetchone() is None:
+        raise CliError("NOT_FOUND", f"person {person_id} not found")
+    n = conn.execute("SELECT COUNT(*) FROM card_citations WHERE person_id = ?", (pid,)).fetchone()[0]
+    if n:
+        raise CliError("CONFLICT", f"{pid} is cited by {n} citation(s) and cannot be removed", "merge them into the right person: kb person merge --from ID --into ID")
+    with transaction(conn):
+        conn.execute("UPDATE sources SET person_id = NULL WHERE person_id = ?", (pid,))
+        conn.execute("UPDATE contents SET person_id = NULL WHERE person_id = ?", (pid,))
+        conn.execute("UPDATE content_segments SET person_id = NULL WHERE person_id = ?", (pid,))
+        counts = {t: conn.execute(f"DELETE FROM {t} WHERE person_id = ?", (pid,)).rowcount for t in ("person_aliases", "person_links", "person_appearances", "person_images", "person_skills")}
+        conn.execute("DELETE FROM persons WHERE id = ?", (pid,))
+    return {"person_id": pid, "removed": True, "reason": reason, "deleted_rows": counts}
 
 
 def person_cards(conn: sqlite3.Connection, person_id: str, category: str | None = None) -> dict[str, Any]:

@@ -11,7 +11,10 @@ export async function GET(request: NextRequest) {
     const limit = searchParams.get("limit") ? parseInt(searchParams.get("limit")!, 10) : 100;
 
     const newest = searchParams.get("order") === "newest";
-    const cards = await getCards({ search, category, person, status, limit, newest });
+    const kind = searchParams.get("kind") || undefined;
+    const domain = searchParams.get("domain") || undefined;
+    const evidence = searchParams.get("evidence") || undefined;
+    const cards = await getCards({ search, category, person, status, limit, newest, kind, domain, evidence });
     return NextResponse.json({ ok: true, cards, count: cards.length });
   } catch (error: unknown) {
     const err = error as Error;

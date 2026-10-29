@@ -12,24 +12,14 @@ import {
   X,
 } from "lucide-react";
 import { Badge, CategoryBadge } from "@/components/Badge";
+import { FilterChips } from "@/components/FilterChips";
+import { useTaxonomy } from "@/lib/taxonomy";
 import { CardModal } from "@/components/CardModal";
 import { CardGridSkeleton } from "@/components/Loading";
 import { PeopleStack } from "@/components/PeopleStack";
 import { ExternalLink } from "lucide-react";
 import { hostOf } from "@/lib/links";
 import type { KnowledgeCard } from "@/lib/types";
-
-const CATEGORIES = [
-  "all",
-  "setup_and_screening",
-  "entry_and_execution",
-  "trade_management",
-  "risk_and_sizing",
-  "psychology_and_review",
-  "concept",
-  "market_dynamics",
-  "research_method",
-];
 
 function CardsContent() {
   const searchParams = useSearchParams();
@@ -40,6 +30,10 @@ function CardsContent() {
   const [search, setSearch] = useState(initialSearch);
   const [category, setCategory] = useState(initialCategory);
   const [status, setStatus] = useState("all");
+  const [kind, setKind] = useState("all");
+  const [domain, setDomain] = useState("all");
+  const [evidence, setEvidence] = useState("all");
+  const tax = useTaxonomy();
   const [loading, setLoading] = useState(true);
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
 
@@ -49,6 +43,9 @@ function CardsContent() {
     if (s.trim()) params.set("search", s.trim());
     if (cat !== "all") params.set("category", cat);
     if (st !== "all") params.set("status", st);
+    if (kind !== "all") params.set("kind", kind);
+    if (domain !== "all") params.set("domain", domain);
+    if (evidence !== "all") params.set("evidence", evidence);
     params.set("limit", "150");
 
     fetch(`/api/cards?${params.toString()}`)
@@ -62,7 +59,7 @@ function CardsContent() {
   useEffect(() => {
     fetchCards(search, category, status);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category, status]);
+  }, [category, status, kind, domain, evidence]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,28 +119,11 @@ function CardsContent() {
           </button>
         </form>
 
-        {/* Categories Bar */}
-        <div className="flex flex-wrap items-center gap-1.5 pt-1">
-          <span className="text-xs font-mono text-zinc-500 mr-1 flex items-center gap-1">
-            <Filter className="h-3 w-3" />
-            <span>Category:</span>
-          </span>
-          {CATEGORIES.map((cat) => {
-            const isSelected = category === cat;
-            return (
-              <button
-                key={cat}
-                onClick={() => setCategory(cat)}
-                className={`rounded-md px-2.5 py-1 text-xs font-mono transition-colors cursor-pointer ${
-                  isSelected
-                    ? "bg-zinc-100 text-zinc-950 font-bold"
-                    : "bg-zinc-800/80 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 border border-zinc-700/50"
-                }`}
-              >
-                {cat.replace(/_/g, " ")}
-              </button>
-            );
-          })}
+        <div className="space-y-2.5 pt-1">
+          <FilterChips label="Category" items={tax?.["cards.category"]?.items} value={category} onChange={setCategory} grouped total={tax?.["cards.category"]?.items.reduce((a, i) => a + i.count, 0)} />
+          <FilterChips label="Kind" items={tax?.["cards.kind"]?.items} value={kind} onChange={setKind} />
+          <FilterChips label="Domain" items={tax?.["cards.domain"]?.items} value={domain} onChange={setDomain} hideEmpty catchAll={tax?.["cards.domain"]?.catch_all} />
+          <FilterChips label="Evidence" items={tax?.["cards.evidence_level"]?.items} value={evidence} onChange={setEvidence} />
         </div>
       </div>
 

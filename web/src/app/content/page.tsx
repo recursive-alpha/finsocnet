@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import {
   Calendar,
   Clock,
@@ -13,23 +14,26 @@ import {
 } from "lucide-react";
 import { Badge, PlatformBadge } from "@/components/Badge";
 import { ContentViewerModal } from "@/components/ContentViewerModal";
+import { FilterChips } from "@/components/FilterChips";
+import { useTaxonomy } from "@/lib/taxonomy";
 import type { ContentItem } from "@/lib/types";
 
 const PLATFORMS = ["all", "youtube", "substack", "podcast", "book", "medium", "x", "reddit", "arxiv"];
 const STATUSES = ["all", "metadata_only", "needs_review", "new", "processed"];
 
-export default function ContentPage() {
+function ContentPageInner() {
   const [contents, setContents] = useState<ContentItem[]>([]);
-  const [platform, setPlatform] = useState("all");
+  const [medium, setMedium] = useState(useSearchParams().get("medium") || "all");
   const [status, setStatus] = useState("all");
+    const tax = useTaxonomy();
   const [search, setSearch] = useState("");
   const [selectedContentId, setSelectedContentId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchContents = (p = platform, st = status) => {
+  const fetchContents = (m = medium, st = status) => {
     setLoading(true);
     const params = new URLSearchParams();
-    if (p !== "all") params.set("platform", p);
+    if (m !== "all") params.set("medium", m);
     if (st !== "all") params.set("status", st);
     params.set("limit", "100");
 
@@ -42,9 +46,9 @@ export default function ContentPage() {
   };
 
   useEffect(() => {
-    fetchContents(platform, status);
+    fetchContents(medium, status);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [platform, status]);
+  }, [medium, status]);
 
   const filtered = contents.filter((c) => {
     if (!search.trim()) return true;
@@ -52,7 +56,8 @@ export default function ContentPage() {
     return (
       (c.title && c.title.toLowerCase().includes(q)) ||
       c.id.toLowerCase().includes(q) ||
-      (c.author_handle && c.author_handle.toLowerCase().includes(q))
+      (c.author_handle && c.author_handle.toLowerCase().includes(q)) ||
+      (c.platform && c.platform.toLowerCase().includes(q))
     );
   });
 
@@ -83,53 +88,16 @@ export default function ContentPage() {
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-500" />
           <input
             type="text"
-            placeholder="Search by title, ID, or author handle..."
+            placeholder="Search by title, id, author or platform…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-lg border border-zinc-800 bg-zinc-950 pl-9 pr-4 py-2 text-xs font-mono text-zinc-200 placeholder:text-zinc-500 focus:border-emerald-500 focus:outline-hidden"
           />
         </div>
 
-        {/* Platform & Status Filters */}
-        <div className="flex flex-wrap items-center justify-between gap-4 pt-1">
-          {/* Platform Filters */}
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-xs font-mono text-zinc-500 mr-1 flex items-center gap-1">
-              <Filter className="h-3 w-3" />
-              <span>Platform:</span>
-            </span>
-            {PLATFORMS.map((p) => (
-              <button
-                key={p}
-                onClick={() => setPlatform(p)}
-                className={`rounded-md px-2.5 py-1 text-xs font-mono transition-colors cursor-pointer ${
-                  platform === p
-                    ? "bg-zinc-100 text-zinc-950 font-bold"
-                    : "bg-zinc-800/80 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 border border-zinc-700/50"
-                }`}
-              >
-                {p}
-              </button>
-            ))}
-          </div>
-
-          {/* Status Filters */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-xs font-mono text-zinc-500 mr-1">Status:</span>
-            {STATUSES.map((st) => (
-              <button
-                key={st}
-                onClick={() => setStatus(st)}
-                className={`rounded-md px-2 py-0.5 text-xs font-mono transition-colors cursor-pointer ${
-                  status === st
-                    ? "bg-emerald-950 text-emerald-400 border border-emerald-800"
-                    : "text-zinc-500 hover:text-zinc-300"
-                }`}
-              >
-                {st}
-              </button>
-            ))}
-          </div>
+        <div className="space-y-2.5 pt-1">
+          <FilterChips label="Medium" items={tax?.["content.medium"]?.items} value={medium} onChange={setMedium} grouped />
+          <FilterChips label="Status" items={tax?.["content.status"]?.items} value={status} onChange={setStatus} />
         </div>
       </div>
 
@@ -215,5 +183,13 @@ export default function ContentPage() {
         onClose={() => setSelectedContentId(null)}
       />
     </div>
+  );
+}
+
+export default function ContentPage() {
+  return (
+    <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-8 sm:px-6"><div className="h-64 animate-pulse rounded-2xl bg-zinc-900/60" /></div>}>
+      <ContentPageInner />
+    </Suspense>
   );
 }

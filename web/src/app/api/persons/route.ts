@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { getPersons } from "@/lib/cli";
+import { getPersonClasses, getPersons } from "@/lib/cli";
 
 export async function GET() {
   try {
-    const persons = await getPersons();
-    return NextResponse.json({ ok: true, persons });
+    const [persons, classes] = await Promise.all([getPersons(), getPersonClasses().catch(() => [])]);
+    return NextResponse.json({ ok: true, persons, classes });
   } catch (error: unknown) {
     const err = error as Error;
     return NextResponse.json(

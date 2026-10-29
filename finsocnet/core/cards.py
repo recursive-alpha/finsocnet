@@ -616,7 +616,8 @@ def get_card(conn: sqlite3.Connection, card_id: int, citations: bool = False, li
 
 
 def list_cards(conn: sqlite3.Connection, person: str | None = None, category: str | None = None, status: str | None = "active",
-               since: str | None = None, limit: int = 50, newest: bool = False) -> list[dict[str, Any]]:
+               since: str | None = None, limit: int = 50, newest: bool = False, kind: str | None = None, domain: str | None = None,
+               evidence: str | None = None, horizon: str | None = None, action: str | None = None) -> list[dict[str, Any]]:
     sql, args = "SELECT k.id FROM knowledge_cards k WHERE 1=1", []
     if status:
         sql += " AND k.status = ?"
@@ -624,6 +625,10 @@ def list_cards(conn: sqlite3.Connection, person: str | None = None, category: st
     if category:
         sql += " AND k.category = ?"
         args.append(category)
+    for col, val in (("kind", kind), ("domain", domain), ("evidence_level", evidence), ("horizon", horizon), ("action", action)):
+        if val:
+            sql += f" AND k.{col} = ?"
+            args.append(val)
     if since:
         sql += " AND k.created_at >= ?"
         args.append(parse_since(since))

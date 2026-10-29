@@ -80,7 +80,7 @@ async function viaServe(args: string[], timeoutMs: number): Promise<string | nul
 // page loads cost nothing and a write by an agent is visible on the next request.
 const cache = new Map<string, { at: number; value: Envelope<unknown> }>();
 const CACHE_MAX = 300;
-const READ_ONLY = /^(stats|doctor|audit|card (list|get|search)|person (list|get|cards|link list)|skill get|source (list|get)|content (list|get|view)|vocab (list|lookup)|run list|decision list|gap list|queue list|embed status|search)\b/;
+const READ_ONLY = /^(stats|doctor|audit|taxonomy|person classes|person coverage|query|schema|card (list|get|search)|person (list|get|cards|link list)|skill get|source (list|get)|content (list|get|view)|vocab (list|lookup)|run list|decision list|gap list|queue list|embed status|search)\b/;
 
 function dbStamp(): string {
   const base = process.env.KNOWLEDGE_DB_PATH || path.join(getRepoRoot(), "data", "knowledge.db");
@@ -184,6 +184,9 @@ export async function getCards(params?: {
   status?: string;
   search?: string;
   newest?: boolean;
+  kind?: string;
+  domain?: string;
+  evidence?: string;
 }): Promise<KnowledgeCard[]> {
   if (params?.search && params.search.trim().length > 0) {
     const res = await runKbCommand<{ results: Array<{ card: KnowledgeCard }> }>([
@@ -204,6 +207,9 @@ export async function getCards(params?: {
   if (params?.category) args.push("--category", params.category);
   if (params?.status) args.push("--status", params.status);
   if (params?.newest) args.push("--newest");
+  if (params?.kind) args.push("--kind", params.kind);
+  if (params?.domain) args.push("--domain", params.domain);
+  if (params?.evidence) args.push("--evidence", params.evidence);
 
   const res = await runKbCommand<{ cards: KnowledgeCard[] }>(args);
   if (!res.ok) {
@@ -233,6 +239,32 @@ export async function getPersons(): Promise<Person[]> {
     throw new Error(res.error?.message || "Failed to list persons");
   }
   return res.data.persons || [];
+}
+
+/** The static classifications with counts (`kb taxonomy`); keys like `cards.category`, `content.platform`, `skills.group`. */
+export async function getTaxonomy(entity?: string): Promise<Record<string, unknown>> {
+  const res = await runKbCommand<Record<string, unknown>>(["taxonomy", ...(entity ? ["--entity", entity] : [])]);
+  if (!res.ok) {
+    throw new Error(res.error?.message || "Failed to load taxonomy");
+  }
+  return res.data;
+}
+
+export interface PersonClass {
+  id: string;
+  group: string;
+  label: string;
+  hint: string;
+  count: number;
+}
+
+/** The static classification of people (core/classes.py), with counts; `other` is the catch-all. */
+export async function getPersonClasses(): Promise<PersonClass[]> {
+  const res = await runKbCommand<{ classes: PersonClass[] }>(["person", "classes"]);
+  if (!res.ok) {
+    throw new Error(res.error?.message || "Failed to load person classes");
+  }
+  return res.data.classes || [];
 }
 
 export async function getPerson(id: string): Promise<Person> {
@@ -280,11 +312,15 @@ export async function getSources(params?: {
   platform?: string;
   person?: string;
   status?: string;
+  kind?: string;
+  medium?: string;
 }): Promise<Source[]> {
   const args = ["source", "list", "--limit", "1000"];
   if (params?.platform) args.push("--platform", params.platform);
   if (params?.person) args.push("--person", params.person);
   if (params?.status) args.push("--status", params.status);
+  if (params?.kind) args.push("--kind", params.kind);
+  if (params?.medium) args.push("--medium", params.medium);
 
   const res = await runKbCommand<{ sources: Source[] }>(args);
   if (!res.ok) {
@@ -307,12 +343,16 @@ export async function getContentList(params?: {
   status?: string;
   person?: string;
   source?: string;
+  type?: string;
+  medium?: string;
 }): Promise<ContentItem[]> {
   const args = ["content", "list", "--limit", String(params?.limit || 50)];
   if (params?.platform) args.push("--platform", params.platform);
   if (params?.status) args.push("--status", params.status);
   if (params?.person) args.push("--person", params.person);
   if (params?.source) args.push("--source", params.source);
+  if (params?.type) args.push("--type", params.type);
+  if (params?.medium) args.push("--medium", params.medium);
 
   const res = await runKbCommand<{ contents: ContentItem[] }>(args);
   if (!res.ok) {
@@ -349,6 +389,9 @@ export async function getSkills(): Promise<SkillItem[]> {
   const repoRoot = getRepoRoot();
   const skillsDir = path.join(repoRoot, ".agents", "skills");
   const items: SkillItem[] = [];
+  // Groups are the static classification of skills (core/taxonomy.py), not a list kept in the UI.
+  const tax = (await getTaxonomy("skills").catch(() => ({}))) as { _skill_group?: Record<string, string> };
+  const groupOf = tax._skill_group || {};
 
   if (fs.existsSync(skillsDir)) {
     const entries = fs.readdirSync(skillsDir, { withFileTypes: true });
@@ -358,7 +401,6 @@ export async function getSkills(): Promise<SkillItem[]> {
       const skillMdPath = path.join(skillsDir, skillName, "SKILL.md");
       let description = "";
       let version = "2.0.0";
-      let type: SkillItem["type"] = "core";
 
       if (fs.existsSync(skillMdPath)) {
         try {
@@ -373,38 +415,8 @@ export async function getSkills(): Promise<SkillItem[]> {
         }
       }
 
-      // Categorize
-      let categoryGroup = "Other";
-      if (
-        [
-          "knowledge-db",
-          "knowledge-transformer",
-          "knowledge-dedup",
-          "knowledge-search",
-          "market-idea-miner",
-          "person-matcher",
-          "person-skill-synthesizer",
-          "person-skills-explorer",
-        ].includes(skillName)
-      ) {
-        type = "core";
-        categoryGroup = "Core Knowledge Engine";
-      } else if (
-        [
-          "agent-browser",
-          "session-bridge",
-          "source-explorer",
-          "self-improver",
-          "skill-installer",
-          "finsocnet",
-        ].includes(skillName)
-      ) {
-        type = "orchestration";
-        categoryGroup = "Orchestration & Automation";
-      } else if (skillName.endsWith("-explorer") || skillName.endsWith("-extractor") || skillName.endsWith("-reader") || skillName.endsWith("-transcriber") || skillName.endsWith("-searcher")) {
-        type = "platform";
-        categoryGroup = "Platform Explorers (P1-P3)";
-      }
+      const categoryGroup = groupOf[skillName] || "Other";
+      const type: SkillItem["type"] = categoryGroup === "Knowledge core" || categoryGroup === "People" ? "core" : categoryGroup === "Loop" || categoryGroup === "Access" ? "orchestration" : "platform";
 
       items.push({
         name: skillName,

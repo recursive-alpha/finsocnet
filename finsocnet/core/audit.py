@@ -77,5 +77,10 @@ def run(conn: sqlite3.Connection, limit: int = 15) -> dict[str, Any]:
         todo.append(f"{out['contents']['fetched_not_mined']} fetched contents are not mined yet (market-idea-miner)")
     if out["sources"]["without_person"]:
         todo.append(f"{out['sources']['without_person']} sources have no person: person-explorer / person-matcher")
+    from finsocnet.core import taxonomy
+    unlisted = {k: v["unlisted_values"] for k, v in taxonomy.build(conn).items() if v.get("unlisted_values") and not k.startswith("skills")}
+    out["unlisted_values"] = unlisted
+    if unlisted:
+        todo.append("values outside the static classification (counted as `other`): " + "; ".join(f"{k}: {', '.join(v[:5])}" for k, v in unlisted.items()) + " (use a listed value; docs/agent-guide.md)")
     out["todo"] = todo
     return out

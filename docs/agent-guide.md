@@ -11,7 +11,7 @@ Scripts fetch, store and measure. **You read, judge and write.** Everything in t
 | Never | Why | Instead |
 |---|---|---|
 | Write a `populate_*.py` (or any script) that holds names, "texts", quotes, URLs or cards you typed from memory | The text is yours, not the source's; quotes "verify" against your own text; reviewers cannot tell | Use the platform skill to fetch, then read what it stored |
-| `INSERT`/`UPDATE` into `data/knowledge.db` (sqlite3, python) | Bypasses validation, runs, history, provenance | `finsocnet kb ... --run R` only |
+| Open `data/knowledge.db` in a script (python/sqlite3), and above all `INSERT`/`UPDATE`/`DELETE` | Bypasses validation, runs, history, provenance | Read: `kb query --sql "SELECT …"`, `kb schema`, `kb person coverage ID`, the `list`/`get` commands. Write or remove: the typed `kb … --run R` commands only |
 | Create a content with text you wrote (`fetch_method` empty) | `kb card validate` refuses citations to it; the audit lists it | Fetch it: `<skill> fetch <url> --ingest --run R`. If nothing can fetch it, store a `metadata_only` content and say so |
 | Invent or guess a URL, handle, id, avatar or "official homepage" | A wrong link is worse than none | Open the page with a skill (`web.py fetch`, `search`, `profile`); store the evidence of what you saw |
 | Write "verified", "official", "100%", "complete" without a number from `kb audit` | Unchecked claims hide gaps | Paste the audit numbers and list what is missing |
@@ -53,6 +53,22 @@ Run `uv run finsocnet kb audit --limit 30` before and after your task and includ
 ## 6. Delegating (omp, other harnesses)
 
 Give each helper: the goal, the list of ids it owns (no overlap), the budget, the skills to read first, this guide, the report path. Ask it to be verbose (what and why before each step). Then **review**: run `kb audit`, open a sample of cards against `kb content view`, open a sample of links, read the event log for forbidden shortcuts (scripts, SQL, guessed URLs). Fix or retire what is wrong (`kb card retire`, `kb person link add` with `match_status: rejected|needs_review`) and say so in your report.
+
+## 6b. Every database operation is a CLI command
+
+| Need | Command |
+|---|---|
+| Any read the list/get commands do not cover | `kb query --sql "SELECT …" [--limit N]` (SELECT only, enforced by SQLite), `kb schema [--table T]` |
+| What do we hold about this person / what is missing | `kb person coverage ID` (profile fields, links by kind, content by type listed/fetched/mined, cards, `gaps` = your to-do) |
+| Who is missing something | `kb person list --missing avatar|bio|homepage|links|… --no-cards --no-sources --class X --search T` |
+| The static classifications | `kb taxonomy [--entity people\|cards\|content\|sources\|skills\|vocab]` (fixed lists with counts; `kb person classes` for people). Never invent a class: use a listed value or `other` |
+| Medium, not platform | Content and sources are classified by **medium** (`video`, `audio`, `article`, `social`, `paper`, `book`, `code`, `document`, `other`), derived from `content_type` (`video short stream episode article page post paper book repo file`). Platforms are free text and will grow: never put a platform in a list, and set `content_type` from the real thing (a podcast episode is `episode`, a newsletter post `article`, a tweet `post`) |
+| Contents by provenance | `kb content list --provenance fetched|missing|metadata_only --type article|book|paper|video|… --person ID --search T` |
+| Sources nobody owns | `kb source list --no-person` (also `--medium book`, `--kind channel`) |
+| Update | `kb person upsert`, `kb person link add`, `kb person alias add`, `kb person appearance add`, `kb source upsert`, `kb card update`, `kb card retire`, `kb queue update` |
+| Remove | `kb person link remove`, `kb person alias remove`, `kb person appearance remove`, `kb person remove` (refused when cited: `kb person merge`), `kb queue remove`; cards, contents, citations and decisions are never deleted (retire / `fail` / `merge`) |
+
+If a command you need does not exist, say so in the report (a `script_bug`/`other` lesson: `kb lesson add`); do not write a script around the database.
 
 ## 7. Quick reference
 

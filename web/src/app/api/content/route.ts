@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     const source = searchParams.get("source") || undefined;
     const limit = searchParams.get("limit") ? parseInt(searchParams.get("limit")!, 10) : 50;
 
-    const contents = await getContentList({ platform, status, person, source, limit });
+    const contents = await getContentList({ platform, status, person, source, limit, type: searchParams.get("type") || undefined, medium: searchParams.get("medium") || undefined });
     return NextResponse.json({ ok: true, contents, count: contents.length });
   } catch (error: unknown) {
     const err = error as Error;

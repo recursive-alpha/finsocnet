@@ -20,6 +20,14 @@
 
 Bottom line: **all eight phases are implemented on `main`**, 45 skills, 181 offline tests (including a real headless Chromium for the session bridge and web reader). Not done, because it needs you, your accounts or time: live checks of the session-gated adapters, the user review of the legacy conversion (and the deletion of `legacy/`), and the answers in section 3.
 
+### 2.9d Complete CLI, static classifications, web review (docs/goals/2026-10-29-complete-data-and-web.md)
+
+- [x] `kb query|schema` (read-only SQL, enforced by the SQLite authorizer), `kb taxonomy`, `kb person classes|coverage|remove|alias remove|appearance list|remove|link remove`, list filters, `queue remove`; agents never open the database themselves.
+- [x] Static classifications for people, cards, content, sources, skills, vocabulary with a catch-all; web filters from `kb taxonomy`; tests tie lists to schemas, migrations and the skills folder.
+- [x] Web: one popup frame with an Escape stack, card detail inside the person popup, appearances open stored text, identifier and alias links, loading bar and skeletons.
+- [x] Skill `person-explorer`: knowledge sweep with `references/knowledge-sources.md` and `kb person coverage`.
+- [ ] Data refill by delegated agents, reviewed against `kb audit`.
+
 ---
 
 ## 1. Done

@@ -9,24 +9,15 @@ import {
   Tag,
   X,
 } from "lucide-react";
+import { FilterChips } from "@/components/FilterChips";
+import { useTaxonomy } from "@/lib/taxonomy";
 import { Badge } from "@/components/Badge";
 import type { VocabTerm } from "@/lib/types";
-
-const FACETS = [
-  "all",
-  "asset_class",
-  "indicator",
-  "pattern",
-  "order_flow",
-  "market_structure",
-  "metric",
-  "timeframe",
-  "risk",
-];
 
 export default function VocabPage() {
   const [terms, setTerms] = useState<VocabTerm[]>([]);
   const [facet, setFacet] = useState("all");
+  const tax = useTaxonomy();
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -107,26 +98,7 @@ export default function VocabPage() {
           </button>
         </form>
 
-        {/* Facet Selectors */}
-        <div className="flex flex-wrap items-center gap-1.5 pt-1">
-          <span className="text-xs font-mono text-zinc-500 mr-1 flex items-center gap-1">
-            <Filter className="h-3 w-3" />
-            <span>Facet:</span>
-          </span>
-          {FACETS.map((f) => (
-            <button
-              key={f}
-              onClick={() => setFacet(f)}
-              className={`rounded-md px-2.5 py-1 text-xs font-mono transition-colors cursor-pointer ${
-                facet === f
-                  ? "bg-zinc-100 text-zinc-950 font-bold"
-                  : "bg-zinc-800/80 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 border border-zinc-700/50"
-              }`}
-            >
-              {f.replace(/_/g, " ")}
-            </button>
-          ))}
-        </div>
+        <FilterChips label="Facet" items={tax?.["vocab.facet"]?.items} value={facet} onChange={setFacet} grouped total={tax?.["vocab.facet"]?.items.reduce((a, i) => a + i.count, 0)} />
       </div>
 
       {/* Terms Grid */}

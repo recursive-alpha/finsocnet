@@ -35,11 +35,11 @@ All commands: `uv run finsocnet kb <group> <command> …` (same as `uv run .agen
 
 | Group | Commands |
 |---|---|
-| admin | `init`, `migrate [--dry-run]`, `backup [--to PATH]`, `doctor`, `stats`, `audit [--limit N]` (completeness and provenance: cards without a fetched source, thin links, people without cards, per-person backlog, todo list; **the numbers to report**), `prune [--dry-run]` |
+| admin | `init`, `migrate [--dry-run]`, `backup [--to PATH]`, `doctor`, `stats`, `query --sql "SELECT …"` (read-only SQL for anything the other commands do not show), `schema [--table T]`, `audit [--limit N]` (completeness and provenance: cards without a fetched source, thin links, people without cards, per-person backlog, todo list; **the numbers to report**), `prune [--dry-run]` |
 | run | `run start --skill S --goal G --harness H --model M [--parent R]` → `{run_id}`; `run end --run R --outcome success\|partial\|failed\|aborted [--stats JSON]`; `run list` |
 | lesson / feedback | `lesson add --skill S --kind K --observation T [--evidence] [--proposal]` W; `lesson list\|update`; `feedback add\|list\|handle` |
-| source | `source upsert --file F` W; `source get\|list`; `source cursor ID --set C` W |
-| content | `content add --file F` W; `get ID`; `view ID [--from-seq A --to-seq B]`; `chunks ID [--max-chars 12000] [--overlap 2]`; `list [--status] [--platform]`; `claim ID` W; `done ID --upto-seq N --cards N` W; `fail ID --error T` W; `link-duplicate ID --of OTHER` W; `search "<text>" [--content ID] [--person P]` |
+| source | `source upsert --file F` W; `source get\|list [--no-person] [--search T]`; `source cursor ID --set C` W |
+| content | `content add --file F` W; `get ID`; `view ID [--from-seq A --to-seq B]`; `chunks ID [--max-chars 12000] [--overlap 2]`; `list [--status] [--platform] [--type T] [--provenance fetched\|missing\|metadata_only] [--search T]`; `claim ID` W; `done ID --upto-seq N --cards N` W; `fail ID --error T` W; `link-duplicate ID --of OTHER` W; `search "<text>" [--content ID] [--person P]` |
 | vocab | `vocab lookup "<phrase>"`; `vocab add --file F` W; `vocab update\|merge` W; `vocab list\|export` |
 | person avatar | `person avatar add --person P (--url U \| --file F) [--kind avatar\|banner\|photo\|logo] [--platform X] [--primary]` W; `person avatar fetch --person P` W (downloads known avatar URLs); `person avatar list --person P` |
 | seen | `seen check KEY…`; `seen mark --key K --status seen\|queued\|fetched\|skipped\|failed [--note N]` W; `seen list [--platform --status --source]`; `seen stats` (items the explorers looked at) |
@@ -47,9 +47,10 @@ All commands: `uv run finsocnet kb <group> <command> …` (same as `uv run .agen
 | translate | `translate detect-pending`; `translate set-language --file F` W; `translate pending [--content C]`; `translate put --file F` W; `translate get C [--seq N]` (the agent detects and translates, see skill `translator`) |
 | card | `card validate --file F`; `card candidates --file F [--limit 10]`; `card commit --file F` W; `card search --query-card F \| --text Q [--mode auto\|lexical\|semantic\|hybrid]`; `card get ID [--citations --links --history]`; `card list`; `card update\|merge\|retire\|undo` W; `card link\|unlink --from A --to B [--relation related] --reason R` W (add or remove one link after the fact; snapshots card A first); `citation attribute ID --person P --role R --confidence C` W |
 | decision | `decision list [--reviewed none]`; `decision review ID --verdict agreed\|overturned` W |
-| person link | `person link add --file F [--person P]` W (links with evidence/confidence; platform+handle also becomes an alias); `person link list --person P [--all]` |
-| person / skill | `person candidates\|upsert\|alias add\|appearance add\|get\|list [--profession P]\|cards\|merge`; `skill upsert\|get\|list` (person fields: profession, affiliation, domains, homepage, relevance, external_ids) |
-| queue / gap / history | `queue add\|next\|update\|list`; `gap add\|list\|update`; `history pending\|mark` |
+| person link | `person link add --file F [--person P]` W (links with evidence/confidence; platform+handle also becomes an alias); `person link list --person P [--all]`; `person link remove --person P --url U` W |
+| person | `person candidates\|upsert\|get\|cards\|merge`; `person list [--class C] [--search T] [--no-cards] [--no-sources] [--missing avatar\|bio\|homepage\|links\|…] [--sort cards\|name\|sources\|recent]`; `person classes` (the static classification, `other` is the catch-all); `person coverage ID` (what we hold and the `gaps` to fill); `person alias add\|remove`; `person appearance add\|list\|remove` ; `person remove ID --reason R` (refused when cited: merge) — writes W |
+| skill | `skill upsert\|get\|list` (person fields: profession, affiliation, domains, homepage, relevance, external_ids) |
+| queue / gap / history | `queue add\|next\|update\|list\|remove`; `gap add\|list\|update`; `history pending\|mark` |
 
 Full reference with outputs: `specs/01-database.md` §6.
 

@@ -3,9 +3,10 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { Brain, Layers, Search, UserCheck, X } from "lucide-react";
+import { FilterChips } from "@/components/FilterChips";
+import type { TaxItem } from "@/lib/taxonomy";
 import { Avatar } from "@/components/Avatar";
 import { Badge } from "@/components/Badge";
-import { CardModal } from "@/components/CardModal";
 import { PersonGridSkeleton } from "@/components/Loading";
 import { PersonModal } from "@/components/PersonModal";
 import type { Person } from "@/lib/types";
@@ -20,33 +21,32 @@ function counts(p: Person) {
 function PeopleContent() {
   const params = useSearchParams();
   const [persons, setPersons] = useState<Person[]>([]);
+  const [classes, setClasses] = useState<TaxItem[] | undefined>(undefined);
   const [search, setSearch] = useState("");
   const [profession, setProfession] = useState("");
   const [sort, setSort] = useState<Sort>("cards");
   const [onlyWithCards, setOnlyWithCards] = useState(false);
   const [selectedPersonId, setSelectedPersonId] = useState<string | null>(params.get("open"));
-  const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/persons")
       .then((r) => r.json())
-      .then((r) => (r.ok ? setPersons(r.persons || []) : setError(r.error || "Failed to load people")))
+      .then((r) => {
+        if (r.ok) {
+          setPersons(r.persons || []);
+          setClasses(r.classes || []);
+        } else setError(r.error || "Failed to load people");
+      })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, []);
 
-  const professions = useMemo(() => {
-    const n: Record<string, number> = {};
-    persons.forEach((p) => p.profession && (n[p.profession] = (n[p.profession] || 0) + 1));
-    return Object.entries(n).sort((a, b) => b[1] - a[1]);
-  }, [persons]);
-
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     const list = persons.filter((p) => {
-      if (profession && p.profession !== profession) return false;
+      if (profession && (p.profession || "other") !== profession) return false;
       if (onlyWithCards && counts(p).cards === 0) return false;
       if (!q) return true;
       return [p.canonical_name, p.moniker, p.affiliation, p.domains, p.relevance, p.profession].some((v) => v && String(v).toLowerCase().includes(q));
@@ -107,21 +107,7 @@ function PeopleContent() {
         </div>
       </div>
 
-      {professions.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {[["", persons.length] as [string, number], ...professions].map(([pr, n]) => (
-            <button
-              key={pr || "all"}
-              onClick={() => setProfession(pr)}
-              className={`rounded-full border px-3 py-1 text-[11px] font-mono transition-colors ${
-                profession === pr ? "border-emerald-500 bg-emerald-500/10 text-emerald-300" : "border-zinc-800 text-zinc-400 hover:text-zinc-200"
-              }`}
-            >
-              {pr ? pr.replace(/_/g, " ") : "all"} <span className="text-zinc-500">{n}</span>
-            </button>
-          ))}
-        </div>
-      )}
+      <FilterChips label="Class" items={classes} value={profession || "all"} onChange={(v) => setProfession(v === "all" ? "" : v)} grouped total={persons.length} />
 
       {error && <div className="rounded-xl border border-rose-900/50 bg-rose-950/20 p-4 text-sm text-rose-400">{error}</div>}
 
@@ -166,12 +152,7 @@ function PeopleContent() {
         </div>
       )}
 
-      <PersonModal
-        personId={selectedPersonId}
-        onClose={() => setSelectedPersonId(null)}
-        onSelectCard={(id) => setSelectedCardId(id)}
-      />
-      <CardModal cardId={selectedCardId} onClose={() => setSelectedCardId(null)} onSelectCard={(id) => setSelectedCardId(id)} />
+      <PersonModal personId={selectedPersonId} onClose={() => setSelectedPersonId(null)} />
     </div>
   );
 }

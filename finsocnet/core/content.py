@@ -78,12 +78,20 @@ def get_source(conn: sqlite3.Connection, source_id: str) -> dict[str, Any]:
 
 
 def list_sources(conn: sqlite3.Connection, platform: str | None = None, person: str | None = None,
-                 status: str | None = None, limit: int = 100) -> list[dict[str, Any]]:
-    sql, args = "SELECT * FROM sources WHERE 1=1", []
-    for col, val in (("platform", platform), ("person_id", person), ("status", status)):
+                 status: str | None = None, limit: int = 100, no_person: bool = False, search: str | None = None, kind: str | None = None, medium: str | None = None) -> list[dict[str, Any]]:
+    from finsocnet.core import taxonomy
+    sql, args = f"SELECT *, {taxonomy.DIMENSIONS['sources.medium']['column']} AS medium FROM sources WHERE 1=1", []
+    d_fmt = taxonomy.DIMENSIONS["sources.medium"]
+    for col, val, dim in (("platform", platform, None), (d_fmt["column"], medium, "sources.medium"), ("kind", kind, "sources.kind"), ("person_id", person, None), ("status", status, None)):
         if val:
-            sql += f" AND {col} = ?"
-            args.append(val)
+            clause, a = taxonomy.clause(dim, col, val) if dim else (f"{col} = ?", [val])
+            sql += f" AND {clause}"
+            args += a
+    if no_person:
+        sql += " AND person_id IS NULL"
+    if search:
+        sql += " AND (id LIKE ? OR title LIKE ? OR url LIKE ?)"
+        args += [f"%{search}%"] * 3
     sql += " ORDER BY id LIMIT ?"
     args.append(limit)
     return [dict(r) for r in conn.execute(sql, args)]
@@ -422,14 +430,27 @@ def link_duplicate(conn: sqlite3.Connection, content_id: str, of: str) -> dict[s
 # --- listing and search ---------------------------------------------------------------------------------
 
 def list_contents(conn: sqlite3.Connection, status: str | None = None, platform: str | None = None,
-                  source: str | None = None, person: str | None = None, limit: int = 50) -> list[dict[str, Any]]:
-    sql = ("SELECT id, platform, content_type, title, source_id, person_id, published_at, process_status, cards_count, "
+                  source: str | None = None, person: str | None = None, limit: int = 50, provenance: str | None = None,
+                  search: str | None = None, content_type: str | None = None, medium: str | None = None) -> list[dict[str, Any]]:
+    from finsocnet.core import taxonomy
+    sql = ("SELECT id, platform, content_type, " + taxonomy._type_case() + " AS medium, title, url, source_id, person_id, published_at, process_status, cards_count, fetch_method, "
            "(SELECT COUNT(*) FROM content_segments s WHERE s.content_id = c.id) AS segments FROM contents c WHERE 1=1")
     args: list[Any] = []
-    for col, val in (("process_status", status), ("platform", platform), ("source_id", source), ("person_id", person)):
+    for col, val, dim in (("process_status", status, None), ("platform", platform, None), ("source_id", source, None), ("person_id", person, None),
+                          ("content_type", content_type, "content.type"), (taxonomy.DIMENSIONS["content.medium"]["column"], medium, "content.medium")):
         if val:
-            sql += f" AND {col} = ?"
-            args.append(val)
+            clause, a = taxonomy.clause(dim, col, val) if dim else (f"{col} = ?", [val])
+            sql += f" AND {clause}"
+            args += a
+    if provenance == "fetched":
+        sql += " AND fetch_method IS NOT NULL AND process_status != 'metadata_only'"
+    elif provenance == "missing":
+        sql += " AND fetch_method IS NULL AND process_status != 'metadata_only'"
+    elif provenance == "metadata_only":
+        sql += " AND process_status = 'metadata_only'"
+    if search:
+        sql += " AND (id LIKE ? OR title LIKE ? OR url LIKE ?)"
+        args += [f"%{search}%"] * 3
     sql += " ORDER BY COALESCE(published_at, created_at) DESC, id LIMIT ?"
     args.append(limit)
     return [dict(r) for r in conn.execute(sql, args)]

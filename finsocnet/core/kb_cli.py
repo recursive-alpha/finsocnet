@@ -312,7 +312,7 @@ def cmd_source_get(ctx: Ctx) -> Result:
 
 def cmd_source_list(ctx: Ctx) -> Result:
     a = ctx.args
-    return Result({"sources": content_mod.list_sources(ctx.conn(), a.platform, a.person, a.status, a.limit)})
+    return Result({"sources": content_mod.list_sources(ctx.conn(), a.platform, a.person, a.status, a.limit, a.no_person, a.search, a.kind, a.medium)})
 
 
 def cmd_source_cursor(ctx: Ctx) -> Result:
@@ -354,7 +354,7 @@ def cmd_content_chunks(ctx: Ctx) -> Result:
 
 def cmd_content_list(ctx: Ctx) -> Result:
     a = ctx.args
-    return Result({"contents": content_mod.list_contents(ctx.conn(), a.status, a.platform, a.source, a.person, a.limit)})
+    return Result({"contents": content_mod.list_contents(ctx.conn(), a.status, a.platform, a.source, a.person, a.limit, a.provenance, a.search, a.type, a.medium)})
 
 
 def cmd_content_claim(ctx: Ctx) -> Result:
@@ -451,7 +451,7 @@ def cmd_card_get(ctx: Ctx) -> Result:
 
 def cmd_card_list(ctx: Ctx) -> Result:
     a = ctx.args
-    return Result({"cards": cards_mod.list_cards(ctx.conn(), a.person, a.category, None if a.status == "any" else a.status, a.since, a.limit, getattr(a, "newest", False))})
+    return Result({"cards": cards_mod.list_cards(ctx.conn(), a.person, a.category, None if a.status == "any" else a.status, a.since, a.limit, a.newest, a.kind, a.domain, a.evidence, a.horizon, a.action)})
 
 
 def cmd_card_update(ctx: Ctx) -> Result:
@@ -539,13 +539,71 @@ def cmd_person_appearance_add(ctx: Ctx) -> Result:
     return Result(res[0] if not isinstance(payload, list) else {"appearances": res})
 
 
+def cmd_person_link_remove(ctx: Ctx) -> Result:
+    ctx.run_id()
+    return Result(persons_mod.link_remove(ctx.conn(), ctx.args.person, ctx.args.url))
+
+
+def cmd_person_alias_remove(ctx: Ctx) -> Result:
+    ctx.run_id()
+    a = ctx.args
+    return Result(persons_mod.alias_remove(ctx.conn(), a.person, a.alias, a.platform or ""))
+
+
+def cmd_person_appearance_list(ctx: Ctx) -> Result:
+    return Result({"person_id": ctx.args.person, "appearances": persons_mod.appearance_list(ctx.conn(), ctx.args.person, ctx.args.limit)})
+
+
+def cmd_person_appearance_remove(ctx: Ctx) -> Result:
+    ctx.run_id()
+    return Result(persons_mod.appearance_remove(ctx.conn(), ctx.args.id))
+
+
+def cmd_person_remove(ctx: Ctx) -> Result:
+    ctx.run_id()
+    return Result(persons_mod.remove(ctx.conn(), ctx.args.id, ctx.args.reason))
+
+
+def cmd_person_classes(ctx: Ctx) -> Result:
+    from finsocnet.core import classes
+    return Result({"classes": classes.with_counts(ctx.conn()), "note": "static list; a person that fits none is `other`"})
+
+
+def cmd_person_coverage(ctx: Ctx) -> Result:
+    return Result(persons_mod.coverage(ctx.conn(), ctx.args.id))
+
+
+def cmd_taxonomy(ctx: Ctx) -> Result:
+    from finsocnet.core import taxonomy
+    data = taxonomy.build(ctx.conn(), ctx.args.entity)
+    if ctx.args.entity in (None, "skills"):
+        data["_skill_group"] = taxonomy.skill_groups()
+    return Result(data, [f"{k}: values outside the static list counted as catch-all: {', '.join(v['unlisted_values'][:8])}" for k, v in data.items() if isinstance(v, dict) and v.get("unlisted_values")])
+
+
+def cmd_query(ctx: Ctx) -> Result:
+    from finsocnet.core import dbtools
+    return Result(dbtools.query(ctx.args.sql, ctx.args.limit))
+
+
+def cmd_schema(ctx: Ctx) -> Result:
+    from finsocnet.core import dbtools
+    return Result(dbtools.schema(ctx.args.table))
+
+
+def cmd_queue_remove(ctx: Ctx) -> Result:
+    ctx.run_id()
+    return Result(queue_mod.remove(ctx.conn(), ctx.args.id))
+
+
 def cmd_person_get(ctx: Ctx) -> Result:
     return Result(persons_mod.get(ctx.conn(), ctx.args.id))
 
 
 def cmd_person_list(ctx: Ctx) -> Result:
-    key = "needs_review" if ctx.args.needs_review else "persons"
-    return Result({key: persons_mod.list_persons(ctx.conn(), ctx.args.needs_review, ctx.args.limit, getattr(ctx.args, "profession", None))})
+    a = ctx.args
+    key = "needs_review" if a.needs_review else "persons"
+    return Result({key: persons_mod.list_persons(ctx.conn(), a.needs_review, a.limit, a.profession, a.search, a.no_cards, a.no_sources, a.missing, a.sort)})
 
 
 def cmd_person_cards(ctx: Ctx) -> Result:
@@ -760,6 +818,13 @@ def build_parser() -> _Parser:
     top("stats", cmd_stats, "counts and distributions")
     p = top("audit", cmd_audit, "completeness and provenance report (cards without a fetched source, thin links, people without cards, backlog)")
     p.add_argument("--limit", type=int, default=15, help="rows of the per-person backlog")
+    p = top("query", cmd_query, "read-only SELECT over the database (the only sanctioned way to read what other commands do not show)")
+    p.add_argument("--sql", required=True, help="one SELECT / WITH statement")
+    p.add_argument("--limit", type=int, default=200)
+    p = top("taxonomy", cmd_taxonomy, "the static classifications (people, cards, content, sources, skills, vocabulary) with counts; unlisted values go to `other`")
+    p.add_argument("--entity", choices=["people", "cards", "content", "sources", "skills", "vocab", "rulebooks"])
+    p = top("schema", cmd_schema, "tables and columns (add --table T for types)")
+    p.add_argument("--table")
     p = top("prune", cmd_prune, "prune cache files and old rows (01 §4)")
     p.add_argument("--dry-run", action="store_true")
 
@@ -816,6 +881,10 @@ def build_parser() -> _Parser:
     p.add_argument("--platform")
     p.add_argument("--person")
     p.add_argument("--status")
+    p.add_argument("--no-person", action="store_true", help="sources nobody owns yet")
+    p.add_argument("--kind", help="channel, feed, publication, user, author, group, site, book, paper, other")
+    p.add_argument("--medium", help="video, audio, article, social, paper, book, code, document, other (what the source mostly publishes; see `kb taxonomy`)")
+    p.add_argument("--search", help="text in id, title or url")
     p.add_argument("--limit", type=int, default=100)
     p = leaf(g, ("source", "cursor"), "cursor", cmd_source_cursor)
     p.add_argument("id")
@@ -840,6 +909,10 @@ def build_parser() -> _Parser:
     p.add_argument("--platform")
     p.add_argument("--source")
     p.add_argument("--person")
+    p.add_argument("--type", help="content_type: video, short, stream, episode, article, page, post, paper, book, repo, file")
+    p.add_argument("--medium", help="video, audio, article, social, paper, book, code, document, other (see `kb taxonomy`)")
+    p.add_argument("--provenance", choices=["fetched", "missing", "metadata_only"], help="fetched: text fetched by a skill; missing: text without fetch_method (re-fetch); metadata_only: listed only")
+    p.add_argument("--search", help="text in id, title or url")
     p.add_argument("--limit", type=int, default=50)
     p = leaf(g, ("content", "claim"), "claim", cmd_content_claim)
     p.add_argument("id")
@@ -908,6 +981,8 @@ def build_parser() -> _Parser:
     p.add_argument("--since")
     p.add_argument("--limit", type=int, default=50)
     p.add_argument("--newest", action="store_true", help="newest cards first")
+    for flag in ("kind", "domain", "evidence", "horizon", "action"):
+        p.add_argument(f"--{flag}", help=f"only this {flag} (static list: kb taxonomy --entity cards)")
     p = leaf(g, ("card", "update"), "update", cmd_card_update)
     p.add_argument("id", type=int)
     p.add_argument("--file", required=True)
@@ -973,12 +1048,39 @@ def build_parser() -> _Parser:
     p = lg.add_parser("list", parents=[common])
     p.add_argument("--person", required=True)
     p.add_argument("--all", action="store_true", help="include rejected links")
+    handlers[("person", "link", "remove")] = cmd_person_link_remove
+    p = lg.add_parser("remove", parents=[common], help="delete a link row (to keep the decision, add it as rejected instead)")
+    p.add_argument("--person", required=True)
+    p.add_argument("--url", required=True)
+    handlers[("person", "alias", "remove")] = cmd_person_alias_remove
+    p = g.choices["alias"]._subparsers._group_actions[0].add_parser("remove", parents=[common])
+    p.add_argument("--person", required=True)
+    p.add_argument("--alias", required=True)
+    p.add_argument("--platform")
+    handlers[("person", "appearance", "list")] = cmd_person_appearance_list
+    p = g.choices["appearance"]._subparsers._group_actions[0].add_parser("list", parents=[common])
+    p.add_argument("--person", required=True)
+    p.add_argument("--limit", type=int, default=200)
+    handlers[("person", "appearance", "remove")] = cmd_person_appearance_remove
+    p = g.choices["appearance"]._subparsers._group_actions[0].add_parser("remove", parents=[common])
+    p.add_argument("id", type=int)
     p = leaf(g, ("person", "get"), "get", cmd_person_get)
     p.add_argument("id")
     p = leaf(g, ("person", "list"), "list", cmd_person_list)
     p.add_argument("--needs-review", action="store_true")
-    p.add_argument("--profession", help="only this profession (trader, portfolio_manager, economist, academic, ...)")
+    p.add_argument("--profession", "--class", dest="profession", help="only this class (see `kb person classes`; unknown people are `other`)")
+    p.add_argument("--search", help="text in name, moniker, affiliation, fields or id")
+    p.add_argument("--no-cards", action="store_true", help="people without an active card")
+    p.add_argument("--no-sources", action="store_true", help="people without a linked source")
+    p.add_argument("--missing", help="people missing a field: bio, affiliation, domains, homepage, relevance, moniker, avatar, links")
+    p.add_argument("--sort", choices=["cards", "name", "sources", "recent"], default="cards")
     p.add_argument("--limit", type=int, default=100)
+    p = leaf(g, ("person", "classes"), "classes", cmd_person_classes, "the static classification with counts")
+    p = leaf(g, ("person", "coverage"), "coverage", cmd_person_coverage, "what we hold about one person and what is missing (the agent's to-do)")
+    p.add_argument("id")
+    p = leaf(g, ("person", "remove"), "remove", cmd_person_remove, "delete a person created by mistake (refused when cited; merge instead)")
+    p.add_argument("id")
+    p.add_argument("--reason", required=True)
     p = leaf(g, ("person", "cards"), "cards", cmd_person_cards)
     p.add_argument("id")
     p.add_argument("--category")
@@ -1027,6 +1129,8 @@ def build_parser() -> _Parser:
     p.add_argument("--status", required=True, choices=queue_mod.STATUSES)
     p.add_argument("--error")
     p.add_argument("--retry-after", type=int)
+    p = leaf(g, ("queue", "remove"), "remove", cmd_queue_remove, "delete a queue item (use update --status skipped to keep the history)")
+    p.add_argument("id", type=int)
     p = leaf(g, ("queue", "list"), "list", cmd_queue_list)
     p.add_argument("--status", choices=queue_mod.STATUSES)
     p.add_argument("--limit", type=int, default=100)

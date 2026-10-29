@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { BookOpen, Brain, ExternalLink, Layers, User, X } from "lucide-react";
+import { BookOpen, Brain, ExternalLink, Eye, Layers, User, X } from "lucide-react";
+import { CardDetail } from "./CardModal";
+import { ContentDetail } from "./ContentViewerModal";
+import { ModalFrame } from "./ModalFrame";
+import { mentionedResources } from "@/lib/identifiers";
 import { Avatar } from "./Avatar";
 import { Badge, CategoryBadge, PlatformBadge } from "./Badge";
 import { Markdown } from "./Markdown";
@@ -26,10 +30,22 @@ const KIND_LABEL: Record<string, string> = {
 export function PersonModal(props: PersonModalProps) {
   // Remount per person: state starts clean without resetting it inside an effect.
   if (!props.personId) return null;
-  return <PersonModalBody key={props.personId} {...props} personId={props.personId} />;
+  return <PersonPopup key={props.personId} {...props} personId={props.personId} />;
 }
 
-function PersonModalBody({ personId, onClose, onSelectCard }: PersonModalProps & { personId: string }) {
+/** The frame and the inner views live together so Escape steps back (card/content -> profile) before it closes. */
+function PersonPopup({ personId, onClose }: PersonModalProps & { personId: string }) {
+  const [view, setView] = useState<View>({ kind: "tabs" });
+  return (
+    <ModalFrame onClose={onClose} onEscape={() => (view.kind === "tabs" ? onClose() : setView({ kind: "tabs" }))} width="max-w-5xl" label="Person">
+      <PersonModalBody personId={personId} onClose={onClose} view={view} setView={setView} />
+    </ModalFrame>
+  );
+}
+
+type View = { kind: "tabs" } | { kind: "card"; id: number } | { kind: "content"; id: string };
+
+function PersonModalBody({ personId, onClose, view, setView }: PersonModalProps & { personId: string; view: View; setView: (v: View) => void }) {
   const [person, setPerson] = useState<Person | null>(null);
   const [cardsByCategory, setCardsByCategory] = useState<Record<string, KnowledgeCard[]>>({});
   const [rulebook, setRulebook] = useState<{ markdown: string; skills: PersonSkill[] } | null>(null);
@@ -58,14 +74,10 @@ function PersonModalBody({ personId, onClose, onSelectCard }: PersonModalProps &
     };
   }, [personId]);
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [personId, onClose]);
-
   const totalCards = Object.values(cardsByCategory).reduce((acc, list) => acc + list.length, 0);
   const hasRulebook = Boolean(rulebook?.markdown || (rulebook?.skills && rulebook.skills.length > 0));
+
+  const resources = useMemo(() => (person ? mentionedResources(person) : []), [person]);
 
   const linkGroups = useMemo(() => {
     const groups: Record<string, NonNullable<Person["links"]>> = {};
@@ -83,15 +95,17 @@ function PersonModalBody({ personId, onClose, onSelectCard }: PersonModalProps &
     { id: "rulebook", label: "Rulebook", icon: BookOpen },
   ];
 
+  const back = { label: person?.canonical_name || "Back", run: () => setView({ kind: "tabs" }) };
+  if (view.kind === "card") {
+    return <CardDetail key={view.id} cardId={view.id} onClose={onClose} onBack={back} onSelectCard={(id) => setView({ kind: "card", id })} />;
+  }
+  if (view.kind === "content") {
+    return <ContentDetail key={view.id} contentId={view.id} onClose={onClose} onBack={back} />;
+  }
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/75 p-4 backdrop-blur-xs sm:p-6" onClick={onClose}>
-      <div
-        className="relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-      >
-        <div className="flex items-start justify-between gap-4 border-b border-zinc-800/80 bg-zinc-900/50 px-6 py-5">
+    <>
+        <div className="flex shrink-0 items-start justify-between gap-4 border-b border-zinc-800/80 bg-zinc-900/50 px-6 py-5">
           <div className="flex min-w-0 items-center gap-4">
             <Avatar name={person?.canonical_name || personId} path={person?.avatar_path} size={72} className="rounded-2xl" />
             <div className="min-w-0 space-y-1">
@@ -133,7 +147,7 @@ function PersonModalBody({ personId, onClose, onSelectCard }: PersonModalProps &
           </button>
         </div>
 
-        <div className="flex gap-1 overflow-x-auto border-b border-zinc-800 bg-zinc-900/40 px-4 pt-2">
+        <div className="flex shrink-0 gap-1 overflow-x-auto overflow-y-hidden border-b border-zinc-800 bg-zinc-900/40 px-4 pt-2">
           {tabs.map((t) => {
             const Icon = t.icon;
             return (
@@ -215,14 +229,21 @@ function PersonModalBody({ personId, onClose, onSelectCard }: PersonModalProps &
                 </section>
               )}
 
-              {person.external_ids && Object.keys(person.external_ids).length > 0 && (
+              {resources.length > 0 && (
                 <section className="space-y-2">
-                  <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-500">Identifiers</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {Object.entries(person.external_ids).map(([k, v]) => (
-                      <span key={k} className="rounded-md border border-zinc-800 bg-zinc-900 px-2.5 py-1 text-xs font-mono text-zinc-300">
-                        <span className="text-zinc-500">{k}</span> {v}
-                      </span>
+                  <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-500">Other places mentioned in the profile ({resources.length})</h3>
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {resources.map((r) => (
+                      <a key={r.href} href={r.href} target="_blank" rel="noopener noreferrer" className="group flex items-center justify-between gap-2 rounded-lg border border-zinc-800 bg-zinc-900/50 px-3 py-2 transition-colors hover:border-emerald-500/50">
+                        <span className="min-w-0">
+                          <span className="block truncate text-xs font-mono text-zinc-200">{r.label}</span>
+                          <span className="block truncate text-[10px] font-mono text-zinc-500">{r.value}</span>
+                        </span>
+                        <span className="flex shrink-0 items-center gap-1.5">
+                          <Badge variant="zinc">{r.kind}</Badge>
+                          <ExternalLink className="h-3.5 w-3.5 text-zinc-500 group-hover:text-emerald-400" />
+                        </span>
+                      </a>
                     ))}
                   </div>
                 </section>
@@ -258,7 +279,7 @@ function PersonModalBody({ personId, onClose, onSelectCard }: PersonModalProps &
                       {list.map((c) => {
                         const cite = (c.citations || [])[0];
                         return (
-                          <div key={c.id} onClick={() => onSelectCard?.(c.id)} className="cursor-pointer space-y-2 rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 transition-colors hover:border-zinc-700">
+                          <div key={c.id} onClick={() => setView({ kind: "card", id: c.id })} className="cursor-pointer space-y-2 rounded-xl border border-zinc-800/80 bg-zinc-900/40 p-4 transition-colors hover:border-zinc-700">
                             <div className="flex items-center justify-between gap-2 text-xs font-mono">
                               <span className="font-semibold text-emerald-400">#{c.id} {c.subject}</span>
                               <Badge variant="zinc">{c.action}</Badge>
@@ -312,18 +333,24 @@ function PersonModalBody({ personId, onClose, onSelectCard }: PersonModalProps &
 
               {person.appearances && person.appearances.filter((a) => a.content_id).length > 0 && (
                 <section className="space-y-2">
-                  <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-500">Appearances in content</h3>
+                  <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-500">Appearances in content ({person.appearances.filter((a) => a.content_id).length})</h3>
                   {person.appearances.filter((a) => a.content_id).map((a, i) => (
                     <div key={i} className="flex items-center justify-between gap-3 rounded-lg border border-zinc-800 bg-zinc-900/50 p-3 text-xs font-mono">
-                      <div className="min-w-0">
-                        {a.url ? (
-                          <a href={a.url} target="_blank" rel="noopener noreferrer" className="block truncate text-zinc-200 hover:text-emerald-400">{a.title || a.content_id}</a>
-                        ) : (
-                          <span className="block truncate text-zinc-200">{a.title || a.content_id}</span>
+                      <button onClick={() => setView({ kind: "content", id: a.content_id })} className="group min-w-0 flex-1 text-left">
+                        <span className="flex items-center gap-1.5 truncate text-zinc-200 group-hover:text-emerald-400">
+                          <Eye className="h-3.5 w-3.5 shrink-0 text-zinc-500" />
+                          <span className="truncate">{a.title || a.content_id}</span>
+                        </span>
+                        <span className="text-[11px] text-zinc-500">{a.role}{a.match_status && a.match_status !== "confirmed" ? " · to review" : ""}</span>
+                      </button>
+                      <div className="flex shrink-0 items-center gap-2">
+                        {a.platform && <PlatformBadge platform={a.platform} />}
+                        {a.url && (
+                          <a href={a.url} target="_blank" rel="noopener noreferrer" title="Open the original page" className="rounded-md border border-zinc-800 p-1 text-zinc-400 hover:border-emerald-500/50 hover:text-emerald-400">
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </a>
                         )}
-                        <span className="text-[11px] text-zinc-500">{a.role}</span>
                       </div>
-                      {a.platform && <PlatformBadge platform={a.platform} />}
                     </div>
                   ))}
                 </section>
@@ -354,8 +381,7 @@ function PersonModalBody({ personId, onClose, onSelectCard }: PersonModalProps &
             </div>
           )}
         </div>
-      </div>
-    </div>
+    </>
   );
 }
 

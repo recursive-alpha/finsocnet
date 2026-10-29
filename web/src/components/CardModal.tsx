@@ -16,7 +16,8 @@ import { Avatar } from "./Avatar";
 import { Badge, CategoryBadge, PlatformBadge } from "./Badge";
 import { ListSkeleton } from "./Loading";
 import { citationLink, hostOf } from "@/lib/links";
-import { ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ModalFrame } from "./ModalFrame";
 import type { CardCitation, CardLink, KnowledgeCard } from "@/lib/types";
 
 interface CardModalProps {
@@ -27,10 +28,23 @@ interface CardModalProps {
 
 export function CardModal(props: CardModalProps) {
   if (!props.cardId) return null;
-  return <CardModalBody key={props.cardId} {...props} cardId={props.cardId} />;
+  return (
+    <ModalFrame onClose={props.onClose} width="max-w-4xl" label="Knowledge card">
+      <CardDetail key={props.cardId} cardId={props.cardId} onClose={props.onClose} onSelectCard={props.onSelectCard} />
+    </ModalFrame>
+  );
 }
 
-function CardModalBody({ cardId, onClose, onSelectCard }: CardModalProps & { cardId: number }) {
+interface CardDetailProps {
+  cardId: number;
+  onClose: () => void;
+  /** When set, the header shows a back button (the card was opened from another view, e.g. a person's profile). */
+  onBack?: { label: string; run: () => void };
+  onSelectCard?: (id: number) => void;
+}
+
+/** The card itself (header + scrolling body); rendered inside a modal frame or inline inside another popup. */
+export function CardDetail({ cardId, onClose, onBack, onSelectCard }: CardDetailProps) {
   const [card, setCard] = useState<KnowledgeCard | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,21 +63,17 @@ function CardModalBody({ cardId, onClose, onSelectCard }: CardModalProps & { car
       .finally(() => setLoading(false));
   }, [cardId]);
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [cardId, onClose]);
-
   return (
-    <div className="fixed inset-0 z-[55] flex items-center justify-center bg-black/70 backdrop-blur-xs p-4 sm:p-6 overflow-y-auto" onClick={onClose}>
-      <div
-        className="relative w-full max-w-4xl max-h-[90vh] flex flex-col rounded-2xl border border-zinc-800 bg-zinc-950 shadow-2xl overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <>
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-zinc-800/80 px-6 py-4 bg-zinc-900/50">
+        <div className="flex shrink-0 items-center justify-between border-b border-zinc-800/80 px-6 py-4 bg-zinc-900/50">
           <div className="flex items-center gap-2.5">
+            {onBack && (
+              <button onClick={onBack.run} className="mr-1 flex items-center gap-1 rounded-md border border-zinc-800 px-2 py-1 text-xs font-mono text-zinc-300 hover:border-emerald-500/50 hover:text-emerald-400">
+                <ArrowLeft className="h-3.5 w-3.5" />
+                {onBack.label}
+              </button>
+            )}
             <span className="font-mono text-xs text-zinc-400 font-semibold px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700">
               CARD #{cardId}
             </span>
@@ -308,7 +318,6 @@ function CardModalBody({ cardId, onClose, onSelectCard }: CardModalProps & { car
             </>
           )}
         </div>
-      </div>
-    </div>
+    </>
   );
 }

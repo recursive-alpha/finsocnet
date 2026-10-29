@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import {
+  ArrowLeft,
   Calendar,
   Clock,
   Eye,
@@ -11,6 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { Badge, PlatformBadge } from "./Badge";
+import { ModalFrame } from "./ModalFrame";
 import type { ContentItem, ContentSegmentView } from "@/lib/types";
 
 interface ContentViewerModalProps {
@@ -18,21 +20,23 @@ interface ContentViewerModalProps {
   onClose: () => void;
 }
 
-export function ContentViewerModal({ contentId, onClose }: ContentViewerModalProps) {
+export function ContentViewerModal(props: ContentViewerModalProps) {
+  if (!props.contentId) return null;
+  return (
+    <ModalFrame onClose={props.onClose} width="max-w-4xl" label="Content">
+      <ContentDetail key={props.contentId} contentId={props.contentId} onClose={props.onClose} />
+    </ModalFrame>
+  );
+}
+
+/** Stored text and metadata of one content (header + scrolling body); used in a frame or inline inside another popup. */
+export function ContentDetail({ contentId, onClose, onBack }: { contentId: string; onClose: () => void; onBack?: { label: string; run: () => void } }) {
   const [content, setContent] = useState<ContentItem | null>(null);
   const [view, setView] = useState<ContentSegmentView | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!contentId) {
-      setContent(null);
-      setView(null);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
     fetch(`/api/content/${contentId}`)
       .then((res) => res.json())
       .then((res) => {
@@ -47,17 +51,17 @@ export function ContentViewerModal({ contentId, onClose }: ContentViewerModalPro
       .finally(() => setLoading(false));
   }, [contentId]);
 
-  if (!contentId) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-4 sm:p-6 overflow-y-auto">
-      <div
-        className="relative w-full max-w-4xl max-h-[92vh] flex flex-col rounded-2xl border border-zinc-800 bg-zinc-950 shadow-2xl overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <>
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-zinc-800/80 px-6 py-4 bg-zinc-900/50">
-          <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center justify-between border-b border-zinc-800/80 px-6 py-4 bg-zinc-900/50">
+          <div className="flex min-w-0 items-center gap-3">
+            {onBack && (
+              <button onClick={onBack.run} className="flex shrink-0 items-center gap-1 rounded-md border border-zinc-800 px-2 py-1 text-xs font-mono text-zinc-300 hover:border-emerald-500/50 hover:text-emerald-400">
+                <ArrowLeft className="h-3.5 w-3.5" />
+                {onBack.label}
+              </button>
+            )}
             <PlatformBadge platform={content?.platform || "media"} />
             <div>
               <h2 className="text-sm font-bold text-zinc-100 line-clamp-1">
@@ -191,7 +195,6 @@ export function ContentViewerModal({ contentId, onClose }: ContentViewerModalPro
             </>
           )}
         </div>
-      </div>
-    </div>
+    </>
   );
 }

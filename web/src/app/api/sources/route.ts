@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const person = searchParams.get("person") || undefined;
     const status = searchParams.get("status") || undefined;
 
-    const sources = await getSources({ platform, person, status });
+    const sources = await getSources({ platform, person, status, kind: searchParams.get("kind") || undefined, medium: searchParams.get("medium") || undefined });
     return NextResponse.json({ ok: true, sources, count: sources.length });
   } catch (error: unknown) {
     const err = error as Error;

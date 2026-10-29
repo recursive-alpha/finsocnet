@@ -11,6 +11,8 @@ import {
   SlidersHorizontal,
   X,
 } from "lucide-react";
+import { FilterChips } from "@/components/FilterChips";
+import { useTaxonomy } from "@/lib/taxonomy";
 import { Badge } from "@/components/Badge";
 import type { SkillItem } from "@/lib/types";
 
@@ -18,6 +20,7 @@ export default function SkillsPage() {
   const [skills, setSkills] = useState<SkillItem[]>([]);
   const [search, setSearch] = useState("");
   const [selectedGroup, setSelectedGroup] = useState("all");
+  const tax = useTaxonomy();
   const [selectedSkill, setSelectedSkill] = useState<{
     name: string;
     markdown: string;
@@ -34,13 +37,6 @@ export default function SkillsPage() {
       })
       .finally(() => setLoading(false));
   }, []);
-
-  const groups = [
-    "all",
-    "Core Knowledge Engine",
-    "Orchestration & Automation",
-    "Platform Explorers (P1-P3)",
-  ];
 
   const filtered = skills.filter((s) => {
     if (selectedGroup !== "all" && s.categoryGroup !== selectedGroup) return false;
@@ -76,7 +72,7 @@ export default function SkillsPage() {
             </h1>
           </div>
           <p className="text-xs text-zinc-400 font-mono mt-1">
-            45 standardized skills conforming to the Agent Skills Specification (agentskills.io)
+            {skills.length} skills in fixed groups, conforming to the Agent Skills Specification (agentskills.io)
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -97,22 +93,7 @@ export default function SkillsPage() {
           />
         </div>
 
-        {/* Group Selector */}
-        <div className="flex flex-wrap items-center gap-1.5 pt-1">
-          {groups.map((grp) => (
-            <button
-              key={grp}
-              onClick={() => setSelectedGroup(grp)}
-              className={`rounded-md px-2.5 py-1 text-xs font-mono transition-colors cursor-pointer ${
-                selectedGroup === grp
-                  ? "bg-zinc-100 text-zinc-950 font-bold"
-                  : "bg-zinc-800/80 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 border border-zinc-700/50"
-              }`}
-            >
-              {grp}
-            </button>
-          ))}
-        </div>
+        <FilterChips label="Group" items={tax?.["skills.group"]?.items} value={selectedGroup} onChange={setSelectedGroup} total={skills.length} />
       </div>
 
       {/* Skills Grid */}

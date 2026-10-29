@@ -92,6 +92,14 @@ def update(conn: sqlite3.Connection, queue_id: int, status: str, error: str | No
     return {"id": queue_id, "status": eff, "not_before": not_before}
 
 
+def remove(conn: sqlite3.Connection, queue_id: int) -> dict[str, Any]:
+    with transaction(conn):
+        n = conn.execute("DELETE FROM explore_queue WHERE id = ?", (queue_id,)).rowcount
+    if not n:
+        raise CliError("NOT_FOUND", f"queue item {queue_id} not found")
+    return {"id": queue_id, "removed": n}
+
+
 def list_items(conn: sqlite3.Connection, status: str | None = None, limit: int = 100) -> list[dict[str, Any]]:
     sql, args = "SELECT * FROM explore_queue WHERE 1=1", []
     if status:
