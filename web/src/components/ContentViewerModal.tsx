@@ -139,7 +139,7 @@ export function ContentDetail({ contentId, onClose, onBack }: { contentId: strin
                     <span>Segments</span>
                   </div>
                   <p className="text-xs font-mono text-zinc-200">
-                    {content.segments || 0} segments
+                    {content.segments || view?.segments || 0} segments
                   </p>
                 </div>
               </div>

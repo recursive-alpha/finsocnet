@@ -31,7 +31,7 @@ export function MediumPanel({ tax }: { tax: Taxonomy | null }) {
       <div className="flex flex-col justify-between gap-2 border-b border-zinc-800/80 pb-3 sm:flex-row sm:items-center">
         <div className="flex items-center gap-2">
           <Layers className="h-4 w-4 text-emerald-400" />
-          <h3 className="font-mono text-sm font-bold text-zinc-100">{tab === "content" ? "Content by medium" : "Sources by medium"}</h3>
+          <h3 className="whitespace-nowrap font-mono text-sm font-bold text-zinc-100">{tab === "content" ? "Content by medium" : "Sources by medium"}</h3>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex rounded-lg bg-zinc-800/80 p-0.5 font-mono text-[11px]">
@@ -46,7 +46,7 @@ export function MediumPanel({ tax }: { tax: Taxonomy | null }) {
               </button>
             ))}
           </div>
-          <Link href={tab === "content" ? "/content" : "/sources"} className="font-mono text-xs text-emerald-400 hover:text-emerald-300">
+          <Link href={tab === "content" ? "/content" : "/sources"} className="whitespace-nowrap font-mono text-xs text-emerald-400 hover:text-emerald-300">
             all {tab} →
           </Link>
         </div>
