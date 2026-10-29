@@ -12,6 +12,10 @@ Archived as given by the user (lightly edited for spelling), with the state of e
 >
 > After all of that, delegate to oh-my-pi sub-agents to refill all data. Make sure we can explore all people, all data and all their knowledge from articles, newspapers, books, talks, videos: as much as possible. The exploration skill must guide the agent in detail. Free to design and update, but the goal must be archived.
 
+> Follow-up: replace the "Platform Discovery" view. Do not mention platforms in the classification, because platforms will be added; categorize by article, book, paper, video, audio, … (free to design), apply again to all data, and explore full data.
+
+Design: a static **medium** classification (`video`, `audio`, `article`, `social`, `paper`, `book`, `code`, `document`, `other`) derived from `content_type`; sources get the medium of what they mostly publish (fallback: their kind). The dashboard panel and the Content/Sources filters use it; platform stays a plain attribute (badge, search text).
+
 ## Parts and status
 
 | # | Part | Where | Status |
@@ -21,6 +25,7 @@ Archived as given by the user (lightly edited for spelling), with the state of e
 | 3 | Person popup: tab bar was clipped; fixed (`shrink-0`) | `PersonModal.tsx` | done |
 | 4 | Complete CLI: every read/update/remove through `kb`: `query`, `schema`, `taxonomy`, `person classes|coverage|remove|alias remove|appearance list|remove|link remove`, `person list` filters, `content list` filters, `source list` filters, `queue remove`, `card list` filters | `finsocnet/core/{dbtools,classes,taxonomy,persons,content,queue,kb_cli}.py`, `docs/agent-guide.md` §6b, skill `knowledge-db` | done |
 | 5 | Static classifications with a catch-all: people (16 classes, `other`), card kind/category/domain/evidence/horizon/action, content type/status/platform, source platform/kind/status, vocabulary facets, skill groups, rulebook categories; web filters read them from `kb taxonomy`; a test ties them to the schemas/migrations/skills folder; `kb audit` lists values outside the lists | `finsocnet/core/taxonomy.py`, `tests/unit/test_taxonomy.py`, `web/src/components/FilterChips.tsx` | done |
+| 5b | Medium classification replaces platform lists and the dashboard "Platform Discovery" panel | `taxonomy.py` (`content.medium`, `sources.medium`, `links.kind`), `web/src/components/MediumPanel.tsx` | done |
 | 6 | Appearances in content: now opens the stored text inside the profile (internal view) with a separate button for the original page; the old external links pointed at URLs invented by earlier agents, which gave 404 | `PersonModal.tsx` (Sources tab) | done |
 | 7 | Links to every mentioned resource: homepage, identifiers (OpenAlex, ORCID, Scholar, SSRN, RePEc, Wikipedia, Wikidata, …) and platform aliases become links | `web/src/lib/identifiers.ts`, `PersonModal.tsx` | done |
 | 8 | Exploration skill with detailed guidance: `person-explorer` step 6b (knowledge sweep) + `references/knowledge-sources.md` (per content type and per class: articles, newspapers, books, talks, videos, podcasts, papers, letters, social) driven by `kb person coverage` (gaps = to-do) | `.agents/skills/person-explorer/` | done |
