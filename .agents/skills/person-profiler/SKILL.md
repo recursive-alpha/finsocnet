@@ -39,6 +39,7 @@ You do the research; scripts only fetch and store. There is no profile-scraping 
 
 ## Rules
 
+- **Full profile, from evidence.** A person is complete only when `canonical_name`, `moniker`, `bio`, `profession`, `affiliation`, `domains`, `homepage`, `relevance` and a fetched primary avatar (`kb person avatar fetch`) all come from pages you opened (name the page in the run stats or the link evidence). Unknown is `null` plus a line in the run stats, never a placeholder, a guessed URL or a bio written from memory. `kb audit` counts what is missing.
 - Public, professional information only: what the person publishes themselves or what is public about their role. No private addresses, phone numbers, family members, personal accounts of relatives, leaked data.
 - A platform that answers `LOGIN_REQUIRED` / `CHECKPOINT` (exit 3): stop on that platform, list it under `not_possible` in the run stats, and tell the user which session to export. Never log in, never ask for passwords or cookies.
 - Never guess a handle or URL from the name (`x.com/<name>` may belong to somebody else). A URL enters the database only after you opened it (or its `profile` command returned it) and compared it with the person.

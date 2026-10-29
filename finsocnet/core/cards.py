@@ -142,9 +142,12 @@ def validate_card(conn: sqlite3.Connection, card: dict[str, Any], legacy: bool =
 def _check_citation(conn: sqlite3.Connection, cit: dict[str, Any], legacy_cit: bool, legacy: bool, warnings: list[str]) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     cid, seq, quote = cit.get("content_id"), cit.get("segment_seq"), cit.get("quote") or ""
-    content = conn.execute("SELECT id FROM contents WHERE id = ?", (cid,)).fetchone() if cid else None
+    content = conn.execute("SELECT id, fetch_method FROM contents WHERE id = ?", (cid,)).fetchone() if cid else None
     if content is None:
         out.append(_problem("/citation/content_id", "VALIDATION_ERROR", f"content {cid} does not exist"))
+    elif not content["fetch_method"] and not legacy:
+        out.append(_problem("/citation/content_id", "VALIDATION_ERROR", f"content {cid} has no fetch provenance (fetch_method is empty): its text was not fetched by a platform skill",
+                            "fetch it with the platform skill (`fetch <url> --ingest --run R`); never write content text yourself (docs/agent-guide.md)"))
     elif legacy_cit:
         n = conn.execute("SELECT COUNT(*) FROM content_segments WHERE content_id = ?", (cid,)).fetchone()[0]
         if n:

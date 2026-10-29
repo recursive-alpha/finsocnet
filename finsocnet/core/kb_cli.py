@@ -198,6 +198,8 @@ def cmd_stats(ctx: Ctx) -> Result:
     data: dict[str, Any] = {"tables": {t: conn.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0] for t in STAT_TABLES}}
     data["contents_by_status"] = _count_by(conn, "SELECT process_status, COUNT(*) FROM contents GROUP BY 1")
     data["contents_by_platform"] = _count_by(conn, "SELECT platform, COUNT(*) FROM contents GROUP BY 1")
+    data["sources_by_platform"] = _count_by(conn, "SELECT platform, COUNT(*) FROM sources GROUP BY 1")
+    data["links_by_platform"] = _count_by(conn, "SELECT platform, COUNT(*) FROM person_links WHERE platform IS NOT NULL AND platform != '' GROUP BY 1")
     data["cards_by_status"] = _count_by(conn, "SELECT status, COUNT(*) FROM knowledge_cards GROUP BY 1")
     data["cards_by_category"] = _count_by(conn, "SELECT category, COUNT(*) FROM knowledge_cards WHERE status = 'active' GROUP BY 1")
     data["top_persons"] = [dict(r) for r in conn.execute(
@@ -207,6 +209,12 @@ def cmd_stats(ctx: Ctx) -> Result:
     data["sessions"] = {"domains": conn.execute("SELECT COUNT(*) FROM browser_sessions").fetchone()[0],
                         "by_login_state": _count_by(conn, "SELECT login_state, COUNT(*) FROM browser_sessions GROUP BY 1")}
     return Result(data)
+
+
+def cmd_audit(ctx: Ctx) -> Result:
+    """Read-only completeness and provenance report; the numbers to trust instead of an agent's summary."""
+    from finsocnet.core import audit
+    return Result(audit.run(ctx.conn(), ctx.args.limit))
 
 
 def cmd_prune(ctx: Ctx) -> Result:
@@ -749,6 +757,8 @@ def build_parser() -> _Parser:
     p = top("doctor", cmd_doctor, "health check")
     p.add_argument("--repair-fts", action="store_true", help="rebuild all FTS indices before checking")
     top("stats", cmd_stats, "counts and distributions")
+    p = top("audit", cmd_audit, "completeness and provenance report (cards without a fetched source, thin links, people without cards, backlog)")
+    p.add_argument("--limit", type=int, default=15, help="rows of the per-person backlog")
     p = top("prune", cmd_prune, "prune cache files and old rows (01 §4)")
     p.add_argument("--dry-run", action="store_true")
 

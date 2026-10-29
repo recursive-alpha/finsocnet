@@ -67,7 +67,7 @@ def seeded(conn, run_id):
         {"seq": 2, "kind": "transcript", "locator": {"start_sec": 40, "end_sec": 60},
          "text": "I never hold a loser overnight hoping it comes back, that is how accounts blow up."},
     ]
-    content.add_content(conn, {"id": "youtube:abc123def45", "platform": "youtube", "content_type": "video", "title": "Selling into strength",
+    content.add_content(conn, {"id": "youtube:abc123def45", "platform": "youtube", "content_type": "video", "fetch_method": "yt-dlp", "title": "Selling into strength",
                                "segments": segs}, run_id)
     return conn
 

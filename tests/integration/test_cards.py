@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import json
 
 import pytest
 
@@ -319,3 +320,10 @@ def test_link_and_unlink_are_snapshotted_and_idempotent(seeded, run_id):
     with pytest.raises(CliError) as e:
         cards.unlink_cards(seeded, 2, 1, "related", "again", run_id)
     assert e.value.code == "NOT_FOUND"
+
+
+def test_citation_to_text_nobody_fetched_is_refused(seeded):
+    from finsocnet.core import cards
+    seeded.execute("UPDATE contents SET fetch_method = NULL")
+    problems = cards.validate_cards(seeded, [make_card()])
+    assert "no fetch provenance" in json.dumps(problems)

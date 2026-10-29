@@ -32,6 +32,8 @@ metadata:
 5. Gaps touched in this step: re-run the gap's Query Card (`kb card search`). Good answer → `kb gap update <id> --status filled --filled-by <card ids>`.
 6. `kb run end --run R --outcome success --stats '{"items": N, "fetched": N, "mined": N, "enqueued": N}'`.
 
+Task-shaped recipes (list of people, channel, books, papers, executives, "find 20–30 new people") are in `references/playbooks.md`; the rules and the definition of done are in `docs/agent-guide.md`. Run `kb audit` before and after.
+
 ## A person's profile URL
 
 A queue item with `origin_ref=person-explore` (added by `finsocnet explore add <profile url> --person`), or a user message such as "explore this person: <url>", is not a single fetch: hand it to the skill `person-explorer`, which resolves the profile, creates or matches the person, profiles them, lists everything they published, mines the most important content and reports. Mark the queue item `done` when it reports.

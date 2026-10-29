@@ -15,7 +15,7 @@ import { Badge, PlatformBadge } from "@/components/Badge";
 import { ContentViewerModal } from "@/components/ContentViewerModal";
 import type { ContentItem } from "@/lib/types";
 
-const PLATFORMS = ["all", "youtube", "x", "reddit", "medium", "arxiv", "book"];
+const PLATFORMS = ["all", "youtube", "substack", "podcast", "book", "medium", "x", "reddit", "arxiv"];
 const STATUSES = ["all", "metadata_only", "needs_review", "new", "processed"];
 
 export default function ContentPage() {

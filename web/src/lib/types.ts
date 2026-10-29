@@ -17,6 +17,8 @@ export interface StatsData {
   tables: Record<string, number>;
   contents_by_status: Record<string, number>;
   contents_by_platform: Record<string, number>;
+  sources_by_platform?: Record<string, number>;
+  links_by_platform?: Record<string, number>;
   cards_by_status: Record<string, number>;
   cards_by_category: Record<string, number>;
   top_persons: Array<{

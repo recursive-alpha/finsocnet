@@ -65,7 +65,7 @@ def test_vocab_and_card_cli_flow(repo, capsys, tmp_path):
     code, env = kb(capsys, "vocab", "lookup", "stop loss", "--db", db)
     assert code == 0 and env["data"]["matches"][0]["term"] == "stop_loss"
 
-    rec = {"id": "youtube:abc123def45", "platform": "youtube", "content_type": "video",
+    rec = {"id": "youtube:abc123def45", "platform": "youtube", "content_type": "video", "fetch_method": "yt-dlp",
            "segments": [{"seq": 0, "kind": "transcript", "locator": {"start_sec": 0}, "text": "so what I do is, once it's up like 3, 4 days after the breakout I sell a third, a quarter maybe,"}]}
     (tmp_path / "rec.json").write_text(json.dumps(rec))
     kb(capsys, "content", "add", "--db", db, "--run", run, "--file", str(tmp_path / "rec.json"))

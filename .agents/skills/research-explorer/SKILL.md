@@ -44,7 +44,7 @@ Common flags (specs/00-conventions.md §3): `--ingest --run R` stores the record
 ## Procedure
 
 1. `uv run finsocnet kb run start --skill research-explorer --goal "<goal>" --harness <h> --model <m>` → `R`. If a parent skill (source-explorer, knowledge-search) already started a run, reuse its `R`.
-2. Evidence for a gap or claim: `search` → choose → `fetch --pdf --ingest --run R` → market-idea-miner.
+2. Evidence for a gap or claim: `search` → choose → `fetch --pdf --ingest --run R` → market-idea-miner. Mine the **full text** (PDF/HTML): an abstract alone is for triage; if only the abstract is available, say so and mark cards `evidence_level: claimed` with a note. For an author: `profile` (OpenAlex id → `external_ids`, topics and works count are the evidence), then their papers one by one (`docs/agent-guide.md`, playbook §4).
 3. Read `warnings` in every envelope (`truncated`, `cap_reached`, `partial`) and pass them on to the user or the queue item; nothing is dropped silently.
 4. `uv run finsocnet kb run end --run R --outcome success|partial|failed --stats '{…}'` when you started the run.
 

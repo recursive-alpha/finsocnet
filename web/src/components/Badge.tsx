@@ -51,9 +51,13 @@ export function PlatformBadge({ platform }: { platform: string }) {
   else if (p === "reddit") variant = "amber";
   else if (p === "medium") variant = "emerald";
   else if (p === "arxiv") variant = "blue";
-  else if (p === "book" || p === "annas_archive") variant = "purple";
-  else if (p === "podcast") variant = "purple";
-  else if (p === "substack") variant = "amber";
+  else if (p === "book" || p === "annas_archive" || p === "openlibrary" || p === "goodreads") variant = "purple";
+  else if (p === "podcast" || p === "spotify") variant = "purple";
+  else if (p === "substack" || p === "rss" || p === "blogspot") variant = "amber";
+  else if (p === "linkedin" || p === "facebook" || p === "discord") variant = "blue";
+  else if (p === "openalex" || p === "google_scholar" || p === "scholar") variant = "blue";
+  else if (p === "instagram" || p === "tiktok") variant = "rose";
+  else if (p === "threads" || p === "wikipedia" || p === "github") variant = "zinc";
 
   return <Badge variant={variant}>{platform}</Badge>;
 }

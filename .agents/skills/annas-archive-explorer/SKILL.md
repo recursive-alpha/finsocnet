@@ -45,6 +45,7 @@ Common flags (specs/00-conventions.md §3): `--ingest --run R` stores the record
 
 1. `uv run finsocnet kb run start --skill annas-archive-explorer --goal "<goal>" --harness <h> --model <m>` → `R`. If a parent skill (source-explorer, knowledge-search) already started a run, reuse its `R`.
 2. `search` → pick the best edition (language, format, completeness) → `fetch --ingest` → `download` → `document-reader fetch data/books/<md5>.<ext> --ingest --run R` → market-idea-miner (8000-char chunks).
+2b. **Full text or no cards.** Metadata (title, author, blurb) creates no card. If the download is blocked (DDoS-Guard/CHECKPOINT) or the format cannot be read, say so in the report and queue the book; do not write a summary from memory as if it were the text. Chunks are mined in order (`content done --upto-seq`), each chunk mined or skipped with a reason. Link the book to its author as a person (`person-explorer`). Playbook: `source-explorer/references/playbooks.md` §3.
 3. Read `warnings` in every envelope (`truncated`, `cap_reached`, `partial`) and pass them on to the user or the queue item; nothing is dropped silently.
 4. `uv run finsocnet kb run end --run R --outcome success|partial|failed --stats '{…}'` when you started the run.
 

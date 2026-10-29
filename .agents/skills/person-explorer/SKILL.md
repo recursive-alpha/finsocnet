@@ -21,6 +21,8 @@ The user gives you **one URL of a person**. You turn it into a complete, verifie
 - `finsocnet explore add <profile url> --person` queues the profile (`action=profile`, `origin_ref=person-explore`); `source-explorer` hands such an item to this skill.
 - Or the user simply says "explore this person: <url>".
 
+Read `docs/agent-guide.md` first (rules, definition of done, what never to do) and finish with `kb audit` numbers in your report.
+
 ## Procedure
 
 1. `uv run finsocnet kb run start --skill person-explorer --goal "explore person from <url>" --harness <h> --model <m>` → `R`. Pass `--run R` to every write below.
@@ -36,13 +38,32 @@ The user gives you **one URL of a person**. You turn it into a complete, verifie
 8. **Synthesize.** With ≥ 5 cards attributed to the person: `person-skill-synthesizer` (rulebook), then `kb embed sync` so search sees the new cards.
 9. **Report** to the user in plain words: who the person is (profession, affiliation), the links found (confirmed vs needs review, with the evidence of the surprising ones), inventory per platform (listed / fetched / mined), cards created, what is blocked and why (session, bot check, no transcript), what is queued next. `kb run end --run R --outcome success|partial --stats '{"person": "<id>", "links_confirmed": n, "links_needs_review": n, "listed": n, "fetched": n, "cards": n, "blocked": ["youtube: bot check"], "queued": n}'`.
 
+## Command shapes (exact JSON; `--file` takes a file in the temp directory, every write needs `--run R`)
+
+```bash
+# person (profession from the controlled list; ids are lowercase slugs)
+kb person upsert --file person.json        # {"id": "jane-trader", "canonical_name": "Jane Trader", "profession": "trader", "relevance": "…", "homepage": "https://…", "aliases": [{"alias": "@jane", "platform": "substack"}]}
+# attach a source to the person (confirmed only)
+kb source upsert --file src.json           # {"id": "substack:publication:jane", "person_id": "jane-trader"}
+# the person owns the source
+kb person appearance add --file app.json   # {"person_id": "jane-trader", "source_id": "substack:publication:jane", "role": "owner", "match_confidence": 0.95, "evidence": "the About page of the newsletter names Jane Trader as the author"}
+# places (person-profiler)
+kb person link add --person jane-trader --file links.json     # [{"url": "https://…", "kind": "social", "platform": "x", "handle": "@jane", "confidence": 0.95, "evidence": "linked in the footer of …"}]
+# queue what you are not mining now
+kb queue add --target <url|handle> --target-kind url --origin person_crosslink --origin-ref person:jane-trader --action fetch --reason "…" --priority 0.5 --run R
+```
+
+If a command rejects the file, read `error.details` (it lists every problem) and `--help`; do not read the Python source.
+
 ## Completeness checklist (state each as done / not possible + why)
 
-profile fields · picture · official site · social accounts · newsletter · podcast · papers/scholar ids · inventory per content place · top content mined · rulebook · queue for the rest.
+full profile fields from pages you opened (canonical_name, moniker, bio, profession, affiliation, domains, homepage, relevance) · fetched primary avatar · official site · social accounts · newsletter · podcast · papers/scholar ids · inventory per content place · top content mined · rulebook · queue for the rest.
+
 
 ## Rules
 
 - Everything in `person-profiler` applies: public professional information only, no guessed URLs, evidence for every link, no passwords or cookies, uncertain means `needs_review`.
+- **Full profile, from evidence.** A person is complete only when `canonical_name`, `moniker`, `bio`, `profession`, `affiliation`, `domains`, `homepage`, `relevance` and a fetched primary avatar (`kb person avatar fetch`) all come from pages you opened (name the page in the run stats or the link evidence). Unknown is `null` plus a line in the run stats, never a placeholder, a guessed URL or a bio written from memory. `kb audit` counts what is missing.
 - The seed is trusted as **the user's pointer**, not as proof that the account is the person it claims: still read it (an impersonator or fan page is possible) and say so in the evidence.
 - Stay within budgets and respect exit codes: 3 → stop that platform and name the export to redo; 4 → `deferred` with `retry_after_sec`; 7 → `agent-browser start` once.
 - Do not mine in the same run what another run already holds: `kb content claim` refuses; `kb seen check` first.

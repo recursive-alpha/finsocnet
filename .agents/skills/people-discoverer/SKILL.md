@@ -32,6 +32,8 @@ Anyone who publishes knowledge about **financial markets, investing, trading, co
 
 A person is **in scope** only with evidence you can state in one sentence (`relevance`): a book, paper, talk, letter, post series or role that is about markets or economics. Fame alone is not enough (a famous CEO of a car maker is in scope only for finance content they publish). Out of scope: skip, and `kb seen mark … --status skipped --note "<why>"` when it came from a search result. Never create a person from a single mention; mentions are queue items (`origin=mention`).
 
+Read `docs/agent-guide.md` first. For a **list** of people (Nobel laureates, central bankers, executives, channels), work **person by person** through steps 3–9, each person finished (see its definition of done) before the next; never create all rows as stubs first. Playbook: `source-explorer/references/playbooks.md` §1 and §7.
+
 ## Procedure
 
 1. `uv run finsocnet kb run start --skill people-discoverer --goal "<topic or names>" --harness <h> --model <m>` → `R` (reuse the parent's `R` when called by source-explorer).
@@ -59,6 +61,7 @@ A person is **in scope** only with evidence you can state in one sentence (`rele
 
 ## Rules
 
+- **Full profile, from evidence.** A person is complete only when `canonical_name`, `moniker`, `bio`, `profession`, `affiliation`, `domains`, `homepage`, `relevance` and a fetched primary avatar (`kb person avatar fetch`) all come from pages you opened (name the page in the run stats or the link evidence). Unknown is `null` plus a line in the run stats, never a placeholder, a guessed URL or a bio written from memory. `kb audit` counts what is missing.
 - Public figures only, and only what they publish themselves or what is public about their professional role. No private contact data, no home addresses, no family details.
 - One person, one record: merge duplicates with `person-matcher`, ask the user before `kb person merge`.
 - `visibility: "public"` unless the person only appears in closed groups.

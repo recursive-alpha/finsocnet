@@ -34,6 +34,7 @@ export default function DashboardPage() {
   const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [platformTab, setPlatformTab] = useState<"catalog" | "discovery">("catalog");
 
   useEffect(() => {
     Promise.all([
@@ -58,6 +59,13 @@ export default function DashboardPage() {
   const totalSegments = stats?.tables.content_segments || 0;
   const totalCitations = stats?.tables.card_citations || 0;
   const totalVocab = stats?.tables.vocabulary || 0;
+  const totalSources = stats?.tables.sources || 0;
+  const totalLinks = Object.values(stats?.links_by_platform || {}).reduce((a, b) => a + b, 0);
+  const discoveredPlatformsCount = new Set([
+    ...Object.keys(stats?.contents_by_platform || {}),
+    ...Object.keys(stats?.sources_by_platform || {}),
+    ...Object.keys(stats?.links_by_platform || {}),
+  ]).size;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 space-y-8">
@@ -151,48 +159,116 @@ export default function DashboardPage() {
       {/* Main Grid: Platforms & Categories */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Platform Distribution */}
+        {/* Platform Distribution & Discovery */}
         <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-5 space-y-4">
-          <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-zinc-800/80 pb-3 gap-2">
             <div className="flex items-center gap-2">
               <Layers className="h-4 w-4 text-emerald-400" />
               <h3 className="text-sm font-bold text-zinc-100 font-mono">
-                Catalog by Platform
+                {platformTab === "catalog" ? "Catalog by Platform" : "Platform Discovery"}
               </h3>
             </div>
-            <Link
-              href="/content"
-              className="text-xs font-mono text-emerald-400 hover:text-emerald-300"
-            >
-              all content →
-            </Link>
+            <div className="flex items-center gap-2">
+              <div className="flex rounded-lg bg-zinc-800/80 p-0.5 text-[11px] font-mono">
+                <button
+                  type="button"
+                  onClick={() => setPlatformTab("catalog")}
+                  className={`px-2 py-0.5 rounded-md transition-colors ${
+                    platformTab === "catalog"
+                      ? "bg-zinc-700 text-zinc-100 font-semibold"
+                      : "text-zinc-400 hover:text-zinc-200"
+                  }`}
+                >
+                  Catalog
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPlatformTab("discovery")}
+                  className={`px-2 py-0.5 rounded-md transition-colors ${
+                    platformTab === "discovery"
+                      ? "bg-zinc-700 text-zinc-100 font-semibold"
+                      : "text-zinc-400 hover:text-zinc-200"
+                  }`}
+                >
+                  Discovery ({discoveredPlatformsCount})
+                </button>
+              </div>
+              <Link
+                href={platformTab === "catalog" ? "/content" : "/sources"}
+                className="text-xs font-mono text-emerald-400 hover:text-emerald-300"
+              >
+                {platformTab === "catalog" ? "all content →" : "all sources →"}
+              </Link>
+            </div>
           </div>
 
-          <div className="space-y-3">
-            {stats?.contents_by_platform &&
-              Object.entries(stats.contents_by_platform)
-                .sort((a, b) => b[1] - a[1])
-                .map(([platform, count]) => {
-                  const pct = totalContent > 0 ? (count / totalContent) * 100 : 0;
-                  return (
-                    <div key={platform} className="space-y-1">
-                      <div className="flex items-center justify-between text-xs font-mono">
-                        <span className="capitalize text-zinc-300">
-                          {platform.replace(/_/g, " ")}
-                        </span>
-                        <span className="text-zinc-400 font-semibold">
-                          {count.toLocaleString()}
-                        </span>
+          {platformTab === "catalog" ? (
+            <div className="space-y-3">
+              {stats?.contents_by_platform &&
+                Object.entries(stats.contents_by_platform)
+                  .sort((a, b) => b[1] - a[1])
+                  .map(([platform, count]) => {
+                    const pct = totalContent > 0 ? (count / totalContent) * 100 : 0;
+                    return (
+                      <div key={platform} className="space-y-1">
+                        <div className="flex items-center justify-between text-xs font-mono">
+                          <span className="flex items-center gap-1.5 capitalize text-zinc-300">
+                            <PlatformBadge platform={platform} />
+                          </span>
+                          <span className="text-zinc-400 font-semibold">
+                            {count.toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="h-1.5 w-full rounded-full bg-zinc-800 overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-emerald-500/80"
+                            style={{ width: `${Math.max(pct, 2)}%` }}
+                          />
+                        </div>
                       </div>
-                      <div className="h-1.5 w-full rounded-full bg-zinc-800 overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-emerald-500/80"
-                          style={{ width: `${Math.max(pct, 2)}%` }}
-                        />
+                    );
+                  })}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider">
+                Content Sources ({totalSources})
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {stats?.sources_by_platform &&
+                  Object.entries(stats.sources_by_platform)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([platform, count]) => (
+                      <div
+                        key={platform}
+                        className="flex items-center justify-between rounded-lg border border-zinc-800/60 bg-zinc-950/40 px-2.5 py-1.5 text-xs font-mono"
+                      >
+                        <PlatformBadge platform={platform} />
+                        <span className="text-zinc-300 font-semibold">{count}</span>
                       </div>
-                    </div>
-                  );
-                })}
-          </div>
+                    ))}
+              </div>
+
+              <div className="pt-2 border-t border-zinc-800/60 flex items-center justify-between text-[11px] font-mono text-zinc-400">
+                <span className="uppercase tracking-wider">Discovered Profiles</span>
+                <span>{totalLinks} endpoints</span>
+              </div>
+              <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto pr-1">
+                {stats?.links_by_platform &&
+                  Object.entries(stats.links_by_platform)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([platform, count]) => (
+                      <span
+                        key={platform}
+                        className="inline-flex items-center gap-1 rounded-md border border-zinc-800/80 bg-zinc-900/60 px-2 py-0.5 text-[11px] font-mono text-zinc-300"
+                      >
+                        <span className="capitalize">{platform}</span>
+                        <span className="text-emerald-400 font-semibold">{count}</span>
+                      </span>
+                    ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Cards by Category */}

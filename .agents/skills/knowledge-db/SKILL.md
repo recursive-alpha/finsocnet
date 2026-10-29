@@ -24,7 +24,7 @@ One SQLite file, `data/knowledge.db`, holds everything: relational tables plus F
 ## Rules
 
 1. Every workflow starts with `kb run start` and ends with `kb run end`. Every write command needs `--run <run_id>` (or `FINSOCNET_RUN_ID`).
-2. Never write to `knowledge.db` with raw SQL or `sqlite3`. Read-only `sqlite3` queries for debugging are fine.
+2. Never write to `knowledge.db` with raw SQL or `sqlite3`, and never write a populate script that holds names, texts, quotes or URLs from memory. Read-only `sqlite3` queries for debugging are fine. Report completeness from `kb audit`, not from your own summary (`docs/agent-guide.md`).
 3. Never delete contents, segments, citations or decisions. Use statuses (`retire`, `fail`, `merged`).
 4. Every command prints one JSON envelope: `{"ok", "command", "data", "warnings", "meta"}` or `{"ok": false, "error": {"code", "message", "hint"}}`. Read `error.hint` before retrying.
 5. Before any migration, a backup is made automatically; still confirm with the user before migrating the real database.
@@ -35,7 +35,7 @@ All commands: `uv run finsocnet kb <group> <command> …` (same as `uv run .agen
 
 | Group | Commands |
 |---|---|
-| admin | `init`, `migrate [--dry-run]`, `backup [--to PATH]`, `doctor`, `stats`, `prune [--dry-run]` |
+| admin | `init`, `migrate [--dry-run]`, `backup [--to PATH]`, `doctor`, `stats`, `audit [--limit N]` (completeness and provenance: cards without a fetched source, thin links, people without cards, per-person backlog, todo list; **the numbers to report**), `prune [--dry-run]` |
 | run | `run start --skill S --goal G --harness H --model M [--parent R]` → `{run_id}`; `run end --run R --outcome success\|partial\|failed\|aborted [--stats JSON]`; `run list` |
 | lesson / feedback | `lesson add --skill S --kind K --observation T [--evidence] [--proposal]` W; `lesson list\|update`; `feedback add\|list\|handle` |
 | source | `source upsert --file F` W; `source get\|list`; `source cursor ID --set C` W |

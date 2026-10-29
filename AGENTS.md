@@ -55,6 +55,10 @@ $S run end --run R --outcome success --stats '{...}'
 
 Exploration: `finsocnet explore add <url|@handle|person|query> [--person]` (`--person`: the URL is a person's profile → skill `person-explorer`) then the `source-explorer` skill (`kb queue next` → platform skill → miner). Improvement: `self-improver` (data fixes directly and reversibly; instruction changes only on a git branch with `finsocnet eval` results).
 
+## How to work (read `docs/agent-guide.md`)
+
+Evidence over claims. **Never** write a script that holds names, texts, quotes or URLs from memory; never write content text yourself (a citation to a content without `fetch_method` is refused); never report "complete" without `finsocnet kb audit` numbers. Use the platform skills to fetch, judge what you read, store with `kb … --run R`. Playbooks for lists of people, channels, books, papers, executives: `.agents/skills/source-explorer/references/playbooks.md`.
+
 ## Sessions and browsing
 
 FinSocNet runs on a remote host; you never type passwords. The user logs in locally and ships the session: `finsocnet session export && finsocnet session push` (local machine) → `session_bridge.py import` (remote) → one agent Chrome (`agent_browser.py start`) that every browser-based skill attaches to. Exit code 3 (`LOGIN_REQUIRED` / `CHECKPOINT`) means: stop that platform and tell the user exactly which export to redo.
@@ -67,6 +71,7 @@ Every script prints one JSON envelope `{"ok", "command", "data", "warnings", "me
 
 | Command | Where |
 |---|---|
+| `finsocnet kb audit` | remote host: completeness and provenance report; the numbers to trust |
 | `finsocnet kb …` (init, migrate, backup, doctor, stats, run, content, card, vocab, person, skill, queue, gap, seen, embed, translate, search, history, decision, lesson, feedback) | remote host |
 | `finsocnet search "<english text>" [--types …] [--mode …] [filters]` (alias of `kb search`), **`--ui` on any command** for a terminal view instead of JSON | remote host |
 | `finsocnet eval prepare\|score\|run` | remote host |

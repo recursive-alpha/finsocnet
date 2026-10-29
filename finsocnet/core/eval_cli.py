@@ -148,7 +148,7 @@ def score_transform(outputs: Path) -> dict[str, Any]:
                     conn.execute("INSERT OR IGNORE INTO persons (id, canonical_name) VALUES (?, ?)", (p["person_id"], p.get("name", p["person_id"])))
             plat = cid.split(":")[0]
             if not conn.execute("SELECT 1 FROM contents WHERE id = ?", (cid,)).fetchone():
-                content_mod.add_content(conn, {"id": cid, "platform": plat, "content_type": CONTENT_TYPE.get(plat, "post"),
+                content_mod.add_content(conn, {"id": cid, "platform": plat, "content_type": CONTENT_TYPE.get(plat, "post"), "fetch_method": "eval-fixture",
                                                "segments": [{"seq": s["seq"], "kind": s["kind"], "locator": {}, "text": s["text"]} for s in segs]}, run)
             exp_total += len(exp)
             prod_total += len(produced)

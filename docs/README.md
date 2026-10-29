@@ -9,6 +9,7 @@ FinSocNet is an agent-operated knowledge network: scripts fetch, store, validate
 | [CLI reference](cli.md) | find a command, read the JSON envelope, use `--ui`, understand exit codes |
 | [Search](search.md) | search by keyword and meaning, filter by data type, translate questions and knowledge |
 | [Exploring](exploring.md) | discover people, communities, channels and threads on **any topic**; visited tracking; add a new site |
+| [Agent guide](agent-guide.md) | rules, definition of done, playbooks and the audit for any agent that explores or populates |
 | [People and pictures](persons.md) | persons, appearances, rulebooks, avatars and other images |
 | [Skills and platforms](skills.md) | the catalogue of 48 skills and which platform needs a login |
 | [Sessions and the agent browser](sessions.md) | log in locally, ship the session, run one Chrome on the server |

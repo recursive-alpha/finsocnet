@@ -20,7 +20,7 @@ Orchestrates other skills for one content item. It has no script of its own; eve
 
 1. `kb run start --skill market-idea-miner --goal "mine <content_id>" --harness <h> --model <m>` → `R`.
 2. `kb content claim <content_id> --run R` — on `CONFLICT` another run is mining it: stop.
-3. `kb content get <content_id> --meta-only` — title, platform, source, author, duration, status. Status `metadata_only` → the text is not fetched yet: fetch it with the platform skill first, or stop.
+3. `kb content get <content_id> --meta-only` — title, platform, source, author, duration, status. Status `metadata_only` → the text is not fetched yet: fetch it with the platform skill first, or stop. A content with no `fetch_method` is refused by `card validate` (its text was not fetched by a skill): never create or edit content text yourself; abstract-only or metadata-only text yields no card (`docs/agent-guide.md`).
 3b. **Language** (`translator` §1): if `contents.language` is empty, read the sample and `kb translate set-language`. A non-English content still yields English cards with source-language quotes; translate its segments afterwards (`translator` §2) so they become searchable.
 4. **People first** (`person-matcher`): find owner/host/guests/author from title, description, source owner and the first segments. Confirm or create persons and appearances. You need the cast before attributing quotes.
 5. `kb content chunks <content_id>` (default 12000 chars; books 8000; code 6000 via `--max-chars`). Chunks start after `processed_upto_seq`, so a resumed or extended content continues where it stopped.
