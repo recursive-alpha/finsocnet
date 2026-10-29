@@ -46,3 +46,10 @@ finsocnet kb person avatar list --person kristjan-qullamaggie
 ```
 
 Rules: only real images (checked by bytes, 200 B – 8 MB, png/jpeg/gif/webp); the first avatar becomes primary; only pictures the person publishes themselves; nothing is attached when the match between a handle and the person is uncertain (a company channel is not its founder). Profile pictures are returned by the profiles of YouTube, X, Reddit, Bluesky, GitHub, Stack Exchange, StockTwits, Substack, Telegram, podcasts, RSS and (through `og:image`) Medium, TradingView, Facebook, Threads, Instagram, LinkedIn and Seeking Alpha. The web UI shows them ([Web UI](web-ui.md)). Details: [`specs/12-person-images.md`](../specs/12-person-images.md).
+
+
+## Static classification
+
+People are classified into a fixed list of 16 classes in 7 groups (`finsocnet/core/classes.py`, `kb person classes`): trader, investor · portfolio manager, analyst, strategist · executive, founder · economist, central banker, regulator · academic, researcher · author, journalist, educator · **other** (the catch-all; a person that fits nothing is `other`, the list is not extended per person). The same applies to cards, content, sources, skills and vocabulary: see `kb taxonomy` and [Concepts](concepts.md). Content and sources are classified by **medium** (video, audio, article, social, paper, book, code, document, other), never by platform, so new platforms need no change.
+
+`kb person coverage <id>` shows what we hold about a person (profile fields, links by kind, content by medium: listed / fetched / mined, cards) and the `gaps` an agent should fill.

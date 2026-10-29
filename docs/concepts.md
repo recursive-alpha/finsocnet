@@ -43,3 +43,8 @@ A **claim** looks like `IF breakout position AND 3-5 days since entry THEN EXIT_
 ## Languages
 
 Cards are English. A Vietnamese forum post yields English cards quoting the Vietnamese text. For search, non-English segments are embedded through an English translation that the agent writes; search questions in any language are first restated in English by the agent ([Search](search.md#languages)).
+
+
+## Static classifications
+
+Everything that is shown or filtered by a category has a fixed list with a catch-all (`finsocnet/core/taxonomy.py`; `finsocnet kb taxonomy`): people classes, card kind/category/domain/evidence/horizon/action, content type/status/**medium**, source kind/status/**medium**, vocabulary facets, skill groups, rulebook categories, link kinds. A value outside a list is counted as `other` and reported by `kb audit`; tests tie the lists to the schemas, migrations and the skills folder. **Platforms are not classes** (they are free text and will grow): content and sources are grouped by medium (video, audio, article, social, paper, book, code, document, other), derived from `content_type`.
